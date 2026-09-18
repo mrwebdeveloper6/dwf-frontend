@@ -1,0 +1,279 @@
+import React, { useState } from 'react';
+import { useDwf } from '../../context/DwfContext';
+import { 
+  Calculator, 
+  HeartPulse, 
+  ShieldCheck, 
+  Coins, 
+  Clock, 
+  CheckCircle2, 
+  TrendingUp, 
+  HelpCircle 
+} from 'lucide-react';
+
+export const BenefitCalculatorSection: React.FC = () => {
+  const { language, setShowApplyModal } = useDwf();
+
+  const [age, setAge] = useState<number>(34);
+  const [membershipYears, setMembershipYears] = useState<number>(10);
+
+  // Dynamic Benefit Calculation based on Age & Term
+  const calculateBenefits = (currentAge: number, years: number) => {
+    let tier = '';
+    let tierBn = '';
+    let monthlyFee = 300;
+    let maxMedicalYearly = 50000;
+    let accidentDeathGrant = 200000;
+    let permanentDisability = 150000;
+    let maturityBonusRate = 0.08; // 8% welfare dividend
+
+    if (currentAge >= 18 && currentAge <= 32) {
+      tier = 'Tier A — Young Operator Shield';
+      tierBn = 'টিয়ার ক — তরুণ চালক সুরক্ষা প্রকল্প';
+      accidentDeathGrant = 250000;
+      permanentDisability = 180000;
+      maturityBonusRate = 0.09;
+    } else if (currentAge > 32 && currentAge <= 45) {
+      tier = 'Tier B — Prime Highway Master';
+      tierBn = 'টিয়ার খ — অভিজ্ঞ হাইওয়ে চালক স্কিম';
+      accidentDeathGrant = 200000;
+      permanentDisability = 150000;
+      maturityBonusRate = 0.08;
+    } else if (currentAge > 45 && currentAge <= 55) {
+      tier = 'Tier C — Senior Veteran Driver';
+      tierBn = 'টিয়ার গ — সিনিয়র মাস্টার চালক স্কিম';
+      accidentDeathGrant = 180000;
+      permanentDisability = 120000;
+      maxMedicalYearly = 60000; // Enhanced medical for senior drivers
+      maturityBonusRate = 0.075;
+    } else {
+      tier = 'Tier D — Elder Care & Golden Member';
+      tierBn = 'টিয়ার ঘ — প্রবীণ চালক ও অবসরকালীন সহায়তা';
+      accidentDeathGrant = 150000;
+      permanentDisability = 100000;
+      maxMedicalYearly = 65000;
+      maturityBonusRate = 0.07;
+    }
+
+    const totalContribution = monthlyFee * 12 * years;
+    const estimatedDividend = Math.round(totalContribution * maturityBonusRate * (years / 2));
+    const totalMaturityBenefit = totalContribution + estimatedDividend;
+
+    return {
+      tier: language === 'bn' ? tierBn : tier,
+      monthlyFee,
+      totalContribution,
+      totalMaturityBenefit,
+      maxMedicalYearly,
+      accidentDeathGrant,
+      permanentDisability
+    };
+  };
+
+  const results = calculateBenefits(age, membershipYears);
+
+  // Bengali number formatter
+  const toBn = (n: number) => {
+    if (language !== 'bn') return n.toLocaleString('en-IN');
+    const d: { [k: string]: string } = { '0': '০', '1': '১', '2': '২', '3': '৩', '4': '৪', '5': '৫', '6': '৬', '7': '৭', '8': '৮', '9': '৯', ',': ',' };
+    return n.toLocaleString('en-IN').replace(/[0-9,]/g, m => d[m] || m);
+  };
+
+  return (
+    <section id="calculator" className="py-20 bg-slate-100/70 border-b border-slate-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Header */}
+        <div className="text-center max-w-3xl mx-auto mb-14">
+          <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100/90 px-3 py-1 rounded-full border border-emerald-200">
+            {language === 'bn' ? 'স্বয়ংক্রিয় গণনা ইঞ্জিন' : 'Automated Benefit Engine'}
+          </span>
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 mt-3 tracking-tight">
+            {language === 'bn' ? 'বয়সভিত্তিক কল্যাণ ও স্বাস্থ্য সহায়তা ক্যালকুলেটর' : 'Age-Based Welfare & Benefits Calculator'}
+          </h2>
+          <p className="text-sm sm:text-base text-slate-600 mt-2">
+            {language === 'bn'
+              ? 'আপনার বর্তমান বয়স ও সদস্যপদের মেয়াদের ওপর ভিত্তি করে চিকিৎসা, দুর্ঘটনা ও আনুমানিক অবসরকালীন তহবিল প্রাক্কলন করুন।'
+              : 'Calculate your personalized medical limit, accident insurance coverage, and projected welfare savings based on your age.'}
+          </p>
+        </div>
+
+        {/* Calculator Card */}
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-12">
+            
+            {/* Input Controls Left Column */}
+            <div className="lg:col-span-6 p-6 sm:p-10 border-b lg:border-b-0 lg:border-r border-slate-200 space-y-8">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-emerald-50 text-emerald-700 rounded-2xl">
+                  <Calculator className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900">
+                    {language === 'bn' ? 'চালকের বয়স ও সময়কাল নির্ধারণ' : 'Set Age & Contribution Duration'}
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    {language === 'bn' ? '১৮ থেকে ৬৫ বছর পর্যন্ত বয়সীদের জন্য প্রযোজ্য' : 'Applicable for drivers aged 18 to 65'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Slider 1: Age */}
+              <div className="space-y-3">
+                <div className="flex justify-between items-center text-sm">
+                  <label htmlFor="driver-age-slider" className="font-semibold text-slate-700">
+                    {language === 'bn' ? 'আপনার বর্তমান বয়স:' : 'Your Current Age:'}
+                  </label>
+                  <span className="font-bold text-lg text-emerald-800 bg-emerald-50 px-3 py-1 rounded-lg border border-emerald-200 font-mono">
+                    {toBn(age)} {language === 'bn' ? 'বছর' : 'Years'}
+                  </span>
+                </div>
+                <input
+                  id="driver-age-slider"
+                  type="range"
+                  min="18"
+                  max="65"
+                  value={age}
+                  onChange={(e) => setAge(Number(e.target.value))}
+                  className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-700"
+                />
+                <div className="flex justify-between text-[11px] text-slate-400 font-mono">
+                  <span>১৮ {language === 'bn' ? 'বছর' : 'yrs'}</span>
+                  <span>৩৫ {language === 'bn' ? 'বছর' : 'yrs'}</span>
+                  <span>৫০ {language === 'bn' ? 'বছর' : 'yrs'}</span>
+                  <span>৬৫ {language === 'bn' ? 'বছর' : 'yrs'}</span>
+                </div>
+              </div>
+
+              {/* Slider 2: Years of Contribution */}
+              <div className="space-y-3">
+                <div className="flex justify-between items-center text-sm">
+                  <label htmlFor="duration-years-slider" className="font-semibold text-slate-700">
+                    {language === 'bn' ? 'প্রত্যাশিত সদস্যপদের মেয়াদ:' : 'Expected Membership Duration:'}
+                  </label>
+                  <span className="font-bold text-lg text-emerald-800 bg-emerald-50 px-3 py-1 rounded-lg border border-emerald-200 font-mono">
+                    {toBn(membershipYears)} {language === 'bn' ? 'বছর' : 'Years'}
+                  </span>
+                </div>
+                <input
+                  id="duration-years-slider"
+                  type="range"
+                  min="1"
+                  max="25"
+                  value={membershipYears}
+                  onChange={(e) => setMembershipYears(Number(e.target.value))}
+                  className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-700"
+                />
+                <div className="flex justify-between text-[11px] text-slate-400 font-mono">
+                  <span>১ {language === 'bn' ? 'বছর' : 'yr'}</span>
+                  <span>৫ {language === 'bn' ? 'বছর' : 'yrs'}</span>
+                  <span>১৫ {language === 'bn' ? 'বছর' : 'yrs'}</span>
+                  <span>২৫ {language === 'bn' ? 'বছর' : 'yrs'}</span>
+                </div>
+              </div>
+
+              {/* Calculated Policy Category Badge */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                <p className="text-xs text-slate-500 font-medium">{language === 'bn' ? 'পলিসি ক্যাটাগরি ও স্কিম:' : 'Applicable Policy Scheme:'}</p>
+                <p className="text-sm font-bold text-emerald-900 mt-1 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <span>{results.tier}</span>
+                </p>
+                <p className="text-[11px] text-slate-500 mt-1.5">
+                  {language === 'bn'
+                    ? 'স্থায়ী তহবিল বিধিমালা অনুযায়ী ৬ মাস নিয়মিত চাঁদা দেওয়ার পর সকল অনুদান কার্যকর হয়।'
+                    : 'All healthcare grants and accident provisions activate after 6 months of regular fee payment.'}
+                </p>
+              </div>
+
+            </div>
+
+            {/* Calculated Output Right Column */}
+            <div className="lg:col-span-6 p-6 sm:p-10 bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900 text-white flex flex-col justify-between">
+              <div>
+                <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider bg-emerald-950/80 px-2.5 py-1 rounded border border-emerald-800/80">
+                  {language === 'bn' ? 'প্রাক্কলিত কল্যাণ ও আর্থিক হিসাব' : 'Estimated Benefit Summary'}
+                </span>
+
+                <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Medical Grant */}
+                  <div className="p-4 rounded-xl bg-slate-800/60 border border-emerald-800/50">
+                    <div className="flex items-center gap-2 text-rose-400 mb-1">
+                      <HeartPulse className="w-4 h-4" />
+                      <span className="text-xs font-semibold">{language === 'bn' ? 'বার্ষিক চিকিৎসা অনুদান' : 'Annual Medical Grant'}</span>
+                    </div>
+                    <p className="text-xl sm:text-2xl font-black text-white font-mono">
+                      ৳ {toBn(results.maxMedicalYearly)}
+                    </p>
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      {language === 'bn' ? '৫০% পর্যন্ত হাসপাতাল বিল মওকুফ' : 'Up to 50% hospital discount'}
+                    </p>
+                  </div>
+
+                  {/* Accident Grant */}
+                  <div className="p-4 rounded-xl bg-slate-800/60 border border-emerald-800/50">
+                    <div className="flex items-center gap-2 text-amber-400 mb-1">
+                      <ShieldCheck className="w-4 h-4" />
+                      <span className="text-xs font-semibold">{language === 'bn' ? 'সর্বোচ্চ দুর্ঘটনা ক্ষতিপূরণ' : 'Max Accident Cover'}</span>
+                    </div>
+                    <p className="text-xl sm:text-2xl font-black text-white font-mono">
+                      ৳ {toBn(results.accidentDeathGrant)}
+                    </p>
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      {language === 'bn' ? 'অঙ্গহানি/মৃত্যুতে এককালীন পরিবার সহায়তা' : 'Immediate lump sum for nominee'}
+                    </p>
+                  </div>
+
+                  {/* Total Contribution */}
+                  <div className="p-4 rounded-xl bg-slate-800/60 border border-emerald-800/50">
+                    <div className="flex items-center gap-2 text-blue-400 mb-1">
+                      <Coins className="w-4 h-4" />
+                      <span className="text-xs font-semibold">{language === 'bn' ? 'আপনার সর্বমোট চাঁদা' : 'Total Contributed'}</span>
+                    </div>
+                    <p className="text-xl sm:text-2xl font-black text-white font-mono">
+                      ৳ {toBn(results.totalContribution)}
+                    </p>
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      {toBn(membershipYears)} {language === 'bn' ? 'বছরে মোট জমাকৃত অর্থ' : 'years total deposit'}
+                    </p>
+                  </div>
+
+                  {/* Maturity Savings */}
+                  <div className="p-4 rounded-xl bg-emerald-950/70 border border-emerald-600/60">
+                    <div className="flex items-center gap-2 text-emerald-300 mb-1">
+                      <TrendingUp className="w-4 h-4" />
+                      <span className="text-xs font-semibold">{language === 'bn' ? 'আনুমানিক সমাপ্তি তহবিল' : 'Projected Maturity Fund'}</span>
+                    </div>
+                    <p className="text-xl sm:text-2xl font-black text-emerald-300 font-mono">
+                      ৳ {toBn(results.totalMaturityBenefit)}
+                    </p>
+                    <p className="text-[10px] text-slate-300 mt-1">
+                      {language === 'bn' ? 'মূল চাঁদা + লভ্যাংশ সমেত' : 'Principal + Welfare Dividend'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Apply CTA */}
+              <div className="pt-6 mt-6 border-t border-emerald-900/80 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p className="text-[11px] text-slate-400 leading-relaxed text-center sm:text-left">
+                  {language === 'bn'
+                    ? '* হিসাবটি ডিডব্লিউএফ সাংগঠনিক উপবিধি ২০২৬ অনুযায়ী আনুমানিক।'
+                    : '* Calculations are based on DWF Constitution Rules 2026.'}
+                </p>
+                <button
+                  onClick={() => setShowApplyModal(true)}
+                  className="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition cursor-pointer shrink-0"
+                >
+                  {language === 'bn' ? 'এখনই সদস্য আবেদন করুন' : 'Apply For Membership'}
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+  );
+};

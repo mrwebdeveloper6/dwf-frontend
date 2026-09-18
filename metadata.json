@@ -1,0 +1,6 @@
+{
+  "name": "Drivers Welfare Foundation (DWF)",
+  "description": "ড্রাইভার্স ওয়েলফেয়ার ফাউন্ডেশন (DWF) — সুরক্ষিত চালক – নিরাপদ সড়ক। প্রাতিষ্ঠানিক সদস্যপদ, ডিজিটাল স্বাস্থ্য সুরক্ষা কার্ড, কল্যাণ তহবিল ও দুর্ঘটনা সহায়তা প্ল্যাটফর্ম।",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
