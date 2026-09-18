@@ -38,9 +38,9 @@ export const DwfLogo: React.FC<DwfLogoProps> = ({
         <defs>
           {/* Subtle gradient for white emblem disc */}
           <radialGradient id="dwfDiscGrad" cx="30%" cy="25%" r="75%">
-            <stop offset="0%" stop-color="#ffffff" />
-            <stop offset="88%" stop-color="#f8fafc" />
-            <stop offset="100%" stop-color="#e2e8f0" />
+            <stop offset="0%" stopColor="#ffffff" />
+            <stop offset="88%" stopColor="#f8fafc" />
+            <stop offset="100%" stopColor="#e2e8f0" />
           </radialGradient>
         </defs>
 

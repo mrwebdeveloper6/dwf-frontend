@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useDwf } from '../../context/DwfContext';
 import { 
   UserPlus, 
@@ -7,112 +7,293 @@ import {
   ShieldCheck, 
   HeartPulse, 
   Scale, 
-  Award,
-  ChevronRight,
-  CheckCircle2
+  ChevronRight, 
+  ChevronLeft,
+  CheckCircle2,
+  Sparkles,
+  PhoneCall,
+  AlertTriangle,
+  GraduationCap
 } from 'lucide-react';
+
+interface HeroSlide {
+  id: string;
+  image: string;
+  tagBn: string;
+  tagEn: string;
+  titleBn: string;
+  titleEn: string;
+  subBn: string;
+  subEn: string;
+  badgeBn: string;
+  badgeEn: string;
+  badgeIcon: React.ElementType;
+  pill1Bn: string;
+  pill1En: string;
+  pill2Bn: string;
+  pill2En: string;
+  pill3Bn: string;
+  pill3En: string;
+}
 
 export const HeroSection: React.FC = () => {
   const { 
     language, 
-    t, 
     setShowApplyModal, 
     setShowVerifyModal, 
     setShowLoginModal 
   } = useDwf();
 
-  return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-slate-900 via-emerald-950 to-slate-950 text-white pt-12 pb-20 lg:pt-16 lg:pb-24 border-b border-emerald-900/40">
-      {/* Subtle Background Geometric Glow & Grid */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#064e3b15_1px,transparent_1px),linear-gradient(to_bottom,#064e3b15_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-emerald-600/15 blur-[120px] rounded-full pointer-events-none" />
-      <div className="absolute -bottom-10 right-10 w-96 h-96 bg-red-600/10 blur-[130px] rounded-full pointer-events-none" />
+  const slides: HeroSlide[] = [
+    {
+      id: 'slide-1',
+      image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=1800&q=80',
+      tagBn: 'জাতীয় চালক কল্যাণ ও সামাজিক নিরাপত্তা প্ল্যাটফর্ম',
+      tagEn: 'National Drivers Welfare & Social Security Platform',
+      titleBn: 'সুরক্ষিত চালক – নিরাপদ সড়ক',
+      titleEn: 'Protected Drivers – Safer Highways',
+      subBn: 'বাংলাদেশের সকল পেশাদার পরিবহন চালকদের সামাজিক নিরাপত্তা, ডিজিটাল স্বাস্থ্য সুরক্ষা কার্ড ও এককালীন জরুরি দুর্ঘটনা অনুদান নিশ্চিত করতে ডিডব্লিউএফ সর্বদা আপনার পাশে।',
+      subEn: 'Ensuring digital health coverage, roadside legal defense, and instant emergency accident relief for commercial drivers across Bangladesh.',
+      badgeBn: '৫০% পর্যন্ত হাসপাতাল ছাড়',
+      badgeEn: 'Up to 50% Hospital Discount',
+      badgeIcon: HeartPulse,
+      pill1Bn: '৫০,০০০৳ পর্যন্ত চিকিৎসা অনুদান',
+      pill1En: 'Up to 50k BDT Medical Grant',
+      pill2Bn: '২৪/৭ ফ্রি আইনি সহায়তা',
+      pill2En: '24/7 Free Legal Defense',
+      pill3Bn: 'তাৎক্ষণিক দুর্ঘটনা ক্ষতিপূরণ',
+      pill3En: 'Immediate Accident Relief'
+    },
+    {
+      id: 'slide-2',
+      image: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1800&q=80',
+      tagBn: 'জরুরি দুর্ঘটনা ত্রাণ ও জীবনবীমা সুরক্ষা',
+      tagEn: 'Emergency Accident Relief & Life Security',
+      titleBn: 'দুর্ঘটনা ও জরুরি চিকিৎসায় তাৎক্ষণিক নগদ সহায়তা',
+      titleEn: 'Instant Relief in Roadside Emergencies',
+      subBn: 'অনাকাঙ্ক্ষিত দুর্ঘটনায় ৫০,০০০ টাকা পর্যন্ত হাসপাতাল চিকিৎসা খরচ এবং চালকের অবর্তমানে পরিবারের জন্য এককালীন ৫ লক্ষ টাকার কল্যাণ অনুদান তহবিল।',
+      subEn: 'Immediate hospital reimbursement and up to 5 Lac BDT lump-sum nominee family security grant in unfortunate roadside casualties.',
+      badgeBn: '২৪/৭ জরুরি রেসপন্স সেল',
+      badgeEn: '24/7 Rapid Response Desk',
+      badgeIcon: AlertTriangle,
+      pill1Bn: 'সরাসরি ব্যাংক/বিকাশে অনুদান',
+      pill1En: 'Direct Bank/bKash Payout',
+      pill2Bn: 'নমিনি ও পরিবারের আর্থিক নিরাপত্তা',
+      pill2En: 'Nominee Family Protection',
+      pill3Bn: 'জরুরি হেল্পলাইন: ১৬৭৮৯',
+      pill3En: 'Emergency Hotline: 16789'
+    },
+    {
+      id: 'slide-3',
+      image: 'https://images.unsplash.com/photo-1506015391300-4802dc74de2e?auto=format&fit=crop&w=1800&q=80',
+      tagBn: 'হাইওয়ে লিগ্যাল এইড ও চালকদের অধিকার রক্ষা',
+      tagEn: 'Highway Legal Aid & Driver Human Rights',
+      titleBn: 'মহাসড়কে বিনামূল্যে আইনি প্রতিরক্ষা ও মানবাধিকার',
+      titleEn: 'Free Highway Legal Defense & Driver Rights',
+      subBn: 'মিথ্যা মামলা, অনাকাঙ্ক্ষিত ঝামেলা ও পুলিশি হয়রানি থেকে চালকদের সুরক্ষা দিতে দেশের সকল বিভাগ ও হাইওয়েতে অভিজ্ঞ প্যানেল আইনজীবীদের আইনি লড়াই।',
+      subEn: 'Round-the-clock defense against false claims, road harassment, and unfair detentions by experienced supreme court & panel advocates.',
+      badgeBn: 'প্যানেল আইনজীবী টিম',
+      badgeEn: 'Panel Lawyer Network',
+      badgeIcon: Scale,
+      pill1Bn: 'সারাদেশে আইনি সাপোর্ট',
+      pill1En: 'Countrywide Legal Support',
+      pill2Bn: 'ফ্রি জামিন ও আইনি পরামর্শ',
+      pill2En: 'Free Bail & Legal Counsel',
+      pill3Bn: 'কোনো গোপন বা মধ্যস্বত্ব ফি নেই',
+      pill3En: 'Zero Middleman Charges'
+    },
+    {
+      id: 'slide-4',
+      image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1800&q=80',
+      tagBn: 'নিরাপদ চালনা কর্মশালা ও টার্মিনাল স্বাস্থ্য ক্যাম্প',
+      tagEn: 'Safe Driving Workshops & Terminal Health Camps',
+      titleBn: 'ডিফেন্সিভ ড্রাইভিং ও নিয়মিত স্বাস্থ্য সেবা',
+      titleEn: 'Defensive Driving & Terminal Health Camps',
+      subBn: 'টার্মিনালে টার্মিনালে চালকদের নিয়মিত বিনামূল্যে চক্ষু ও সাধারণ স্বাস্থ্য পরীক্ষা এবং আধুনিক মহাসড়ক ট্রাফিক আইন বিষয়ক বিশেষ প্রশিক্ষণ কর্মশালা।',
+      subEn: 'Free eye screenings, general physician checkups, and defensive highway safety certifications conducted regularly at bus and truck terminals.',
+      badgeBn: 'ফ্রি হেলথ ক্যাম্প',
+      badgeEn: 'Free Health Screening',
+      badgeIcon: GraduationCap,
+      pill1Bn: 'টার্মিনালে চক্ষু পরীক্ষা',
+      pill1En: 'Terminal Eye Checkups',
+      pill2Bn: 'ট্রাফিক আইন ও সুরক্ষা সনদ',
+      pill2En: 'Traffic Safety Certificates',
+      pill3Bn: 'অভিজ্ঞ ট্রেইনার দ্বারা পরিচালনা',
+      pill3En: 'Certified Master Trainers'
+    }
+  ];
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  };
+
+  // Auto-advance timer (moves automatically after 3 seconds)
+  useEffect(() => {
+    if (isPaused) return;
+
+    autoPlayRef.current = setInterval(() => {
+      nextSlide();
+    }, 3000);
+
+    return () => {
+      if (autoPlayRef.current) clearInterval(autoPlayRef.current);
+    };
+  }, [isPaused, currentSlide]);
+
+  const activeSlide = slides[currentSlide];
+  const BadgeIcon = activeSlide.badgeIcon;
+
+  return (
+    <section 
+      className="relative overflow-hidden min-h-[580px] lg:min-h-[660px] flex items-center justify-center bg-slate-950 text-white border-b border-emerald-900/40 select-none"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
+      {/* Background Images with Cross-Fade & Cinematic Overlays */}
+      {slides.map((slide, index) => {
+        const isActive = index === currentSlide;
+        return (
+          <div
+            key={slide.id}
+            className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+              isActive ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
+            }`}
+          >
+            {/* Background Photography */}
+            <img
+              src={slide.image}
+              alt="DWF Highway Drivers"
+              className={`w-full h-full object-cover object-center transform transition-transform duration-3500 ease-out ${
+                isActive ? 'scale-105' : 'scale-100'
+              }`}
+              loading={index === 0 ? 'eager' : 'lazy'}
+              referrerPolicy="no-referrer"
+            />
+
+            {/* Cinematic Gradient Overlays for Readability */}
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/85 to-slate-950/70" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/50 to-emerald-950/40" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-emerald-900/20 via-transparent to-slate-950/90" />
+          </div>
+        );
+      })}
+
+      {/* Foreground Container */}
+      <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-18 lg:py-22 w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
           
-          {/* Left Column: Heading & Core CTAs */}
+          {/* Left Column: Slide Content */}
           <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
             
-            {/* Institutional Badge */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-900/60 border border-emerald-700/50 text-emerald-300 text-xs font-semibold shadow-inner">
+            {/* Tag Badge */}
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-900/70 border border-emerald-500/50 text-emerald-300 text-xs font-bold shadow-lg backdrop-blur-md">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              <span>{language === 'bn' ? 'জাতীয় চালক কল্যাণ ও সামাজিক নিরাপত্তা প্ল্যাটফর্ম' : 'National Drivers Welfare & Social Security Platform'}</span>
+              <span>{language === 'bn' ? activeSlide.tagBn : activeSlide.tagEn}</span>
             </div>
 
-            {/* Tagline */}
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight text-white font-sans">
-              <span className="text-emerald-400">{t.tagline.split('–')[0]}</span>
-              <span className="text-slate-400 mx-2 font-light hidden sm:inline">–</span>
-              <br className="sm:hidden" />
-              <span className="text-white">{t.tagline.split('–')[1] || 'নিরাপদ সড়ক'}</span>
+            {/* Slide Title with Bengali Emphasis */}
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight text-white font-sans drop-shadow-md min-h-[72px] sm:min-h-[110px]">
+              {language === 'bn' ? (
+                <>
+                  <span className="text-emerald-400">{activeSlide.titleBn.split('–')[0]}</span>
+                  {activeSlide.titleBn.includes('–') && (
+                    <>
+                      <span className="text-slate-400 mx-2 font-light hidden sm:inline">–</span>
+                      <br className="sm:hidden" />
+                      <span className="text-white">{activeSlide.titleBn.split('–')[1]}</span>
+                    </>
+                  )}
+                </>
+              ) : (
+                <span className="text-emerald-300">{activeSlide.titleEn}</span>
+              )}
             </h1>
 
-            {/* Supporting Description */}
-            <p className="text-base sm:text-xl text-slate-300 leading-relaxed max-w-2xl mx-auto lg:mx-0 font-normal">
-              {t.subTagline}
+            {/* Slide Subtitle */}
+            <p className="text-sm sm:text-lg text-slate-200 leading-relaxed max-w-2xl mx-auto lg:mx-0 font-medium drop-shadow-sm min-h-[56px] sm:min-h-[72px]">
+              {language === 'bn' ? activeSlide.subBn : activeSlide.subEn}
             </p>
 
-            {/* Value Pillars Badges */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs font-medium text-slate-300 pt-1">
-              <div className="flex items-center gap-1.5 bg-slate-800/80 px-3 py-1.5 rounded-md border border-slate-700">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span>{language === 'bn' ? '৫০,০০০৳ পর্যন্ত চিকিৎসা অনুদান' : 'Up to 50k BDT Medical Grant'}</span>
+            {/* Feature Pills */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2.5 sm:gap-3 text-xs font-semibold text-slate-200 pt-1">
+              <div className="flex items-center gap-1.5 bg-slate-900/80 backdrop-blur-md px-3 py-1.5 rounded-lg border border-emerald-500/30 shadow-xs">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>{language === 'bn' ? activeSlide.pill1Bn : activeSlide.pill1En}</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-slate-800/80 px-3 py-1.5 rounded-md border border-slate-700">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span>{language === 'bn' ? '২৪/৭ ফ্রি আইনি সহায়তা' : '24/7 Free Legal Defense'}</span>
+              <div className="flex items-center gap-1.5 bg-slate-900/80 backdrop-blur-md px-3 py-1.5 rounded-lg border border-emerald-500/30 shadow-xs">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>{language === 'bn' ? activeSlide.pill2Bn : activeSlide.pill2En}</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-slate-800/80 px-3 py-1.5 rounded-md border border-slate-700">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span>{language === 'bn' ? 'তাৎক্ষণিক দুর্ঘটনা ক্ষতিপূরণ' : 'Immediate Accident Relief'}</span>
+              <div className="flex items-center gap-1.5 bg-slate-900/80 backdrop-blur-md px-3 py-1.5 rounded-lg border border-emerald-500/30 shadow-xs">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>{language === 'bn' ? activeSlide.pill3Bn : activeSlide.pill3En}</span>
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 pt-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 pt-3">
               {/* Primary: Membership Application */}
               <button
                 onClick={() => setShowApplyModal(true)}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 text-sm sm:text-base font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl transition shadow-lg shadow-emerald-950/50 cursor-pointer active:scale-98"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 text-sm sm:text-base font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl transition shadow-xl shadow-emerald-950/60 cursor-pointer active:scale-98 border border-emerald-400/40"
               >
                 <UserPlus className="w-5 h-5" />
-                <span>{t.btnApply}</span>
-                <ChevronRight className="w-4 h-4 ml-1" />
+                <span>{language === 'bn' ? 'সদস্য হতে আবেদন করুন' : 'Apply for Membership'}</span>
+                <ChevronRight className="w-4 h-4 ml-0.5" />
               </button>
 
               {/* Secondary: Member Login */}
               <button
                 onClick={() => setShowLoginModal(true)}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3.5 text-sm sm:text-base font-semibold text-emerald-300 hover:text-white bg-slate-800/90 hover:bg-slate-800 border border-emerald-700/60 rounded-xl transition cursor-pointer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3.5 text-sm sm:text-base font-bold text-emerald-300 hover:text-white bg-slate-900/80 hover:bg-slate-800 border border-emerald-600/50 rounded-xl transition cursor-pointer backdrop-blur-md"
               >
                 <LogIn className="w-5 h-5 text-emerald-400" />
-                <span>{t.btnLogin}</span>
+                <span>{language === 'bn' ? 'সদস্য লগইন' : 'Member Login'}</span>
               </button>
 
               {/* Tertiary: Public Verification */}
               <button
                 onClick={() => setShowVerifyModal(true)}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-3.5 text-sm font-medium text-slate-300 hover:text-white bg-transparent hover:bg-slate-800/50 border border-slate-700 rounded-xl transition cursor-pointer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4.5 py-3.5 text-sm font-semibold text-slate-300 hover:text-white bg-slate-950/60 hover:bg-slate-800/80 border border-slate-700/80 rounded-xl transition cursor-pointer backdrop-blur-md"
               >
-                <Search className="w-4 h-4 text-amber-400" />
-                <span>{t.btnVerify}</span>
+                <Search className="w-4 h-4 text-emerald-400" />
+                <span>{language === 'bn' ? 'আইডি ও কিউআর যাচাই' : 'Verify Member ID'}</span>
               </button>
             </div>
 
+            {/* Direct Assurance Notice */}
             <p className="text-[11px] text-slate-400 pt-1">
               {language === 'bn' 
-                ? '* কোনো মধ্যস্বত্বভোগী ছাড়াই সরাসরি আবেদন ও তাৎক্ষণিক ডিজিটাল ট্র্যাকিং সুবিধা।' 
-                : '* Direct online membership enrollment with immediate application tracking.'}
+                ? '✓ সরকারি নিয়মানুযায়ী নিবন্ধিত অলাভজনক চালক কল্যাণ সংস্থা • কোনো মধ্যস্বত্বভোগী ছাড়া সরাসরি সেবা।' 
+                : '✓ Registered non-profit driver welfare trust • Direct verification and instant member assistance.'}
             </p>
           </div>
 
-          {/* Right Column: Interactive Digital Health & ID Card Preview Visual */}
-          <div className="lg:col-span-5 relative">
+          {/* Right Column: Digital ID Card Showcase with Live Slide Badge */}
+          <div className="lg:col-span-5 relative hidden md:block">
             <div className="relative mx-auto max-w-md">
               
-              {/* Decorative Card 1: Official Digital ID Card Mockup */}
-              <div className="relative z-20 rounded-2xl p-6 bg-gradient-to-br from-emerald-800 via-emerald-900 to-slate-900 border border-emerald-500/40 shadow-2xl shadow-emerald-950/80 text-white backdrop-blur-sm">
+              {/* Dynamic Slide Accent Badge */}
+              <div className="absolute -top-5 -right-3 z-30 bg-emerald-950/90 border border-emerald-500/60 rounded-2xl p-3 shadow-2xl backdrop-blur-md flex items-center gap-3 transition-all duration-300">
+                <div className="p-2 bg-emerald-600/30 text-emerald-300 rounded-xl">
+                  <BadgeIcon className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-white">{language === 'bn' ? activeSlide.badgeBn : activeSlide.badgeEn}</p>
+                  <p className="text-[10px] text-emerald-300 font-medium">{language === 'bn' ? 'ডিডব্লিউএফ নিশ্চয়তা' : 'DWF Guarantee'}</p>
+                </div>
+              </div>
+
+              {/* Official Digital Smart ID Card Mockup */}
+              <div className="relative z-20 rounded-2xl p-6 bg-gradient-to-br from-emerald-900/90 via-slate-900/95 to-slate-950/95 border border-emerald-500/40 shadow-2xl shadow-emerald-950/90 text-white backdrop-blur-lg">
                 
                 {/* Header with Seal */}
                 <div className="flex items-center justify-between border-b border-emerald-700/60 pb-3">
@@ -125,8 +306,8 @@ export const HeroSection: React.FC = () => {
                       <p className="text-[10px] text-emerald-300 font-medium">DRIVERS WELFARE FOUNDATION</p>
                     </div>
                   </div>
-                  <span className="bg-red-600 text-white font-bold text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider">
-                    সদস্য কার্ড
+                  <span className="bg-red-600 text-white font-bold text-[9px] px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-xs">
+                    ডিজিটাল স্মার্ট কার্ড
                   </span>
                 </div>
 
@@ -134,18 +315,18 @@ export const HeroSection: React.FC = () => {
                 <div className="mt-4 flex gap-4 items-center">
                   <img
                     src="https://images.unsplash.com/photo-1544717305-2782549b5136?w=400&auto=format&fit=crop&q=80"
-                    alt="Member"
-                    className="w-16 h-20 rounded-lg object-cover border-2 border-emerald-400 shadow-md shrink-0"
+                    alt="Sample Member"
+                    className="w-16 h-20 rounded-xl object-cover border-2 border-emerald-400 shadow-md shrink-0"
                   />
                   <div className="space-y-1 text-xs">
                     <p className="font-bold text-base text-white">মোঃ কামাল হোসেন</p>
-                    <p className="text-emerald-200 text-[11px]">আইডি: <span className="font-mono font-bold text-white">DWF-000142</span></p>
+                    <p className="text-emerald-200 text-[11px]">সদস্য আইডি: <span className="font-mono font-bold text-white">DWF-000142</span></p>
                     <p className="text-slate-300 text-[11px]">পেশা: দূরপাল্লার ভারী বাস চালক</p>
                     <div className="flex items-center gap-3 pt-1 text-[11px]">
                       <span className="bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-700">
                         রক্ত: <strong className="text-white">B+</strong>
                       </span>
-                      <span className="text-emerald-300">মেয়াদ: ২০২৭</span>
+                      <span className="text-emerald-300 font-mono">মেয়াদ: ২০২৭</span>
                     </div>
                   </div>
                 </div>
@@ -154,36 +335,24 @@ export const HeroSection: React.FC = () => {
                 <div className="mt-4 pt-3 border-t border-emerald-700/60 flex items-center justify-between text-[10px] text-emerald-200">
                   <div className="space-y-0.5">
                     <p className="font-semibold text-white">ডিজিটাল স্মার্ট কিউআর ভেরিফাইড</p>
-                    <p className="text-slate-300">সুরক্ষিত চালক – নিরাপদ সড়ক</p>
+                    <p className="text-slate-400">সুরক্ষিত চালক – নিরাপদ সড়ক</p>
                   </div>
-                  <div className="w-10 h-10 bg-white p-1 rounded-sm shadow">
-                    {/* Simulated SVG QR */}
-                    <div className="w-full h-full bg-slate-900 flex items-center justify-center text-[7px] text-white font-mono font-bold">
+                  <div className="w-10 h-10 bg-white p-1 rounded-md shadow flex items-center justify-center">
+                    <div className="w-full h-full bg-slate-900 rounded-sm flex items-center justify-center text-[7px] text-white font-mono font-bold">
                       QR-DWF
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Floating Benefit Tag 1 */}
-              <div className="absolute -top-4 -right-4 z-30 bg-slate-900/95 border border-emerald-500/50 rounded-xl p-3 shadow-xl backdrop-blur-md flex items-center gap-2.5">
-                <div className="p-2 bg-emerald-500/20 text-emerald-400 rounded-lg">
-                  <HeartPulse className="w-5 h-5" />
+              {/* Floating Benefit Tag Bottom */}
+              <div className="absolute -bottom-5 -left-4 z-30 bg-slate-950/90 border border-emerald-500/50 rounded-2xl p-3 shadow-xl backdrop-blur-md flex items-center gap-3">
+                <div className="p-2 bg-emerald-500/20 text-emerald-400 rounded-xl">
+                  <Sparkles className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-white">স্বাস্থ্য সুরক্ষা কার্ড</p>
-                  <p className="text-[10px] text-emerald-400">হাসপাতালে ৫০% ছাড় সুবিধা</p>
-                </div>
-              </div>
-
-              {/* Floating Benefit Tag 2 */}
-              <div className="absolute -bottom-5 -left-4 z-30 bg-slate-900/95 border border-amber-500/50 rounded-xl p-3 shadow-xl backdrop-blur-md flex items-center gap-2.5">
-                <div className="p-2 bg-amber-500/20 text-amber-400 rounded-lg">
-                  <Scale className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-white">বিনামূল্যে লিগ্যাল এইড</p>
-                  <p className="text-[10px] text-amber-400">২৪/৭ অভিজ্ঞ প্যানেল আইনজীবী</p>
+                  <p className="text-xs font-bold text-white">অনলাইন ডাটাবেস নিবন্ধিত</p>
+                  <p className="text-[10px] text-emerald-400">১০০% নমিনি ও জীবন নিরাপত্তা</p>
                 </div>
               </div>
 
@@ -191,6 +360,64 @@ export const HeroSection: React.FC = () => {
           </div>
 
         </div>
+
+        {/* Slider Bottom Navigation & Controls */}
+        <div className="mt-12 pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4">
+          
+          {/* Slide Indicator Buttons / Progress */}
+          <div className="flex items-center gap-2">
+            {slides.map((slide, idx) => {
+              const isSelected = idx === currentSlide;
+              return (
+                <button
+                  key={slide.id}
+                  onClick={() => setCurrentSlide(idx)}
+                  className={`group relative py-1.5 px-3 rounded-xl transition cursor-pointer flex items-center gap-2 border ${
+                    isSelected
+                      ? 'bg-emerald-950/90 border-emerald-500/70 text-white'
+                      : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                  }`}
+                  aria-label={`Go to slide ${idx + 1}`}
+                >
+                  <span className="font-mono text-xs font-bold">0{idx + 1}</span>
+                  <span className="hidden md:inline text-[11px] font-medium max-w-[120px] truncate">
+                    {language === 'bn' ? slide.titleBn.split('–')[0] : slide.titleEn.split('–')[0]}
+                  </span>
+                  {isSelected && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Arrow Controls & Pause Indicator */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={prevSlide}
+              className="p-2.5 rounded-xl bg-slate-900/80 hover:bg-emerald-900/80 border border-slate-700/80 text-white transition cursor-pointer active:scale-95 shadow-xs"
+              aria-label="Previous Slide"
+              title="পূর্ববর্তী স্লাইড"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+
+            <span className="text-[11px] font-mono text-slate-400 px-2">
+              0{currentSlide + 1} / 0{slides.length}
+            </span>
+
+            <button
+              onClick={nextSlide}
+              className="p-2.5 rounded-xl bg-slate-900/80 hover:bg-emerald-900/80 border border-slate-700/80 text-white transition cursor-pointer active:scale-95 shadow-xs"
+              aria-label="Next Slide"
+              title="পরবর্তী স্লাইড"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+
+        </div>
+
       </div>
     </section>
   );
