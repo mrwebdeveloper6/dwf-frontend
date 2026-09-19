@@ -1,0 +1,314 @@
+{
+  "entities": {
+    "Member": {
+      "title": "Member",
+      "description": "Registered driver member with welfare health card and contribution balance",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "memberId": { "type": "string" },
+        "name": { "type": "string" },
+        "nameBn": { "type": "string" },
+        "phone": { "type": "string" },
+        "whatsapp": { "type": "string" },
+        "email": { "type": "string" },
+        "nid": { "type": "string" },
+        "dob": { "type": "string" },
+        "bloodGroup": { "type": "string" },
+        "fatherName": { "type": "string" },
+        "motherName": { "type": "string" },
+        "currentAddress": { "type": "string" },
+        "permanentAddress": { "type": "string" },
+        "profession": { "type": "string" },
+        "drivingLicenseNo": { "type": "string" },
+        "licenseType": { "type": "string" },
+        "licenseExpiry": { "type": "string" },
+        "vehicleType": { "type": "string" },
+        "vehicleRegNo": { "type": "string" },
+        "photoUrl": { "type": "string" },
+        "status": { "type": "string" },
+        "joinedDate": { "type": "string" },
+        "healthCardNo": { "type": "string" },
+        "healthCardExpiry": { "type": "string" },
+        "branchId": { "type": "string" },
+        "branchName": { "type": "string" },
+        "verificationToken": { "type": "string" },
+        "monthlyContribution": { "type": "number" },
+        "totalDeposit": { "type": "number" },
+        "welfareBalance": { "type": "number" },
+        "outstandingDue": { "type": "number" },
+        "medicalAllowanceLimit": { "type": "number" },
+        "nominees": { "type": "array" }
+      },
+      "required": ["id", "memberId", "name", "phone", "nid", "status"]
+    },
+    "MembershipApplication": {
+      "title": "MembershipApplication",
+      "description": "Online membership registration application submitted by driver",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "applicationId": { "type": "string" },
+        "fullName": { "type": "string" },
+        "fatherName": { "type": "string" },
+        "motherName": { "type": "string" },
+        "dob": { "type": "string" },
+        "nid": { "type": "string" },
+        "phone": { "type": "string" },
+        "whatsapp": { "type": "string" },
+        "bloodGroup": { "type": "string" },
+        "drivingLicenseNo": { "type": "string" },
+        "licenseType": { "type": "string" },
+        "vehicleType": { "type": "string" },
+        "currentAddress": { "type": "string" },
+        "permanentAddress": { "type": "string" },
+        "preferredBranch": { "type": "string" },
+        "monthlyPledge": { "type": "number" },
+        "status": { "type": "string" },
+        "submittedAt": { "type": "string" },
+        "photoPreview": { "type": "string" },
+        "licensePhotoPreview": { "type": "string" },
+        "nidPhotoPreview": { "type": "string" },
+        "nominees": { "type": "array" },
+        "reviewNotes": { "type": "string" },
+        "reviewedBy": { "type": "string" },
+        "reviewedAt": { "type": "string" }
+      },
+      "required": ["id", "applicationId", "fullName", "phone", "nid", "status", "submittedAt"]
+    },
+    "PaymentRecord": {
+      "title": "PaymentRecord",
+      "description": "Monthly welfare contribution or fund transaction",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "receiptNo": { "type": "string" },
+        "memberId": { "type": "string" },
+        "memberName": { "type": "string" },
+        "amount": { "type": "number" },
+        "paymentType": { "type": "string" },
+        "paymentMethod": { "type": "string" },
+        "transactionId": { "type": "string" },
+        "date": { "type": "string" },
+        "monthCovered": { "type": "string" },
+        "status": { "type": "string" },
+        "collectedBy": { "type": "string" },
+        "remarks": { "type": "string" }
+      },
+      "required": ["id", "receiptNo", "memberId", "amount", "date", "status"]
+    },
+    "MedicalClaim": {
+      "title": "MedicalClaim",
+      "description": "Medical hospital discount or treatment claim",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "claimNo": { "type": "string" },
+        "memberId": { "type": "string" },
+        "memberName": { "type": "string" },
+        "hospitalName": { "type": "string" },
+        "hospitalBranch": { "type": "string" },
+        "admissionDate": { "type": "string" },
+        "dischargeDate": { "type": "string" },
+        "ailmentDescription": { "type": "string" },
+        "totalHospitalBill": { "type": "number" },
+        "discountReceived": { "type": "number" },
+        "claimedAllowance": { "type": "number" },
+        "approvedAmount": { "type": "number" },
+        "status": { "type": "string" },
+        "submittedAt": { "type": "string" },
+        "reviewedBy": { "type": "string" },
+        "reviewedAt": { "type": "string" },
+        "documents": { "type": "array" }
+      },
+      "required": ["id", "claimNo", "memberId", "hospitalName", "status", "submittedAt"]
+    },
+    "AccidentClaim": {
+      "title": "AccidentClaim",
+      "description": "Emergency road accident relief or nominee compensation claim",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "claimNo": { "type": "string" },
+        "memberId": { "type": "string" },
+        "memberName": { "type": "string" },
+        "accidentDate": { "type": "string" },
+        "accidentLocation": { "type": "string" },
+        "vehicleRegNo": { "type": "string" },
+        "severity": { "type": "string" },
+        "policeStationReport": { "type": "string" },
+        "initialHospital": { "type": "string" },
+        "requestedAmount": { "type": "number" },
+        "approvedAmount": { "type": "number" },
+        "emergencyDisbursed": { "type": "number" },
+        "status": { "type": "string" },
+        "submittedAt": { "type": "string" },
+        "disbursedAt": { "type": "string" },
+        "investigationNotes": { "type": "string" }
+      },
+      "required": ["id", "claimNo", "memberId", "accidentDate", "status", "submittedAt"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "System operational and financial audit trail",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "actorName": { "type": "string" },
+        "actorRole": { "type": "string" },
+        "action": { "type": "string" },
+        "module": { "type": "string" },
+        "recordId": { "type": "string" },
+        "details": { "type": "string" },
+        "ipAddress": { "type": "string" }
+      },
+      "required": ["id", "timestamp", "actorName", "action", "module"]
+    },
+    "SystemMetrics": {
+      "title": "SystemMetrics",
+      "description": "Real-time summary counts and reserve funds",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "totalMembers": { "type": "number" },
+        "activeMembers": { "type": "number" },
+        "totalReserveFund": { "type": "number" },
+        "totalDisbursed": { "type": "number" },
+        "monthlyCollectionTarget": { "type": "number" },
+        "currentMonthCollection": { "type": "number" },
+        "pendingApplications": { "type": "number" },
+        "activeMedicalClaims": { "type": "number" },
+        "lastUpdated": { "type": "string" }
+      },
+      "required": ["id", "totalMembers", "totalReserveFund"]
+    },
+    "StoredFile": {
+      "title": "StoredFile",
+      "description": "Uploaded document or image stored in cloud or local vault",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "size": { "type": "number" },
+        "type": { "type": "string" },
+        "url": { "type": "string" },
+        "storageType": { "type": "string" },
+        "uploadedAt": { "type": "string" },
+        "category": { "type": "string" },
+        "memberId": { "type": "string" },
+        "uploadedBy": { "type": "string" }
+      },
+      "required": ["id", "name", "size", "type", "url", "storageType", "uploadedAt"]
+    },
+    "CommitteeMember": {
+      "title": "CommitteeMember",
+      "description": "Central or branch executive committee officer/leader",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nameBn": { "type": "string" },
+        "nameEn": { "type": "string" },
+        "designationBn": { "type": "string" },
+        "designationEn": { "type": "string" },
+        "phone": { "type": "string" },
+        "cleanPhone": { "type": "string" },
+        "roleType": { "type": "string" },
+        "photo": { "type": "string" },
+        "locationBn": { "type": "string" },
+        "locationEn": { "type": "string" },
+        "tenureBn": { "type": "string" },
+        "tenureEn": { "type": "string" },
+        "isKeyLeader": { "type": "boolean" },
+        "order": { "type": "number" }
+      },
+      "required": ["id", "nameBn", "designationBn", "phone", "roleType"]
+    },
+    "NoticeItem": {
+      "title": "NoticeItem",
+      "description": "Organizational circular, news bulletin, or emergency notice",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "titleBn": { "type": "string" },
+        "excerpt": { "type": "string" },
+        "excerptBn": { "type": "string" },
+        "content": { "type": "string" },
+        "contentBn": { "type": "string" },
+        "category": { "type": "string" },
+        "date": { "type": "string" },
+        "isUrgent": { "type": "boolean" },
+        "image": { "type": "string" }
+      },
+      "required": ["id", "titleBn", "excerptBn", "category", "date"]
+    },
+    "ProfileUpdateRequest": {
+      "title": "ProfileUpdateRequest",
+      "description": "Member profile modification requests requiring administrative review and approval before committing changes to member profile",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "requestId": { "type": "string" },
+        "memberId": { "type": "string" },
+        "memberName": { "type": "string" },
+        "memberNameBn": { "type": "string" },
+        "currentData": { "type": "object" },
+        "requestedChanges": { "type": "object" },
+        "reason": { "type": "string" },
+        "status": { "type": "string" },
+        "submittedAt": { "type": "string" },
+        "reviewedAt": { "type": "string" },
+        "reviewedBy": { "type": "string" },
+        "reviewNotes": { "type": "string" }
+      },
+      "required": ["id", "requestId", "memberId", "status", "submittedAt"]
+    }
+  },
+  "firestore": {
+    "/members/{memberId}": {
+      "schema": "#/entities/Member",
+      "description": "Collection of all registered driver foundation members"
+    },
+    "/applications/{applicationId}": {
+      "schema": "#/entities/MembershipApplication",
+      "description": "Collection of membership registration applications"
+    },
+    "/payments/{paymentId}": {
+      "schema": "#/entities/PaymentRecord",
+      "description": "Collection of membership contributions and welfare receipts"
+    },
+    "/medicalClaims/{claimId}": {
+      "schema": "#/entities/MedicalClaim",
+      "description": "Collection of hospital discount and medical allowance claims"
+    },
+    "/accidentClaims/{claimId}": {
+      "schema": "#/entities/AccidentClaim",
+      "description": "Collection of highway accident relief and compensation claims"
+    },
+    "/auditLogs/{logId}": {
+      "schema": "#/entities/AuditLog",
+      "description": "Collection of administrative audit trail records"
+    },
+    "/metrics/{metricId}": {
+      "schema": "#/entities/SystemMetrics",
+      "description": "System-wide real-time metric aggregates"
+    },
+    "/storedFiles/{fileId}": {
+      "schema": "#/entities/StoredFile",
+      "description": "Collection of uploaded documents and verified file attachments"
+    },
+    "/committee/{memberId}": {
+      "schema": "#/entities/CommitteeMember",
+      "description": "Collection of central and branch committee leadership records"
+    },
+    "/notices/{noticeId}": {
+      "schema": "#/entities/NoticeItem",
+      "description": "Collection of published news, training alerts, and circulars"
+    },
+    "/profileUpdateRequests/{requestId}": {
+      "schema": "#/entities/ProfileUpdateRequest",
+      "description": "Collection of pending and reviewed member profile change requests"
+    }
+  }
+}

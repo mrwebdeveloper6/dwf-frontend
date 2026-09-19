@@ -5,10 +5,12 @@ import {
   MedicalClaim, 
   AccidentClaim, 
   NoticeItem, 
+  CommitteeMember,
   Branch, 
   AuditLog, 
   SmsRecord, 
-  SystemMetrics 
+  SystemMetrics,
+  ProfileUpdateRequest
 } from '../types/dwf';
 
 export const initialSystemMetrics: SystemMetrics = {
@@ -522,5 +524,280 @@ export const initialSmsRecords: SmsRecord[] = [
     status: 'DELIVERED',
     sentAt: '2026-09-15 14:00',
     cost: 0.35
+  }
+];
+
+export const initialCommitteeMembers: CommitteeMember[] = [
+  {
+    id: 'cm-1',
+    nameBn: 'আলহাজ্ব মো: রফিকুল ইসলাম',
+    nameEn: 'Alhaj Md. Rafiqul Islam',
+    designationBn: 'সভাপতি',
+    designationEn: 'President',
+    phone: '০১৭১১-২৩৪৫৬৭',
+    cleanPhone: '+8801711234567',
+    roleType: 'PRESIDIUM',
+    photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
+    locationBn: 'কেন্দ্রীয় পরিচালনা পর্ষদ, ঢাকা',
+    locationEn: 'Central Executive Board, Dhaka',
+    tenureBn: '২০২৪ – ২০২৭ মেয়াদ',
+    tenureEn: 'Term: 2024 – 2027',
+    isKeyLeader: true,
+    order: 1
+  },
+  {
+    id: 'cm-2',
+    nameBn: 'মোহাম্মদ জসিম উদ্দিন',
+    nameEn: 'Mohammad Jasim Uddin',
+    designationBn: 'সাধারণ সম্পাদক',
+    designationEn: 'General Secretary',
+    phone: '০১৮১২-৩৪৫৬৭৮',
+    cleanPhone: '+8801812345678',
+    roleType: 'PRESIDIUM',
+    photo: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80',
+    locationBn: 'সায়েদাবাদ আন্তঃজেলা টার্মিনাল উইং',
+    locationEn: 'Sayedabad Terminal Wing',
+    tenureBn: '২০২৪ – ২০২৭ মেয়াদ',
+    tenureEn: 'Term: 2024 – 2027',
+    isKeyLeader: true,
+    order: 2
+  },
+  {
+    id: 'cm-3',
+    nameBn: 'কাজী আবুল কালাম',
+    nameEn: 'Kazi Abul Kalam',
+    designationBn: 'সিনিয়র সহ-সভাপতি',
+    designationEn: 'Senior Vice President',
+    phone: '০১৯১১-৯৮৭৬৫৪',
+    cleanPhone: '+8801911987654',
+    roleType: 'PRESIDIUM',
+    photo: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80',
+    locationBn: 'গাবতলী টার্মিনাল জোন',
+    locationEn: 'Gabtoli Terminal Zone',
+    tenureBn: '২০২৪ – ২০২৭ মেয়াদ',
+    tenureEn: 'Term: 2024 – 2027',
+    order: 3
+  },
+  {
+    id: 'cm-4',
+    nameBn: 'হাজী আব্দুল মোতালেব',
+    nameEn: 'Haji Abdul Motaleb',
+    designationBn: 'সহ-সভাপতি',
+    designationEn: 'Vice President',
+    phone: '০১৭১২-৮৮৮৭৭৭',
+    cleanPhone: '+8801712888777',
+    roleType: 'PRESIDIUM',
+    photo: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=400&q=80',
+    locationBn: 'মহাখালী বাস টার্মিনাল জোন',
+    locationEn: 'Mohakhali Terminal Zone',
+    tenureBn: '২০২৪ – ২০২৭ মেয়াদ',
+    tenureEn: 'Term: 2024 – 2027',
+    order: 4
+  },
+  {
+    id: 'cm-5',
+    nameBn: 'শাহ আলম হাওলাদার',
+    nameEn: 'Shah Alam Hawlader',
+    designationBn: 'যুগ্ম সাধারণ সম্পাদক',
+    designationEn: 'Joint General Secretary',
+    phone: '০১৬১১-৩৩৪৪৫৫',
+    cleanPhone: '+8801611334455',
+    roleType: 'SECRETARY',
+    photo: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80',
+    locationBn: 'ফুলবাড়িয়া ও কেরানীগঞ্জ সার্কেল',
+    locationEn: 'Fulbaria & Keraniganj Circle',
+    tenureBn: '২০২৪ – ২০২৭ মেয়াদ',
+    tenureEn: 'Term: 2024 – 2027',
+    order: 5
+  },
+  {
+    id: 'cm-6',
+    nameBn: 'মোঃ ফারুক হোসেন',
+    nameEn: 'Md. Faruk Hossain',
+    designationBn: 'সাংগঠনিক সম্পাদক',
+    designationEn: 'Organizing Secretary',
+    phone: '০১৭২৩-৫৫৬৬৭৭',
+    cleanPhone: '+8801723556677',
+    roleType: 'SECRETARY',
+    photo: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=400&q=80',
+    locationBn: 'সারাদেশের সাংগঠনিক নেটওয়ার্ক',
+    locationEn: 'National Organization Wing',
+    tenureBn: '২০২৪ – ২০২৭ মেয়াদ',
+    tenureEn: 'Term: 2024 – 2027',
+    order: 6
+  },
+  {
+    id: 'cm-7',
+    nameBn: 'মীর মোয়াজ্জেম হোসেন',
+    nameEn: 'Mir Moazzem Hossain',
+    designationBn: 'অর্থ ও কল্যাণ সম্পাদক',
+    designationEn: 'Finance & Welfare Secretary',
+    phone: '০১৮১৯-১১২২৩৩',
+    cleanPhone: '+8801819112233',
+    roleType: 'SECRETARY',
+    photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+    locationBn: 'কেন্দ্রীয় কল্যাণ ফান্ড উইং',
+    locationEn: 'Central Welfare Fund Wing',
+    tenureBn: '২০২৪ – ২০২৭ মেয়াদ',
+    tenureEn: 'Term: 2024 – 2027',
+    order: 7
+  },
+  {
+    id: 'cm-8',
+    nameBn: 'এডভোকেট কামরুল হাসান',
+    nameEn: 'Advocate Kamrul Hasan',
+    designationBn: 'আইন ও সালিশ বিষয়ক সম্পাদক',
+    designationEn: 'Legal Affairs Secretary',
+    phone: '০১৭১৫-৯৯৮৮৭৭',
+    cleanPhone: '+8801715998877',
+    roleType: 'SPECIALIZED',
+    photo: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=400&q=80',
+    locationBn: 'সুপ্রিম কোর্ট ও হাইওয়ে লিগ্যাল এইড সেল',
+    locationEn: 'Supreme Court & Highway Legal Aid',
+    tenureBn: '২০২৪ – ২০২৭ মেয়াদ',
+    tenureEn: 'Term: 2024 – 2027',
+    order: 8
+  },
+  {
+    id: 'cm-9',
+    nameBn: 'ডা: এস. এম. হারুন-অর-রশীদ',
+    nameEn: 'Dr. S. M. Harun-or-Rashid',
+    designationBn: 'স্বাস্থ্য ও চিকিৎসা বিষয়ক সম্পাদক',
+    designationEn: 'Health & Medical Secretary',
+    phone: '০১৭৮৮-৪৪৫৫৬৬',
+    cleanPhone: '+8801788445566',
+    roleType: 'SPECIALIZED',
+    photo: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=400&q=80',
+    locationBn: 'ডিজিটাল হেলথ কার্ড ও হাসপাতাল উইং',
+    locationEn: 'Digital Health Card & Hospital Wing',
+    tenureBn: '২০২৪ – ২০২৭ মেয়াদ',
+    tenureEn: 'Term: 2024 – 2027',
+    order: 9
+  },
+  {
+    id: 'cm-10',
+    nameBn: 'এম. এ. জলিল',
+    nameEn: 'M. A. Jalil',
+    designationBn: 'দপ্তর ও প্রচার সম্পাদক',
+    designationEn: 'Office & Publicity Secretary',
+    phone: '০১৯৩৩-৬৬৭৭৮৮',
+    cleanPhone: '+8801933667788',
+    roleType: 'SECRETARY',
+    photo: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=400&q=80',
+    locationBn: 'কেন্দ্রীয় সচিবালয় ও মিডিয়া সেল',
+    locationEn: 'Central Secretariat & Media Cell',
+    tenureBn: '২০২৪ – ২০২৭ মেয়াদ',
+    tenureEn: 'Term: 2024 – 2027',
+    order: 10
+  }
+];
+
+export const initialProfileUpdateRequests: ProfileUpdateRequest[] = [
+  {
+    id: 'pur-1',
+    requestId: 'PUR-2026-0012',
+    memberId: 'DWF-000142',
+    memberName: 'Md. Kamal Hossain',
+    memberNameBn: 'মোঃ কামাল হোসেন',
+    currentData: {
+      name: 'Md. Kamal Hossain',
+      nameBn: 'মোঃ কামাল হোসেন',
+      phone: '01711-234567',
+      whatsapp: '01711-234567',
+      photoUrl: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=400&auto=format&fit=crop&q=80',
+      bloodGroup: 'B+',
+      currentAddress: 'বাসা # ১২, রোড # ৪, মিরপুর-১০, ঢাকা',
+      permanentAddress: 'গ্রাম: চরভদ্রাসন, ডাকঘর: চরভদ্রাসন, জেলা: ফরিদপুর',
+      drivingLicenseNo: 'DK-7890452-PROF',
+      vehicleType: 'BUS',
+      vehicleRegNo: 'ঢাকা মেট্রো-ব ১৪-৯৮২৩',
+      nominees: [
+        {
+          id: 'nom-1',
+          name: 'মোসাঃ নাসিমা আক্তার',
+          relationship: 'স্ত্রী (Wife)',
+          nid: '19882695555555555',
+          mobile: '01722-987654',
+          address: 'মিরপুর-১০, ঢাকা',
+          percentage: 70
+        },
+        {
+          id: 'nom-2',
+          name: 'তানভীর হোসেন',
+          relationship: 'পুত্র (Son)',
+          nid: '20052697777777777',
+          mobile: '01733-112233',
+          address: 'মিরপুর-১০, ঢাকা',
+          percentage: 30
+        }
+      ]
+    },
+    requestedChanges: {
+      nameBn: 'মোঃ কামাল হোসেন প্রধান',
+      phone: '01711-234567',
+      whatsapp: '01711-234567',
+      currentAddress: 'বাসা # ১৮/এ, রোড # ৬, সেকশন-১১, মিরপুর, ঢাকা-১২১৬',
+      nominees: [
+        {
+          id: 'nom-1',
+          name: 'মোসাঃ নাসিমা আক্তার',
+          relationship: 'স্ত্রী (Wife)',
+          nid: '19882695555555555',
+          mobile: '01722-987654',
+          address: 'মিরপুর, ঢাকা',
+          percentage: 60
+        },
+        {
+          id: 'nom-2',
+          name: 'তানভীর হোসেন',
+          relationship: 'পুত্র (Son)',
+          nid: '20052697777777777',
+          mobile: '01733-112233',
+          address: 'মিরপুর, ঢাকা',
+          percentage: 40
+        }
+      ]
+    },
+    reason: 'বাসা পরিবর্তন হওয়ায় বর্তমান ঠিকানা আপডেট এবং নমিনির শতকরা অংশ পরিবর্তন প্রয়োজন।',
+    status: 'PENDING',
+    submittedAt: '2026-09-18'
+  },
+  {
+    id: 'pur-2',
+    requestId: 'PUR-2026-0008',
+    memberId: 'DWF-000143',
+    memberName: 'Md. Rafiqul Islam',
+    memberNameBn: 'মোঃ রফিকুল ইসলাম',
+    currentData: {
+      name: 'Md. Rafiqul Islam',
+      nameBn: 'মোঃ রফিকুল ইসলাম',
+      phone: '01819-876543',
+      photoUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80',
+      bloodGroup: 'O+',
+      drivingLicenseNo: 'CTG-4512980-PROF',
+      vehicleType: 'TRUCK',
+      vehicleRegNo: 'চট্ট মেট্রো-ট ১১-৫৬৭৮',
+      nominees: [
+        {
+          id: 'nom-3',
+          name: 'শামীমা নাসরিন',
+          relationship: 'স্ত্রী (Wife)',
+          nid: '19905419999999999',
+          mobile: '01819-112233',
+          address: 'আগ্রাবাদ, চট্টগ্রাম',
+          percentage: 100
+        }
+      ]
+    },
+    requestedChanges: {
+      vehicleRegNo: 'চট্ট মেট্রো-ট ১২-৮৯০১',
+      drivingLicenseNo: 'CTG-4512980-PROF'
+    },
+    reason: 'নতুন গাড়ির দায়িত্ব গ্রহণের কারণে গাড়ির রেজিস্ট্রেশন নম্বর পরিবর্তন।',
+    status: 'APPROVED',
+    submittedAt: '2026-09-10',
+    reviewedAt: '2026-09-12',
+    reviewedBy: 'মেম্বারশিপ অফিসার',
+    reviewNotes: 'পরিবহন মালিকের প্রত্যায়ন ও গাড়ির ব্লুবুক যাচাই করে অনুমোদন প্রদান করা হলো।'
   }
 ];

@@ -177,6 +177,8 @@ export interface AccidentClaim {
   submittedAt: string;
   reviewedAt?: string;
   reviewNotes?: string;
+  accidentDetails?: string;
+  hospitalAdmitted?: string;
 }
 
 export interface AuditLog {
@@ -186,10 +188,54 @@ export interface AuditLog {
   userName: string;
   role: string;
   action: string;
-  module: 'MEMBER' | 'PAYMENT' | 'CLAIM' | 'APPLICATION' | 'SETTINGS' | 'SMS' | 'AUTH';
+  module: 'MEMBER' | 'PAYMENT' | 'CLAIM' | 'APPLICATION' | 'SETTINGS' | 'SMS' | 'AUTH' | 'STORAGE_VAULT' | 'COMMITTEE' | 'CIRCULAR' | 'PROFILE_UPDATE';
   recordId: string;
   details: string;
   ipAddress?: string;
+}
+
+export type ProfileUpdateStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+
+export interface ProfileUpdateRequest {
+  id: string;
+  requestId: string; // e.g. PUR-2026-0042
+  memberId: string; // e.g. DWF-000142
+  memberName: string;
+  memberNameBn: string;
+  currentData: {
+    name: string;
+    nameBn: string;
+    phone: string;
+    whatsapp?: string;
+    photoUrl: string;
+    bloodGroup?: string;
+    currentAddress?: string;
+    permanentAddress?: string;
+    drivingLicenseNo?: string;
+    vehicleType?: string;
+    vehicleRegNo?: string;
+    nominees: Nominee[];
+  };
+  requestedChanges: {
+    name?: string;
+    nameBn?: string;
+    phone?: string;
+    whatsapp?: string;
+    photoUrl?: string;
+    bloodGroup?: string;
+    currentAddress?: string;
+    permanentAddress?: string;
+    drivingLicenseNo?: string;
+    vehicleType?: string;
+    vehicleRegNo?: string;
+    nominees?: Nominee[];
+  };
+  reason?: string;
+  status: ProfileUpdateStatus;
+  submittedAt: string;
+  reviewedAt?: string;
+  reviewedBy?: string;
+  reviewNotes?: string;
 }
 
 export interface SmsRecord {
@@ -217,6 +263,24 @@ export interface NoticeItem {
   image?: string;
 }
 
+export interface CommitteeMember {
+  id: string;
+  nameBn: string;
+  nameEn: string;
+  designationBn: string;
+  designationEn: string;
+  phone: string;
+  cleanPhone?: string;
+  roleType: 'PRESIDIUM' | 'SECRETARY' | 'SPECIALIZED';
+  photo: string;
+  locationBn: string;
+  locationEn: string;
+  tenureBn: string;
+  tenureEn: string;
+  isKeyLeader?: boolean;
+  order?: number;
+}
+
 export interface Branch {
   id: string;
   code: string;
@@ -231,6 +295,7 @@ export interface Branch {
 }
 
 export interface SystemMetrics {
+  id?: string;
   totalMembers: number;
   activeMembers: number;
   pendingApplications: number;
@@ -240,4 +305,31 @@ export interface SystemMetrics {
   trainedMembers: number;
   monthlyCollection: number; // in BDT
   todayCollection: number; // in BDT
+}
+
+export type StorageOption = 'FIREBASE_STORAGE' | 'LOCAL_VAULT';
+
+export type FileCategory = 
+  | 'MEMBER_PHOTO' 
+  | 'DRIVING_LICENSE' 
+  | 'NID_CARD' 
+  | 'MEDICAL_DOC' 
+  | 'ACCIDENT_PROOF' 
+  | 'PAYMENT_SLIP' 
+  | 'INSURANCE' 
+  | 'OTHER';
+
+export interface StoredFile {
+  id: string;
+  name: string;
+  size: number;
+  type: string;
+  url: string;
+  storageType: StorageOption;
+  category: FileCategory;
+  uploadedAt: string;
+  memberId?: string;
+  memberName?: string;
+  uploadedBy?: string;
+  description?: string;
 }

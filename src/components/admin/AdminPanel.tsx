@@ -23,9 +23,17 @@ import {
   LayoutDashboard,
   Filter,
   Check,
-  X
+  X,
+  FolderArchive,
+  Cloud,
+  HardDrive,
+  Award,
+  UserCog
 } from 'lucide-react';
 import { MembershipApplication, MedicalClaim, AccidentClaim, PaymentRecord } from '../../types/dwf';
+import { AdminCommitteeManager } from './AdminCommitteeManager';
+import { AdminNoticeManager } from './AdminNoticeManager';
+import { ProfileRequestsManager } from './ProfileRequestsManager';
 
 export const AdminPanel: React.FC = () => {
   const { 
@@ -44,12 +52,16 @@ export const AdminPanel: React.FC = () => {
     metrics, 
     auditLogs, 
     notices, 
+    committeeMembers,
     smsRecords,
-    setActiveView 
+    storedFiles,
+    setShowDocumentVaultModal,
+    setActiveView,
+    profileUpdateRequests
   } = useDwf();
 
   const [activeTab, setActiveTab] = useState<
-    'dashboard' | 'applications' | 'members' | 'payments' | 'medical' | 'accident' | 'welfare' | 'audit' | 'notices'
+    'dashboard' | 'committee' | 'notices' | 'applications' | 'profile-requests' | 'members' | 'payments' | 'medical' | 'accident' | 'welfare' | 'audit'
   >('dashboard');
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -65,6 +77,7 @@ export const AdminPanel: React.FC = () => {
   // Stats calculation
   const totalActiveMembers = members.filter(m => m.status === 'ACTIVE').length;
   const pendingApps = applications.filter(a => a.status === 'SUBMITTED' || a.status === 'UNDER_REVIEW').length;
+  const pendingProfileRequests = profileUpdateRequests.filter(r => r.status === 'PENDING').length;
   const pendingMedical = medicalClaims.filter(m => m.status === 'SUBMITTED' || m.status === 'UNDER_REVIEW').length;
   const pendingAccidents = accidentClaims.filter(a => a.status === 'SUBMITTED' || a.status === 'UNDER_REVIEW').length;
   const totalCollections = payments.reduce((sum, p) => sum + p.amount, 0);
@@ -105,6 +118,18 @@ export const AdminPanel: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowDocumentVaultModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-950/70 hover:bg-emerald-900 text-emerald-300 text-xs font-bold rounded-lg border border-emerald-800 transition cursor-pointer"
+            title="সকল সংরক্ষিত নথি ও স্টোরেজ ভল্ট দেখুন"
+          >
+            <FolderArchive className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="hidden sm:inline">ফাইল স্টোরেজ ভল্ট</span>
+            <span className="bg-emerald-800 text-emerald-100 text-[10px] px-1.5 py-0.2 rounded-full font-mono">
+              {storedFiles.length}
+            </span>
+          </button>
+
           <span className="hidden sm:inline-block bg-slate-800 text-slate-300 text-xs px-2.5 py-1 rounded-full border border-slate-700">
             {user?.name}
           </span>
@@ -128,7 +153,10 @@ export const AdminPanel: React.FC = () => {
           </div>
           {[
             { id: 'dashboard', label: 'ড্যাশবোর্ড ওভারভিউ', icon: LayoutDashboard, badge: null },
+            { id: 'committee', label: 'কেন্দ্রীয় কমিটি পরিচালনা', icon: Award, badge: committeeMembers.length },
+            { id: 'notices', label: 'সংবাদ ও নোটিশ বোর্ড', icon: Bell, badge: notices.length },
             { id: 'applications', label: 'সদস্যপদ আবেদনপত্র', icon: FileCheck, badge: pendingApps },
+            { id: 'profile-requests', label: 'প্রোফাইল পরিবর্তন আবেদন', icon: UserCog, badge: pendingProfileRequests },
             { id: 'members', label: 'নিবন্ধিত চালক তালিকা', icon: Users, badge: totalActiveMembers },
             { id: 'payments', label: 'চাঁদা ও ব্যাংক খতিয়ান', icon: Wallet, badge: null },
             { id: 'medical', label: 'চিকিৎসা দাবি রিভিউ', icon: HeartPulse, badge: pendingMedical },
@@ -161,6 +189,21 @@ export const AdminPanel: React.FC = () => {
               </button>
             );
           })}
+
+          <div className="pt-3 border-t border-slate-800/80 mt-2">
+            <button
+              onClick={() => setShowDocumentVaultModal(true)}
+              className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-850 text-emerald-300 border border-emerald-900/50 transition cursor-pointer"
+            >
+              <div className="flex items-center gap-2.5">
+                <FolderArchive className="w-4 h-4 text-emerald-400" />
+                <span>ডকুমেন্ট ও ফাইল ভল্ট</span>
+              </div>
+              <span className="text-[10px] bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded-full font-bold font-mono">
+                {storedFiles.length}
+              </span>
+            </button>
+          </div>
         </aside>
 
         {/* Content Area */}
@@ -210,6 +253,45 @@ export const AdminPanel: React.FC = () => {
                   <p className="text-[11px] text-slate-500 mt-2">বিতরণকৃত: ৳ {metrics.totalMedicalAssistance.toLocaleString('en-IN')}</p>
                 </div>
 
+              </div>
+
+              {/* Dynamic Content Quick Access */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-slate-950 p-4 sm:p-5 rounded-2xl border border-slate-800 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-amber-950/80 border border-amber-800/80 flex items-center justify-center text-amber-400 shrink-0">
+                      <Award className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-white">কেন্দ্রীয় পরিচালনা পর্ষদ ও কমিটি</h4>
+                      <p className="text-xs text-slate-400">বর্তমানে {committeeMembers.length} জন কর্মকর্তা সক্রিয় রয়েছেন</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab('committee')}
+                    className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold rounded-xl shrink-0 transition cursor-pointer"
+                  >
+                    কমিটি পরিচালনা
+                  </button>
+                </div>
+
+                <div className="bg-slate-950 p-4 sm:p-5 rounded-2xl border border-slate-800 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-950/80 border border-emerald-800/80 flex items-center justify-center text-emerald-400 shrink-0">
+                      <Bell className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-white">সাংগঠনিক সংবাদ ও বিজ্ঞপ্তি</h4>
+                      <p className="text-xs text-slate-400">মোট {notices.length} টি বিজ্ঞপ্তি ও আপডেট প্রকাশিত আছে</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab('notices')}
+                    className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shrink-0 transition cursor-pointer"
+                  >
+                    বিজ্ঞপ্তি প্রকাশ
+                  </button>
+                </div>
               </div>
 
               {/* Recent Pending Applications Table */}
@@ -435,6 +517,11 @@ export const AdminPanel: React.FC = () => {
             </div>
           )}
 
+          {/* TAB: PROFILE UPDATE REQUESTS (ADMIN APPROVAL) */}
+          {activeTab === 'profile-requests' && (
+            <ProfileRequestsManager />
+          )}
+
           {/* TAB: REGISTERED MEMBERS */}
           {activeTab === 'members' && (
             <div className="space-y-6">
@@ -583,6 +670,52 @@ export const AdminPanel: React.FC = () => {
                           className="px-4 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs rounded-lg cursor-pointer"
                         >
                           ২০,০০০ টাকা অনুমোদন করুন
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB: CENTRAL COMMITTEE MANAGEMENT */}
+          {activeTab === 'committee' && <AdminCommitteeManager />}
+
+          {/* TAB: NOTICES & CIRCULARS MANAGEMENT */}
+          {activeTab === 'notices' && <AdminNoticeManager />}
+
+          {/* TAB: ACCIDENT CLAIMS */}
+          {activeTab === 'accident' && (
+            <div className="space-y-6">
+              <h2 className="text-xl font-bold text-white">দুর্ঘটনা সহায়তা আবেদন পর্যালোচনা ও ক্ষতিপূরণ</h2>
+              <div className="space-y-4">
+                {accidentClaims.map((c) => (
+                  <div key={c.id} className="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-bold text-white text-sm">{c.memberName}</h3>
+                          <span className="text-xs font-mono font-bold text-amber-400">{c.claimNo}</span>
+                        </div>
+                        <p className="text-xs text-slate-400 mt-1">তারিখ: {c.accidentDate} | স্থান: {c.location}</p>
+                      </div>
+                      <span className="bg-emerald-950 text-emerald-400 font-mono font-bold text-xs px-2.5 py-1 rounded border border-emerald-800">
+                        দাবিকৃত: ৳ {c.claimAmount}
+                      </span>
+                    </div>
+
+                    <div className="bg-slate-900 p-3 rounded-xl border border-slate-800 text-xs flex justify-between items-center">
+                      <div>
+                        <span className="text-slate-400">বর্ণনা: {c.accidentDetails}</span>
+                        <p className="text-slate-300 mt-0.5 font-mono">হাসপাতাল: {c.hospitalAdmitted || 'হাইওয়ে প্রাথমিক চিকিৎসা কেন্দ্র'}</p>
+                      </div>
+                      {c.status === 'UNDER_REVIEW' && (
+                        <button
+                          onClick={() => updateAccidentClaimStatus(c.id, 'APPROVED', c.claimAmount, 'দুর্ঘটনা সেল কর্তৃক যাচাইকৃত ও অনুমোদিত')}
+                          className="px-4 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs rounded-lg cursor-pointer"
+                        >
+                          অনুমোদন করুন
                         </button>
                       )}
                     </div>

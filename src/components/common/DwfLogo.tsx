@@ -97,7 +97,7 @@ export const DwfLogo: React.FC<DwfLogoProps> = ({
       {/* Institutional Typography */}
       {showText && (
         <div className="flex flex-col leading-tight">
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1 sm:gap-1.5">
             <span
               className={`font-bold tracking-tight ${
                 variant === 'light'
@@ -105,14 +105,15 @@ export const DwfLogo: React.FC<DwfLogoProps> = ({
                   : 'text-slate-900'
               } ${currentSize.title}`}
             >
-              ড্রাইভার্স ওয়েলফেয়ার ফাউন্ডেশন
+              <span className="sm:hidden">ডিডব্লিউএফ</span>
+              <span className="hidden sm:inline">ড্রাইভার্স ওয়েলফেয়ার ফাউন্ডেশন</span>
             </span>
-            <span className="bg-emerald-700 text-white font-black text-[10px] px-1.5 py-0.5 rounded tracking-wide font-mono">
+            <span className="bg-emerald-700 text-white font-black text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded tracking-wide font-mono shrink-0">
               DWF
             </span>
           </div>
           <span
-            className={`font-medium ${
+            className={`font-medium hidden sm:block ${
               variant === 'light' ? 'text-emerald-300' : 'text-emerald-700'
             } ${currentSize.sub}`}
           >

@@ -15,6 +15,7 @@ import {
   ShieldCheck, 
   FileText 
 } from 'lucide-react';
+import { FileUploadZone } from '../common/FileUploadZone';
 
 export const MembershipApplicationModal: React.FC = () => {
   const { 
@@ -50,10 +51,13 @@ export const MembershipApplicationModal: React.FC = () => {
   const [vehicleType, setVehicleType] = useState('BUS');
   const [vehicleRegNo, setVehicleRegNo] = useState('');
 
-  // Step 4: Documents (simulated uploads)
+  // Step 4: Documents (Real File Uploads & Storage Options)
   const [applicantPhoto, setApplicantPhoto] = useState('https://images.unsplash.com/photo-1544717305-2782549b5136?w=400&auto=format&fit=crop&q=80');
-  const [nidUploaded, setNidUploaded] = useState(true);
-  const [licenseUploaded, setLicenseUploaded] = useState(true);
+  const [photoFileName, setPhotoFileName] = useState('driver_passport_photo.jpg');
+  const [nidDocumentUrl, setNidDocumentUrl] = useState('https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=600&auto=format&fit=crop&q=80');
+  const [nidFileName, setNidFileName] = useState('nid_smart_card_front_back.pdf');
+  const [licenseDocumentUrl, setLicenseDocumentUrl] = useState('https://images.unsplash.com/photo-1544717305-2782549b5136?w=600&auto=format&fit=crop&q=80');
+  const [licenseFileName, setLicenseFileName] = useState('brta_heavy_driving_license.jpg');
 
   // Step 5: Nominees
   const [nominees, setNominees] = useState<Nominee[]>([
@@ -533,37 +537,75 @@ export const MembershipApplicationModal: React.FC = () => {
                 </div>
               )}
 
-              {/* STEP 4: Documents Upload Simulation */}
+              {/* STEP 4: Real Documents Upload & Storage Options */}
               {step === 4 && (
                 <div className="space-y-4">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded inline-block">
-                    {language === 'bn' ? 'ধাপ ৪: প্রয়োজনীয় প্রমাণপত্র ও ছবি' : 'Step 4: Documents & Photo'}
-                  </h4>
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded inline-block">
+                      {language === 'bn' ? 'ধাপ ৪: প্রয়োজনীয় প্রমাণপত্র ও ছবি আপলোড' : 'Step 4: Real Documents & Photo Upload'}
+                    </h4>
+                    <span className="text-[11px] text-slate-500 font-medium">
+                      Cloud / Local Storage সমর্থিত
+                    </span>
+                  </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                    <div className="border border-dashed border-emerald-300 bg-emerald-50/50 rounded-xl p-4 text-center space-y-2">
-                      <UploadCloud className="w-8 h-8 text-emerald-700 mx-auto" />
-                      <p className="font-bold text-slate-800">চালকের পাসপোর্ট সাইজ ছবি</p>
-                      <span className="inline-block bg-emerald-700 text-white text-[10px] px-2 py-0.5 rounded font-semibold">
-                        ✓ যাচাইকৃত ছবি সংযুক্ত
-                      </span>
-                    </div>
+                  <div className="space-y-4 text-xs">
+                    {/* 1. Applicant Passport Photo */}
+                    <FileUploadZone
+                      label="১. চালকের সাম্প্রতিক পাসপোর্ট সাইজ ছবি *"
+                      subLabel="পরিষ্কার ছবি, ব্যাকগ্রাউন্ড হালকা"
+                      category="MEMBER_PHOTO"
+                      accept="image/*"
+                      maxSizeMb={5}
+                      currentValue={applicantPhoto}
+                      currentFileName={photoFileName}
+                      onFileSelect={(file, dataUrl) => {
+                        setApplicantPhoto(dataUrl);
+                        setPhotoFileName(file.name);
+                      }}
+                      onFileClear={() => {
+                        setApplicantPhoto('');
+                        setPhotoFileName('');
+                      }}
+                    />
 
-                    <div className="border border-dashed border-emerald-300 bg-emerald-50/50 rounded-xl p-4 text-center space-y-2">
-                      <UploadCloud className="w-8 h-8 text-emerald-700 mx-auto" />
-                      <p className="font-bold text-slate-800">জাতীয় পরিচয়পত্র (NID ফ্রন্ট ও ব্যাক)</p>
-                      <span className="inline-block bg-emerald-700 text-white text-[10px] px-2 py-0.5 rounded font-semibold">
-                        ✓ এনআইডি কপি প্রস্তুত
-                      </span>
-                    </div>
+                    {/* 2. National ID Card */}
+                    <FileUploadZone
+                      label="২. জাতীয় পরিচয়পত্র (NID ফ্রন্ট ও ব্যাক) *"
+                      subLabel="স্মার্ট কার্ড বা অনলাইন জন্ম নিবন্ধন কপি"
+                      category="NID_CARD"
+                      accept="image/*,application/pdf"
+                      maxSizeMb={10}
+                      currentValue={nidDocumentUrl}
+                      currentFileName={nidFileName}
+                      onFileSelect={(file, dataUrl) => {
+                        setNidDocumentUrl(dataUrl);
+                        setNidFileName(file.name);
+                      }}
+                      onFileClear={() => {
+                        setNidDocumentUrl('');
+                        setNidFileName('');
+                      }}
+                    />
 
-                    <div className="sm:col-span-2 border border-dashed border-emerald-300 bg-emerald-50/50 rounded-xl p-4 text-center space-y-2">
-                      <UploadCloud className="w-8 h-8 text-emerald-700 mx-auto" />
-                      <p className="font-bold text-slate-800">বিআরটিএ ড্রাইভিং লাইসেন্সের স্ক্যান কপি</p>
-                      <span className="inline-block bg-emerald-700 text-white text-[10px] px-2 py-0.5 rounded font-semibold">
-                        ✓ লাইসেন্স কপি প্রস্তুত
-                      </span>
-                    </div>
+                    {/* 3. BRTA Driving License */}
+                    <FileUploadZone
+                      label="৩. বিআরটিএ ড্রাইভিং লাইসেন্সের স্ক্যান কপি *"
+                      subLabel="মেয়াদ সম্বলিত পেশাদার/অপেশাদার লাইসেন্স"
+                      category="DRIVING_LICENSE"
+                      accept="image/*,application/pdf"
+                      maxSizeMb={10}
+                      currentValue={licenseDocumentUrl}
+                      currentFileName={licenseFileName}
+                      onFileSelect={(file, dataUrl) => {
+                        setLicenseDocumentUrl(dataUrl);
+                        setLicenseFileName(file.name);
+                      }}
+                      onFileClear={() => {
+                        setLicenseDocumentUrl('');
+                        setLicenseFileName('');
+                      }}
+                    />
                   </div>
                 </div>
               )}

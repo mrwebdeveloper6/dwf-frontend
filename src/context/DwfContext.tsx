@@ -8,13 +8,18 @@ import {
   MedicalClaim, 
   AccidentClaim, 
   NoticeItem, 
+  CommitteeMember,
   Branch, 
   AuditLog, 
   SmsRecord, 
   SystemMetrics,
   Nominee,
   PaymentMethod,
-  PaymentType
+  PaymentType,
+  StoredFile,
+  StorageOption,
+  FileCategory,
+  ProfileUpdateRequest
 } from '../types/dwf';
 import { 
   initialMembers, 
@@ -23,12 +28,35 @@ import {
   initialMedicalClaims, 
   initialAccidentClaims, 
   initialNotices, 
+  initialCommitteeMembers,
   initialBranches, 
   initialAuditLogs, 
   initialSmsRecords, 
-  initialSystemMetrics 
+  initialSystemMetrics,
+  initialProfileUpdateRequests
 } from '../data/initialData';
 import { translations } from '../lib/i18n';
+import { 
+  uploadDocumentFile, 
+  removeDocumentFile, 
+  initialSampleFiles 
+} from '../lib/storage';
+import {
+  syncMemberToFirestore,
+  syncApplicationToFirestore,
+  syncPaymentToFirestore,
+  syncMedicalClaimToFirestore,
+  syncAccidentClaimToFirestore,
+  syncAuditLogToFirestore,
+  syncMetricsToFirestore,
+  syncCommitteeMemberToFirestore,
+  deleteCommitteeMemberFromFirestore,
+  syncNoticeToFirestore,
+  deleteNoticeFromFirestore,
+  syncProfileUpdateRequestToFirestore,
+  seedInitialFirestoreData,
+  fetchAllFromFirestore
+} from '../lib/firebase';
 
 interface PublicVerificationResult {
   found: boolean;
@@ -61,10 +89,13 @@ interface DwfContextType {
   medicalClaims: MedicalClaim[];
   accidentClaims: AccidentClaim[];
   notices: NoticeItem[];
+  committeeMembers: CommitteeMember[];
   branches: Branch[];
   auditLogs: AuditLog[];
   smsRecords: SmsRecord[];
   metrics: SystemMetrics;
+  storedFiles: StoredFile[];
+  profileUpdateRequests: ProfileUpdateRequest[];
 
   // Modals
   showApplyModal: boolean;
@@ -73,8 +104,14 @@ interface DwfContextType {
   setShowVerifyModal: (open: boolean) => void;
   showLoginModal: boolean;
   setShowLoginModal: (open: boolean) => void;
+  showDocumentVaultModal: boolean;
+  setShowDocumentVaultModal: (open: boolean) => void;
+  documentVaultCategoryFilter?: FileCategory;
+  setDocumentVaultCategoryFilter: (cat?: FileCategory) => void;
 
   // Actions
+  uploadFileRecord: (file: File, params: { category: FileCategory; preferredStorage?: StorageOption; memberId?: string; memberName?: string; description?: string }) => Promise<{ success: boolean; file: StoredFile; message: string }>;
+  deleteFileRecord: (fileId: string) => Promise<boolean>;
   submitApplication: (appData: Omit<MembershipApplication, 'id' | 'applicationId' | 'status' | 'submittedAt'>) => { success: boolean; applicationId: string; message: string };
   approveApplication: (appId: string, reviewNotes?: string) => { success: boolean; memberId: string };
   rejectApplication: (appId: string, reason: string) => void;
@@ -84,6 +121,15 @@ interface DwfContextType {
   submitAccidentClaim: (claim: Omit<AccidentClaim, 'id' | 'claimNo' | 'status' | 'submittedAt'>) => { success: boolean; claimNo: string };
   updateAccidentClaimStatus: (claimId: string, status: AccidentClaim['status'], approvedAmount?: number, notes?: string) => void;
   updateNominees: (memberId: string, nominees: Nominee[]) => { success: boolean; message: string };
+  submitProfileUpdateRequest: (request: Omit<ProfileUpdateRequest, 'id' | 'requestId' | 'status' | 'submittedAt'>) => { success: boolean; requestId: string; message: string };
+  approveProfileUpdateRequest: (requestId: string, reviewNotes?: string) => { success: boolean; message: string };
+  rejectProfileUpdateRequest: (requestId: string, reason: string) => { success: boolean; message: string };
+  addCommitteeMember: (memberData: Omit<CommitteeMember, 'id'>) => { success: boolean; id: string };
+  updateCommitteeMember: (id: string, updates: Partial<CommitteeMember>) => { success: boolean };
+  deleteCommitteeMember: (id: string) => { success: boolean };
+  addNotice: (noticeData: Omit<NoticeItem, 'id'>) => { success: boolean; id: string };
+  updateNotice: (id: string, updates: Partial<NoticeItem>) => { success: boolean };
+  deleteNotice: (id: string) => { success: boolean };
   sendSms: (phone: string, name: string, template: string, message: string) => void;
   verifyMember: (query: string) => PublicVerificationResult;
   currentMemberData: Member | null;
@@ -109,6 +155,8 @@ export const DwfProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [showApplyModal, setShowApplyModal] = useState<boolean>(false);
   const [showVerifyModal, setShowVerifyModal] = useState<boolean>(false);
   const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
+  const [showDocumentVaultModal, setShowDocumentVaultModal] = useState<boolean>(false);
+  const [documentVaultCategoryFilter, setDocumentVaultCategoryFilter] = useState<FileCategory | undefined>(undefined);
 
   // User Session
   const [user, setUser] = useState<UserSession | null>(() => {
@@ -149,7 +197,14 @@ export const DwfProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return saved ? JSON.parse(saved) : initialAccidentClaims;
   });
 
-  const [notices] = useState<NoticeItem[]>(initialNotices);
+  const [notices, setNotices] = useState<NoticeItem[]>(() => {
+    const saved = localStorage.getItem('dwf_notices');
+    return saved ? JSON.parse(saved) : initialNotices;
+  });
+  const [committeeMembers, setCommitteeMembers] = useState<CommitteeMember[]>(() => {
+    const saved = localStorage.getItem('dwf_committee_members');
+    return saved ? JSON.parse(saved) : initialCommitteeMembers;
+  });
   const [branches] = useState<Branch[]>(initialBranches);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(() => {
     const saved = localStorage.getItem('dwf_audit_logs');
@@ -162,6 +217,14 @@ export const DwfProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [metrics, setMetrics] = useState<SystemMetrics>(() => {
     const saved = localStorage.getItem('dwf_metrics');
     return saved ? JSON.parse(saved) : initialSystemMetrics;
+  });
+  const [storedFiles, setStoredFiles] = useState<StoredFile[]>(() => {
+    const saved = localStorage.getItem('dwf_stored_files');
+    return saved ? JSON.parse(saved) : initialSampleFiles;
+  });
+  const [profileUpdateRequests, setProfileUpdateRequests] = useState<ProfileUpdateRequest[]>(() => {
+    const saved = localStorage.getItem('dwf_profile_requests');
+    return saved ? JSON.parse(saved) : initialProfileUpdateRequests;
   });
 
   // Sync to local storage
@@ -186,6 +249,14 @@ export const DwfProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [accidentClaims]);
 
   useEffect(() => {
+    localStorage.setItem('dwf_notices', JSON.stringify(notices));
+  }, [notices]);
+
+  useEffect(() => {
+    localStorage.setItem('dwf_committee_members', JSON.stringify(committeeMembers));
+  }, [committeeMembers]);
+
+  useEffect(() => {
     localStorage.setItem('dwf_audit_logs', JSON.stringify(auditLogs));
   }, [auditLogs]);
 
@@ -196,6 +267,70 @@ export const DwfProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     localStorage.setItem('dwf_metrics', JSON.stringify(metrics));
   }, [metrics]);
+
+  useEffect(() => {
+    localStorage.setItem('dwf_stored_files', JSON.stringify(storedFiles));
+  }, [storedFiles]);
+
+  useEffect(() => {
+    localStorage.setItem('dwf_profile_requests', JSON.stringify(profileUpdateRequests));
+  }, [profileUpdateRequests]);
+
+  // Initial Cloud Firestore Synchronization
+  useEffect(() => {
+    let isMounted = true;
+    const initCloudDb = async () => {
+      try {
+        const cloudData = await fetchAllFromFirestore();
+        if (cloudData && isMounted) {
+          if (cloudData.members && cloudData.members.length > 0) {
+            setMembers(cloudData.members);
+          }
+          if (cloudData.applications && cloudData.applications.length > 0) {
+            setApplications(cloudData.applications);
+          }
+          if (cloudData.payments && cloudData.payments.length > 0) {
+            setPayments(cloudData.payments);
+          }
+          if (cloudData.medicalClaims && cloudData.medicalClaims.length > 0) {
+            setMedicalClaims(cloudData.medicalClaims);
+          }
+          if (cloudData.accidentClaims && cloudData.accidentClaims.length > 0) {
+            setAccidentClaims(cloudData.accidentClaims);
+          }
+          if (cloudData.metrics) {
+            setMetrics(cloudData.metrics);
+          }
+          if (cloudData.storedFiles && cloudData.storedFiles.length > 0) {
+            setStoredFiles(cloudData.storedFiles);
+          }
+          if (cloudData.committeeMembers && cloudData.committeeMembers.length > 0) {
+            setCommitteeMembers(cloudData.committeeMembers);
+          }
+          if (cloudData.notices && cloudData.notices.length > 0) {
+            setNotices(cloudData.notices);
+          }
+          if (cloudData.profileUpdateRequests && cloudData.profileUpdateRequests.length > 0) {
+            setProfileUpdateRequests(cloudData.profileUpdateRequests);
+          }
+        } else {
+          // Cloud collection is fresh/empty; seed initial data
+          await seedInitialFirestoreData({
+            members: initialMembers,
+            applications: initialApplications,
+            payments: initialPayments,
+            medicalClaims: initialMedicalClaims,
+            accidentClaims: initialAccidentClaims,
+            metrics: initialSystemMetrics
+          });
+        }
+      } catch (err) {
+        console.warn('Firebase initial sync deferred, running with local storage:', err);
+      }
+    };
+    initCloudDb();
+    return () => { isMounted = false; };
+  }, []);
 
   const addAuditLog = (action: string, module: AuditLog['module'], recordId: string, details: string) => {
     const newLog: AuditLog = {
@@ -211,6 +346,7 @@ export const DwfProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ipAddress: '103.220.201.18'
     };
     setAuditLogs(prev => [newLog, ...prev]);
+    syncAuditLogToFirestore(newLog);
   };
 
   const loginAsMember = (memberId = 'DWF-000142') => {
@@ -251,7 +387,16 @@ export const DwfProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     setUser(null);
     localStorage.removeItem('dwf_user');
+    setShowDocumentVaultModal(false);
     setActiveView('home');
+  };
+
+  const handleSetShowDocumentVaultModal = (open: boolean) => {
+    if (open && !user) {
+      setShowLoginModal(true);
+      return;
+    }
+    setShowDocumentVaultModal(open);
   };
 
   const currentMemberData = user?.role === 'MEMBER' && user.memberId
@@ -281,7 +426,13 @@ export const DwfProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     setApplications(prev => [newApp, ...prev]);
-    setMetrics(prev => ({ ...prev, pendingApplications: prev.pendingApplications + 1 }));
+    setMetrics(prev => {
+      const updated = { ...prev, pendingApplications: prev.pendingApplications + 1 };
+      syncMetricsToFirestore(updated);
+      return updated;
+    });
+
+    syncApplicationToFirestore(newApp);
 
     addAuditLog('SUBMIT_APPLICATION', 'APPLICATION', newAppId, `নতুন সদস্যপদের আবেদন দাখিল: ${appData.fullName}`);
 
@@ -347,17 +498,20 @@ export const DwfProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     // Update Application
-    setApplications(prev => prev.map(a => a.id === appId ? {
-      ...a,
+    const updatedApp: MembershipApplication = {
+      ...app,
       status: 'APPROVED',
       reviewedAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
       reviewedBy: user?.name || 'অফিসার',
       reviewNotes,
       assignedMemberId: newMemberId
-    } : a));
+    };
+    setApplications(prev => prev.map(a => a.id === appId ? updatedApp : a));
+    syncApplicationToFirestore(updatedApp);
 
     // Add Member
     setMembers(prev => [newMember, ...prev]);
+    syncMemberToFirestore(newMember);
 
     // Initial Registration Payment Record
     const receiptNo = `DWF-REC-2026-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -375,15 +529,20 @@ export const DwfProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       remarks: 'সদস্যপদ অন্তর্ভুক্তি ও প্রথম মাসের প্রাথমিক চাঁদা'
     };
     setPayments(prev => [initPay, ...prev]);
+    syncPaymentToFirestore(initPay);
 
     // Update metrics
-    setMetrics(prev => ({
-      ...prev,
-      totalMembers: prev.totalMembers + 1,
-      activeMembers: prev.activeMembers + 1,
-      pendingApplications: Math.max(0, prev.pendingApplications - 1),
-      totalWelfareFund: prev.totalWelfareFund + 300
-    }));
+    setMetrics(prev => {
+      const updated = {
+        ...prev,
+        totalMembers: prev.totalMembers + 1,
+        activeMembers: prev.activeMembers + 1,
+        pendingApplications: Math.max(0, prev.pendingApplications - 1),
+        totalWelfareFund: prev.totalWelfareFund + 300
+      };
+      syncMetricsToFirestore(updated);
+      return updated;
+    });
 
     addAuditLog('APPROVE_MEMBER', 'MEMBER', newMemberId, `আবেদন ${app.applicationId} অনুমোদিত এবং নতুন সদস্যপদ ${newMemberId} ইস্যু সম্পন্ন`);
 
@@ -399,18 +558,27 @@ export const DwfProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const rejectApplication = (appId: string, reason: string) => {
-    setApplications(prev => prev.map(a => a.id === appId ? {
-      ...a,
-      status: 'REJECTED',
-      reviewedAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      reviewedBy: user?.name || 'অফিসার',
-      reviewNotes: reason
-    } : a));
+    const targetApp = applications.find(a => a.id === appId);
+    if (targetApp) {
+      const updatedApp: MembershipApplication = {
+        ...targetApp,
+        status: 'REJECTED',
+        reviewedAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
+        reviewedBy: user?.name || 'অফিসার',
+        reviewNotes: reason
+      };
+      setApplications(prev => prev.map(a => a.id === appId ? updatedApp : a));
+      syncApplicationToFirestore(updatedApp);
+    }
 
-    setMetrics(prev => ({
-      ...prev,
-      pendingApplications: Math.max(0, prev.pendingApplications - 1)
-    }));
+    setMetrics(prev => {
+      const updated = {
+        ...prev,
+        pendingApplications: Math.max(0, prev.pendingApplications - 1)
+      };
+      syncMetricsToFirestore(updated);
+      return updated;
+    });
 
     addAuditLog('REJECT_APPLICATION', 'APPLICATION', appId, `আবেদন বাতিল করা হয়েছে। কারণ: ${reason}`);
   };
@@ -452,27 +620,34 @@ export const DwfProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     setPayments(prev => [newPayment, ...prev]);
+    syncPaymentToFirestore(newPayment);
 
     // Update Member deposit
     setMembers(prev => prev.map(m => {
       if (m.memberId === memberId) {
-        return {
+        const updated = {
           ...m,
           totalDeposit: m.totalDeposit + amount,
           welfareBalance: m.welfareBalance + amount,
           outstandingDue: Math.max(0, m.outstandingDue - amount)
         };
+        syncMemberToFirestore(updated);
+        return updated;
       }
       return m;
     }));
 
     // Update metrics
-    setMetrics(prev => ({
-      ...prev,
-      totalWelfareFund: prev.totalWelfareFund + amount,
-      todayCollection: prev.todayCollection + amount,
-      monthlyCollection: prev.monthlyCollection + amount
-    }));
+    setMetrics(prev => {
+      const updated = {
+        ...prev,
+        totalWelfareFund: prev.totalWelfareFund + amount,
+        todayCollection: prev.todayCollection + amount,
+        monthlyCollection: prev.monthlyCollection + amount
+      };
+      syncMetricsToFirestore(updated);
+      return updated;
+    });
 
     addAuditLog('PAYMENT_RECEIVED', 'PAYMENT', receiptNo, `সদস্য ${memberId} এর নিকট হতে ৳${amount} (${paymentMethod}) জমা`);
 
@@ -501,6 +676,7 @@ export const DwfProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     setMedicalClaims(prev => [newClaim, ...prev]);
+    syncMedicalClaimToFirestore(newClaim);
     addAuditLog('SUBMIT_MEDICAL_CLAIM', 'CLAIM', claimNo, `চিকিৎসা অনুদানের দাবি দাখিল: ৳${claim.claimAmount}`);
 
     return { success: true, claimNo };
@@ -509,7 +685,7 @@ export const DwfProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateMedicalClaimStatus = (claimId: string, status: MedicalClaim['status'], approvedAmount?: number, notes?: string) => {
     setMedicalClaims(prev => prev.map(c => {
       if (c.id === claimId) {
-        return {
+        const updated = {
           ...c,
           status,
           approvedAmount: approvedAmount !== undefined ? approvedAmount : c.approvedAmount,
@@ -518,15 +694,21 @@ export const DwfProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           reviewNotes: notes || c.reviewNotes,
           paymentDate: status === 'PAID' ? new Date().toISOString().substring(0, 10) : c.paymentDate
         };
+        syncMedicalClaimToFirestore(updated);
+        return updated;
       }
       return c;
     }));
 
     if (status === 'PAID' && approvedAmount) {
-      setMetrics(prev => ({
-        ...prev,
-        totalMedicalAssistance: prev.totalMedicalAssistance + approvedAmount
-      }));
+      setMetrics(prev => {
+        const updated = {
+          ...prev,
+          totalMedicalAssistance: prev.totalMedicalAssistance + approvedAmount
+        };
+        syncMetricsToFirestore(updated);
+        return updated;
+      });
     }
 
     addAuditLog('UPDATE_MEDICAL_CLAIM', 'CLAIM', claimId, `মেডিকেল দাবি অবস্থা পরিবর্তন: ${status} (অনুমোদিত ৳${approvedAmount || 0})`);
@@ -544,6 +726,7 @@ export const DwfProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     setAccidentClaims(prev => [newClaim, ...prev]);
+    syncAccidentClaimToFirestore(newClaim);
     addAuditLog('SUBMIT_ACCIDENT_CLAIM', 'CLAIM', claimNo, `দুর্ঘটনা সহায়তার আবেদন দাখিল: ৳${claim.claimAmount}`);
 
     return { success: true, claimNo };
@@ -552,22 +735,28 @@ export const DwfProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateAccidentClaimStatus = (claimId: string, status: AccidentClaim['status'], approvedAmount?: number, notes?: string) => {
     setAccidentClaims(prev => prev.map(c => {
       if (c.id === claimId) {
-        return {
+        const updated = {
           ...c,
           status,
           approvedAmount: approvedAmount !== undefined ? approvedAmount : c.approvedAmount,
           reviewedAt: new Date().toISOString().substring(0, 10),
           reviewNotes: notes || c.reviewNotes
         };
+        syncAccidentClaimToFirestore(updated);
+        return updated;
       }
       return c;
     }));
 
     if (status === 'PAID' && approvedAmount) {
-      setMetrics(prev => ({
-        ...prev,
-        totalAccidentAssistance: prev.totalAccidentAssistance + approvedAmount
-      }));
+      setMetrics(prev => {
+        const updated = {
+          ...prev,
+          totalAccidentAssistance: prev.totalAccidentAssistance + approvedAmount
+        };
+        syncMetricsToFirestore(updated);
+        return updated;
+      });
     }
 
     addAuditLog('UPDATE_ACCIDENT_CLAIM', 'CLAIM', claimId, `দুর্ঘটনা সহায়তা অবস্থা পরিবর্তন: ${status}`);
@@ -583,12 +772,179 @@ export const DwfProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
     }
 
-    setMembers(prev => prev.map(m => m.memberId === memberId ? { ...m, nominees: newNominees } : m));
+    setMembers(prev => prev.map(m => {
+      if (m.memberId === memberId) {
+        const updated = { ...m, nominees: newNominees };
+        syncMemberToFirestore(updated);
+        return updated;
+      }
+      return m;
+    }));
     addAuditLog('UPDATE_NOMINEES', 'MEMBER', memberId, `নমিনি তথ্য হালনাগাদ করা হয়েছে (মোট ১০০% নিশ্চিত)`);
 
     return {
       success: true,
       message: language === 'bn' ? 'নমিনি তথ্য সফলভাবে সংরক্ষিত হয়েছে!' : 'Nominees successfully updated!'
+    };
+  };
+
+  // Profile Update Request Workflow with Admin Approval
+  const submitProfileUpdateRequest = (
+    reqData: Omit<ProfileUpdateRequest, 'id' | 'requestId' | 'status' | 'submittedAt'>
+  ) => {
+    const requestId = `PUR-2026-${String(profileUpdateRequests.length + 1).padStart(4, '0')}`;
+    const newRequest: ProfileUpdateRequest = {
+      ...reqData,
+      id: `pur-${Date.now()}`,
+      requestId,
+      status: 'PENDING',
+      submittedAt: new Date().toISOString().substring(0, 10)
+    };
+
+    setProfileUpdateRequests(prev => [newRequest, ...prev]);
+    syncProfileUpdateRequestToFirestore(newRequest);
+
+    addAuditLog(
+      'SUBMIT_PROFILE_UPDATE_REQUEST',
+      'PROFILE_UPDATE',
+      requestId,
+      `সদস্য ${reqData.memberId} প্রোফাইল তথ্য পরিবর্তনের আবেদন করেছেন (অনুমোদনের অপেক্ষায়)`
+    );
+
+    sendSms(
+      reqData.currentData.phone,
+      reqData.memberName,
+      'PROFILE_UPDATE_SUBMITTED',
+      `আপনার প্রোফাইল পরিবর্তনের আবেদন দাখিল হয়েছে (আইডি: ${requestId})। অ্যাডমিন যাচাই ও অনুমোদন শেষে আপনার অ্যাকাউন্টে হালনাগাদ হবে।`
+    );
+
+    return {
+      success: true,
+      requestId,
+      message: language === 'bn' 
+        ? `প্রোফাইল পরিবর্তনের আবেদন সফলভাবে জমা হয়েছে (আইডি: ${requestId})। অ্যাডমিন যাচাই ও অনুমোদনের পর ডাটাবেসে কার্যকর হবে।`
+        : `Profile update request submitted (ID: ${requestId}). Changes will reflect upon admin approval.`
+    };
+  };
+
+  const approveProfileUpdateRequest = (requestId: string, reviewNotes?: string) => {
+    const target = profileUpdateRequests.find(r => r.id === requestId || r.requestId === requestId);
+    if (!target) {
+      return { success: false, message: 'Request not found' };
+    }
+
+    const reviewedAt = new Date().toISOString().substring(0, 10);
+    const reviewer = user?.name || (language === 'bn' ? 'অ্যাডমিন বোর্ড' : 'Admin Board');
+
+    const updatedRequest: ProfileUpdateRequest = {
+      ...target,
+      status: 'APPROVED',
+      reviewedAt,
+      reviewedBy: reviewer,
+      reviewNotes: reviewNotes || (language === 'bn' ? 'সকল তথ্য ও নথিপত্র সফলভাবে যাচাইপূর্বক অনুমোদিত' : 'Approved after verification')
+    };
+
+    setProfileUpdateRequests(prev => prev.map(r => (r.id === target.id ? updatedRequest : r)));
+    syncProfileUpdateRequestToFirestore(updatedRequest);
+
+    // Apply approved changes to the Member record in DB
+    setMembers(prev => prev.map(m => {
+      if (m.memberId === target.memberId) {
+        const up: Member = {
+          ...m,
+          name: target.requestedChanges.name ?? m.name,
+          nameBn: target.requestedChanges.nameBn ?? m.nameBn,
+          phone: target.requestedChanges.phone ?? m.phone,
+          whatsapp: target.requestedChanges.whatsapp ?? m.whatsapp,
+          photoUrl: target.requestedChanges.photoUrl ?? m.photoUrl,
+          bloodGroup: target.requestedChanges.bloodGroup ?? m.bloodGroup,
+          currentAddress: target.requestedChanges.currentAddress ?? m.currentAddress,
+          permanentAddress: target.requestedChanges.permanentAddress ?? m.permanentAddress,
+          drivingLicenseNo: target.requestedChanges.drivingLicenseNo ?? m.drivingLicenseNo,
+          vehicleType: (target.requestedChanges.vehicleType as any) ?? m.vehicleType,
+          vehicleRegNo: target.requestedChanges.vehicleRegNo ?? m.vehicleRegNo,
+          nominees: target.requestedChanges.nominees && target.requestedChanges.nominees.length > 0 
+            ? target.requestedChanges.nominees 
+            : m.nominees
+        };
+        syncMemberToFirestore(up);
+
+        // If currently logged in user is this member, sync session
+        if (user && user.memberId === m.memberId) {
+          const updatedSession: UserSession = {
+            ...user,
+            name: language === 'bn' ? up.nameBn : up.name,
+            phone: up.phone,
+            avatar: up.photoUrl
+          };
+          setUser(updatedSession);
+          localStorage.setItem('dwf_user', JSON.stringify(updatedSession));
+        }
+
+        return up;
+      }
+      return m;
+    }));
+
+    addAuditLog(
+      'APPROVE_PROFILE_UPDATE',
+      'PROFILE_UPDATE',
+      target.requestId,
+      `সদস্য ${target.memberId} এর প্রোফাইল পরিবর্তনের আবেদন অনুমোদিত এবং ডাটাবেস হালনাগাদ সম্পন্ন`
+    );
+
+    sendSms(
+      target.requestedChanges.phone || target.currentData.phone,
+      target.memberName,
+      'PROFILE_UPDATE_APPROVED',
+      `অভিনন্দন! আপনার প্রোফাইল পরিবর্তনের আবেদন (${target.requestId}) অনুমোদিত হয়েছে এবং সিস্টেমে কার্যকর করা হয়েছে। হেল্পলাইন: ১৬৭৮৯`
+    );
+
+    return {
+      success: true,
+      message: language === 'bn'
+        ? `আবেদন ${target.requestId} অনুমোদিত হয়েছে এবং সদস্যের ডাটাবেস সফলভাবে আপডেট হয়েছে!`
+        : `Request ${target.requestId} approved and database updated!`
+    };
+  };
+
+  const rejectProfileUpdateRequest = (requestId: string, reason: string) => {
+    const target = profileUpdateRequests.find(r => r.id === requestId || r.requestId === requestId);
+    if (!target) {
+      return { success: false, message: 'Request not found' };
+    }
+
+    const reviewedAt = new Date().toISOString().substring(0, 10);
+    const reviewer = user?.name || (language === 'bn' ? 'অ্যাডমিন বোর্ড' : 'Admin Board');
+
+    const updatedRequest: ProfileUpdateRequest = {
+      ...target,
+      status: 'REJECTED',
+      reviewedAt,
+      reviewedBy: reviewer,
+      reviewNotes: reason || (language === 'bn' ? 'কাগজপত্রে অসঙ্গতির কারণে বাতিল করা হলো' : 'Rejected due to discrepancies')
+    };
+
+    setProfileUpdateRequests(prev => prev.map(r => (r.id === target.id ? updatedRequest : r)));
+    syncProfileUpdateRequestToFirestore(updatedRequest);
+
+    addAuditLog(
+      'REJECT_PROFILE_UPDATE',
+      'PROFILE_UPDATE',
+      target.requestId,
+      `সদস্য ${target.memberId} এর প্রোফাইল পরিবর্তনের আবেদন বাতিল। কারণ: ${reason}`
+    );
+
+    sendSms(
+      target.currentData.phone,
+      target.memberName,
+      'PROFILE_UPDATE_REJECTED',
+      `আপনার প্রোফাইল পরিবর্তনের আবেদন (${target.requestId}) বাতিল হয়েছে। কারণ: ${reason}। বিস্তারিত জানতে শাখায় যোগাযোগ করুন।`
+    );
+
+    return {
+      success: true,
+      message: language === 'bn' ? 'আবেদন বাতিল করা হয়েছে।' : 'Request rejected.'
     };
   };
 
@@ -635,6 +991,169 @@ export const DwfProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
   };
 
+  // Upload document file to chosen storage (Firebase Cloud Storage or Local Vault)
+  const uploadFileRecord = async (
+    file: File, 
+    params: { category: FileCategory; preferredStorage?: StorageOption; memberId?: string; memberName?: string; description?: string }
+  ) => {
+    const actorName = user?.name || 'অনলাইন চালক সদস্য';
+    const result = await uploadDocumentFile(file, {
+      ...params,
+      uploadedBy: actorName
+    });
+
+    if (result.success) {
+      setStoredFiles(prev => [result.file, ...prev]);
+      addAuditLog(
+        'FILE_UPLOAD',
+        'STORAGE_VAULT',
+        result.file.id,
+        `ফাইল আপলোড: ${result.file.name} (${result.file.storageType === 'FIREBASE_STORAGE' ? 'Firebase Cloud' : 'Local Vault'})`
+      );
+    }
+    return result;
+  };
+
+  // Delete document file
+  const deleteFileRecord = async (fileId: string) => {
+    const target = storedFiles.find(f => f.id === fileId);
+    if (!target) return false;
+    await removeDocumentFile(target);
+    setStoredFiles(prev => prev.filter(f => f.id !== fileId));
+
+    addAuditLog(
+      'FILE_DELETE',
+      'STORAGE_VAULT',
+      fileId,
+      `ফাইল মুছে ফেলা হয়েছে: ${target.name}`
+    );
+
+    return true;
+  };
+
+  // Committee Leadership Actions
+  const addCommitteeMember = (memberData: Omit<CommitteeMember, 'id'>) => {
+    const id = `cm-${Date.now()}`;
+    const cleanPhone = memberData.cleanPhone || memberData.phone.replace(/[^0-9+]/g, '');
+    const formattedCleanPhone = cleanPhone.startsWith('+88') 
+      ? cleanPhone 
+      : `+88${cleanPhone.startsWith('0') ? cleanPhone : '0' + cleanPhone}`;
+    
+    const newMember: CommitteeMember = {
+      ...memberData,
+      id,
+      cleanPhone: formattedCleanPhone,
+      order: memberData.order || (committeeMembers.length + 1)
+    };
+
+    setCommitteeMembers(prev => [newMember, ...prev]);
+    syncCommitteeMemberToFirestore(newMember);
+    addAuditLog(
+      'COMMITTEE_MEMBER_ADD',
+      'COMMITTEE',
+      id,
+      `নতুন কর্মকর্তা যুক্ত: ${newMember.nameBn} (${newMember.designationBn})`
+    );
+    return { success: true, id };
+  };
+
+  const updateCommitteeMember = (id: string, updates: Partial<CommitteeMember>) => {
+    let updatedMember: CommitteeMember | null = null;
+    setCommitteeMembers(prev => prev.map(m => {
+      if (m.id === id) {
+        let cleanPhone = updates.cleanPhone || m.cleanPhone;
+        if (updates.phone && !updates.cleanPhone) {
+          const raw = updates.phone.replace(/[^0-9+]/g, '');
+          cleanPhone = raw.startsWith('+88') ? raw : `+88${raw.startsWith('0') ? raw : '0' + raw}`;
+        }
+        updatedMember = { ...m, ...updates, cleanPhone };
+        return updatedMember;
+      }
+      return m;
+    }));
+
+    if (updatedMember) {
+      syncCommitteeMemberToFirestore(updatedMember);
+      addAuditLog(
+        'COMMITTEE_MEMBER_UPDATE',
+        'COMMITTEE',
+        id,
+        `কর্মকর্তার তথ্য সংশোধন: ${(updatedMember as CommitteeMember).nameBn}`
+      );
+    }
+    return { success: true };
+  };
+
+  const deleteCommitteeMember = (id: string) => {
+    const target = committeeMembers.find(m => m.id === id);
+    setCommitteeMembers(prev => prev.filter(m => m.id !== id));
+    deleteCommitteeMemberFromFirestore(id);
+    if (target) {
+      addAuditLog(
+        'COMMITTEE_MEMBER_DELETE',
+        'COMMITTEE',
+        id,
+        `কর্মকর্তা অপসারণ: ${target.nameBn} (${target.designationBn})`
+      );
+    }
+    return { success: true };
+  };
+
+  // Official News & Notices Actions
+  const addNotice = (noticeData: Omit<NoticeItem, 'id'>) => {
+    const id = `not-${Date.now()}`;
+    const newNotice: NoticeItem = {
+      ...noticeData,
+      id
+    };
+    setNotices(prev => [newNotice, ...prev]);
+    syncNoticeToFirestore(newNotice);
+    addAuditLog(
+      'NOTICE_PUBLISH',
+      'CIRCULAR',
+      id,
+      `বিজ্ঞপ্তি প্রকাশ: ${newNotice.titleBn} (${newNotice.category})`
+    );
+    return { success: true, id };
+  };
+
+  const updateNotice = (id: string, updates: Partial<NoticeItem>) => {
+    let updatedNotice: NoticeItem | null = null;
+    setNotices(prev => prev.map(n => {
+      if (n.id === id) {
+        updatedNotice = { ...n, ...updates };
+        return updatedNotice;
+      }
+      return n;
+    }));
+
+    if (updatedNotice) {
+      syncNoticeToFirestore(updatedNotice);
+      addAuditLog(
+        'NOTICE_UPDATE',
+        'CIRCULAR',
+        id,
+        `বিজ্ঞপ্তি সংশোধন: ${(updatedNotice as NoticeItem).titleBn}`
+      );
+    }
+    return { success: true };
+  };
+
+  const deleteNotice = (id: string) => {
+    const target = notices.find(n => n.id === id);
+    setNotices(prev => prev.filter(n => n.id !== id));
+    deleteNoticeFromFirestore(id);
+    if (target) {
+      addAuditLog(
+        'NOTICE_DELETE',
+        'CIRCULAR',
+        id,
+        `বিজ্ঞপ্তি অপসারণ: ${target.titleBn}`
+      );
+    }
+    return { success: true };
+  };
+
   return (
     <DwfContext.Provider value={{
       language,
@@ -652,16 +1171,25 @@ export const DwfProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       medicalClaims,
       accidentClaims,
       notices,
+      committeeMembers,
       branches,
       auditLogs,
       smsRecords,
       metrics,
+      storedFiles,
+      profileUpdateRequests,
       showApplyModal,
       setShowApplyModal,
       showVerifyModal,
       setShowVerifyModal,
       showLoginModal,
       setShowLoginModal,
+      showDocumentVaultModal,
+      setShowDocumentVaultModal: handleSetShowDocumentVaultModal,
+      documentVaultCategoryFilter,
+      setDocumentVaultCategoryFilter,
+      uploadFileRecord,
+      deleteFileRecord,
       submitApplication,
       approveApplication,
       rejectApplication,
@@ -671,6 +1199,15 @@ export const DwfProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       submitAccidentClaim,
       updateAccidentClaimStatus,
       updateNominees,
+      submitProfileUpdateRequest,
+      approveProfileUpdateRequest,
+      rejectProfileUpdateRequest,
+      addCommitteeMember,
+      updateCommitteeMember,
+      deleteCommitteeMember,
+      addNotice,
+      updateNotice,
+      deleteNotice,
       sendSms,
       verifyMember,
       currentMemberData

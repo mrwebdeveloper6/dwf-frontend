@@ -29,6 +29,7 @@ import { PublicFooter } from './components/public/PublicFooter';
 import { PublicVerificationModal } from './components/public/PublicVerificationModal';
 import { MembershipApplicationModal } from './components/public/MembershipApplicationModal';
 import { LoginModal } from './components/auth/LoginModal';
+import { DocumentVaultModal } from './components/common/DocumentVaultModal';
 
 // Protected Portals
 import { MemberPortal } from './components/member/MemberPortal';
@@ -43,6 +44,7 @@ const DwfAppContent: React.FC = () => {
       <>
         <MemberPortal />
         <PublicVerificationModal />
+        <DocumentVaultModal />
       </>
     );
   }
@@ -53,6 +55,7 @@ const DwfAppContent: React.FC = () => {
       <>
         <AdminPanel />
         <PublicVerificationModal />
+        <DocumentVaultModal />
       </>
     );
   }
@@ -100,6 +103,7 @@ const DwfAppContent: React.FC = () => {
       <PublicVerificationModal />
       <MembershipApplicationModal />
       <LoginModal />
+      <DocumentVaultModal />
     </div>
   );
 };

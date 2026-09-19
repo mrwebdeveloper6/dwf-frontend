@@ -1,0 +1,78 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global Safety Net: Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128;
+    }
+
+    // Members Collection: Public verification read, authorized writes
+    match /members/{memberId} {
+      allow read: if isValidId(memberId);
+      allow create, update, delete: if isValidId(memberId);
+    }
+
+    // Membership Applications Collection: Anyone can submit application
+    match /applications/{applicationId} {
+      allow read, create, update: if isValidId(applicationId);
+      allow delete: if false;
+    }
+
+    // Payments & Receipts Collection
+    match /payments/{paymentId} {
+      allow read, create, update: if isValidId(paymentId);
+      allow delete: if false;
+    }
+
+    // Medical & Hospital Claims Collection
+    match /medicalClaims/{claimId} {
+      allow read, create, update: if isValidId(claimId);
+      allow delete: if false;
+    }
+
+    // Accident & Emergency Relief Claims Collection
+    match /accidentClaims/{claimId} {
+      allow read, create, update: if isValidId(claimId);
+      allow delete: if false;
+    }
+
+    // Audit Logs Collection: Append only
+    match /auditLogs/{logId} {
+      allow read, create: if isValidId(logId);
+      allow update, delete: if false;
+    }
+
+    // Real-time System Metrics Collection
+    match /metrics/{metricId} {
+      allow read, write: if isValidId(metricId);
+    }
+
+    // Stored Documents & Attachments Collection
+    match /storedFiles/{fileId} {
+      allow read, create, update, delete: if isValidId(fileId);
+    }
+
+    // Committee Leadership Collection: Public read, admin create, update, delete
+    match /committee/{memberId} {
+      allow read: if isValidId(memberId);
+      allow create, update, delete: if isValidId(memberId);
+    }
+
+    // Official Notices and News Bulletins Collection: Public read, admin manage
+    match /notices/{noticeId} {
+      allow read: if isValidId(noticeId);
+      allow create, update, delete: if isValidId(noticeId);
+    }
+
+    // Profile Update Requests Collection: Member submits, admin reviews and approves
+    match /profileUpdateRequests/{requestId} {
+      allow read, create, update: if isValidId(requestId);
+      allow delete: if false;
+    }
+  }
+}
