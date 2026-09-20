@@ -75,7 +75,7 @@ export const PublicNavbar: React.FC = () => {
     <>
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-20">
+          <div className="flex items-center justify-between h-14 sm:h-16">
             
             {/* Left: Brand Logo */}
             <div 
@@ -88,12 +88,12 @@ export const PublicNavbar: React.FC = () => {
             </div>
 
             {/* Right: Actions (Tablet/Compact style across all screen sizes) */}
-            <div className="flex items-center gap-1.5 sm:gap-2.5">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               
               {/* Member Verification Button (সদস্য যাচাই) */}
               <button
                 onClick={() => setShowVerifyModal(true)}
-                className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3.5 sm:py-2 text-xs font-bold text-emerald-800 hover:text-emerald-950 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/90 rounded-xl transition cursor-pointer shadow-2xs shrink-0 active:scale-95"
+                className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 text-[11px] sm:text-xs font-bold text-emerald-800 hover:text-emerald-950 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/90 rounded-xl transition cursor-pointer shadow-2xs shrink-0 active:scale-95"
                 title={language === 'bn' ? 'সদস্যপদ ও কার্ড যাচাই করুন' : 'Verify Member ID & Card'}
               >
                 <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 shrink-0" />
@@ -105,7 +105,7 @@ export const PublicNavbar: React.FC = () => {
               {user ? (
                 <button
                   onClick={() => setActiveView(user.role === 'MEMBER' ? 'member-portal' : 'admin-panel')}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3.5 sm:py-2 text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl transition cursor-pointer shadow-xs shrink-0"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 text-[11px] sm:text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl transition cursor-pointer shadow-xs shrink-0"
                 >
                   <UserCheck className="w-3.5 h-3.5" />
                   <span>{user.role === 'MEMBER' ? (language === 'bn' ? 'ড্যাশবোর্ড' : 'Portal') : (language === 'bn' ? 'এডমিন' : 'Admin')}</span>
@@ -123,7 +123,7 @@ export const PublicNavbar: React.FC = () => {
               {/* Apply CTA Button */}
               <button
                 onClick={() => setShowApplyModal(true)}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-4 sm:py-2 text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl transition cursor-pointer shadow-xs shrink-0 active:scale-95"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3.5 sm:py-2 text-[11px] sm:text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl transition cursor-pointer shadow-xs shrink-0 active:scale-95"
               >
                 <UserPlus className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">{language === 'bn' ? 'সদস্য আবেদন' : 'Apply'}</span>
@@ -133,7 +133,7 @@ export const PublicNavbar: React.FC = () => {
               {/* Menu Toggle Button (Tablet style available across all screens) */}
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                className="flex items-center justify-center p-2 rounded-xl text-slate-800 hover:text-emerald-900 bg-slate-100 hover:bg-slate-200 border border-slate-300 transition cursor-pointer shrink-0 active:scale-95"
+                className="flex items-center justify-center p-1.5 sm:p-2 rounded-xl text-slate-800 hover:text-emerald-900 bg-slate-100 hover:bg-slate-200 border border-slate-300 transition cursor-pointer shrink-0 active:scale-95"
                 aria-label={menuOpen ? 'মেনু বন্ধ করুন' : 'মেনু খুলুন'}
                 title={menuOpen ? 'মেনু বন্ধ করুন' : 'মেনু খুলুন'}
               >

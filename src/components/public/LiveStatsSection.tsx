@@ -90,7 +90,7 @@ export const LiveStatsSection: React.FC = () => {
   ];
 
   return (
-    <section className="relative -mt-10 z-30 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="relative -mt-5 sm:-mt-6 z-30 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xl shadow-slate-900/5 p-6 sm:p-8">
         <div className="flex flex-col sm:flex-row items-center justify-between pb-6 border-b border-slate-100 gap-2 text-center sm:text-left">
           <div>

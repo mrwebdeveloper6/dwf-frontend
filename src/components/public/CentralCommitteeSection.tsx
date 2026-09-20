@@ -45,12 +45,12 @@ export const CentralCommitteeSection: React.FC = () => {
   });
 
   return (
-    <section id="central-committee" className="py-16 sm:py-20 bg-slate-50/80 border-b border-slate-200/80">
+    <section id="central-committee" className="py-16 sm:py-20 bg-slate-200/80 border-y border-slate-300/90">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-3 mb-10 sm:mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300/80 text-xs font-bold shadow-2xs">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100/90 text-emerald-950 border border-emerald-300 text-xs font-bold shadow-2xs">
             <ShieldCheck className="w-4 h-4 text-emerald-700" />
             <span>{language === 'bn' ? 'সাংগঠনিক পরিচালনা পর্ষদ' : 'Central Governing Body'}</span>
           </div>
@@ -59,7 +59,7 @@ export const CentralCommitteeSection: React.FC = () => {
             {language === 'bn' ? 'কেন্দ্রীয় কমিটি' : 'Central Executive Committee'}
           </h2>
 
-          <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-medium">
+          <p className="text-sm sm:text-base text-slate-700 leading-relaxed font-medium">
             {language === 'bn'
               ? 'ড্রাইভার্স ওয়েলফেয়ার ফাউন্ডেশনের সম্মানিত কেন্দ্রীয় পরিচালনা পর্ষদ ও দায়িত্বপ্রাপ্ত কর্মকর্তাবৃন্দ — সার্বক্ষণিক চালক ভাইদের সেবায় নিবেদিতপ্রাণ।'
               : 'The designated leaders and executive board officers of Drivers Welfare Foundation, dedicated 24/7 to the welfare and rights of commercial drivers.'}
@@ -70,13 +70,13 @@ export const CentralCommitteeSection: React.FC = () => {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
           
           {/* Filter Pills */}
-          <div className="flex items-center gap-1.5 p-1 bg-white border border-slate-200 rounded-xl shadow-xs overflow-x-auto w-full sm:w-auto">
+          <div className="flex items-center gap-1.5 p-1 bg-white border border-slate-300 rounded-xl shadow-xs overflow-x-auto w-full sm:w-auto">
             <button
               onClick={() => setFilterType('ALL')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer shrink-0 ${
                 filterType === 'ALL'
                   ? 'bg-emerald-800 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-emerald-800 hover:bg-slate-50'
+                  : 'text-slate-700 hover:text-emerald-800 hover:bg-slate-100'
               }`}
             >
               {language === 'bn' ? 'সকল কর্মকর্তা' : 'All Leaders'} ({committeeMembers.length})
@@ -86,7 +86,7 @@ export const CentralCommitteeSection: React.FC = () => {
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer shrink-0 ${
                 filterType === 'PRESIDIUM'
                   ? 'bg-emerald-800 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-emerald-800 hover:bg-slate-50'
+                  : 'text-slate-700 hover:text-emerald-800 hover:bg-slate-100'
               }`}
             >
               {language === 'bn' ? 'সভাপতি ও সহ-সভাপতি' : 'Presidium'}
@@ -96,7 +96,7 @@ export const CentralCommitteeSection: React.FC = () => {
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer shrink-0 ${
                 filterType === 'SECRETARY'
                   ? 'bg-emerald-800 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-emerald-800 hover:bg-slate-50'
+                  : 'text-slate-700 hover:text-emerald-800 hover:bg-slate-100'
               }`}
             >
               {language === 'bn' ? 'সম্পাদক মণ্ডলী' : 'Secretariat'}
@@ -106,7 +106,7 @@ export const CentralCommitteeSection: React.FC = () => {
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer shrink-0 ${
                 filterType === 'SPECIALIZED'
                   ? 'bg-emerald-800 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-emerald-800 hover:bg-slate-50'
+                  : 'text-slate-700 hover:text-emerald-800 hover:bg-slate-100'
               }`}
             >
               {language === 'bn' ? 'আইন ও স্বাস্থ্য সেল' : 'Legal & Health'}
@@ -121,7 +121,7 @@ export const CentralCommitteeSection: React.FC = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={language === 'bn' ? 'নাম, পদবী বা ফোন দিয়ে খুঁজুন...' : 'Search leader by name/phone...'}
-              className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 shadow-xs"
+              className="w-full pl-9 pr-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 shadow-xs"
             />
           </div>
 
@@ -137,8 +137,8 @@ export const CentralCommitteeSection: React.FC = () => {
                 key={member.id}
                 className={`bg-white rounded-2xl border transition-all duration-200 hover:shadow-md flex flex-col justify-between overflow-hidden relative ${
                   member.isKeyLeader 
-                    ? 'border-emerald-400/80 ring-2 ring-emerald-500/15' 
-                    : 'border-slate-200 hover:border-emerald-300'
+                    ? 'border-emerald-400/90 ring-2 ring-emerald-500/20 shadow-sm' 
+                    : 'border-slate-300/80 hover:border-emerald-400 shadow-sm'
                 }`}
               >
                 {/* Top Badge for Key Leaders */}
@@ -242,7 +242,7 @@ export const CentralCommitteeSection: React.FC = () => {
 
         {/* Empty Search State */}
         {filteredMembers.length === 0 && (
-          <div className="text-center py-12 bg-white rounded-2xl border border-slate-200">
+          <div className="text-center py-12 bg-white rounded-2xl border border-slate-300 shadow-sm">
             <Users className="w-10 h-10 text-slate-300 mx-auto mb-2" />
             <p className="text-sm font-bold text-slate-700">
               {language === 'bn' ? 'কোনো কর্মকর্তার তথ্য পাওয়া যায়নি' : 'No committee member found matching your query'}

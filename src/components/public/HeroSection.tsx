@@ -153,7 +153,7 @@ export const HeroSection: React.FC = () => {
 
   return (
     <section 
-      className="relative overflow-hidden min-h-[580px] lg:min-h-[660px] flex items-center justify-center bg-slate-950 text-white border-b border-emerald-900/40 select-none"
+      className="relative overflow-hidden w-full lg:h-[calc(100vh-92px)] lg:min-h-[560px] lg:max-h-[760px] flex flex-col justify-between bg-slate-950 text-white select-none"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -186,21 +186,23 @@ export const HeroSection: React.FC = () => {
         );
       })}
 
-      {/* Foreground Container */}
-      <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-18 lg:py-22 w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+      {/* Foreground Container - Flex column to fill screen height cleanly */}
+      <div className="relative z-20 max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-4 w-full h-full flex flex-col justify-between">
+        
+        {/* Main Center Content Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 xl:gap-10 items-center my-auto pt-2 pb-2">
           
           {/* Left Column: Slide Content */}
-          <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
+          <div className="lg:col-span-7 space-y-3 sm:space-y-4 lg:space-y-3.5 text-center lg:text-left">
             
             {/* Tag Badge */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-900/70 border border-emerald-500/50 text-emerald-300 text-xs font-bold shadow-lg backdrop-blur-md">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              <span>{language === 'bn' ? activeSlide.tagBn : activeSlide.tagEn}</span>
+            <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 rounded-full bg-emerald-900/70 border border-emerald-500/50 text-emerald-300 text-[10px] sm:text-xs font-bold shadow-md backdrop-blur-md">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0" />
+              <span className="truncate max-w-[280px] xs:max-w-none">{language === 'bn' ? activeSlide.tagBn : activeSlide.tagEn}</span>
             </div>
 
             {/* Slide Title with Bengali Emphasis */}
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight text-white font-sans drop-shadow-md min-h-[72px] sm:min-h-[110px]">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[34px] xl:text-[42px] font-black tracking-tight leading-[1.18] text-white font-sans drop-shadow-md">
               {language === 'bn' ? (
                 <>
                   <span className="text-emerald-400">{activeSlide.titleBn.split('–')[0]}</span>
@@ -218,59 +220,59 @@ export const HeroSection: React.FC = () => {
             </h1>
 
             {/* Slide Subtitle */}
-            <p className="text-sm sm:text-lg text-slate-200 leading-relaxed max-w-2xl mx-auto lg:mx-0 font-medium drop-shadow-sm min-h-[56px] sm:min-h-[72px]">
+            <p className="text-xs sm:text-sm lg:text-[14px] xl:text-[15px] text-slate-200 leading-relaxed max-w-2xl mx-auto lg:mx-0 font-medium drop-shadow-xs">
               {language === 'bn' ? activeSlide.subBn : activeSlide.subEn}
             </p>
 
             {/* Feature Pills */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2.5 sm:gap-3 text-xs font-semibold text-slate-200 pt-1">
-              <div className="flex items-center gap-1.5 bg-slate-900/80 backdrop-blur-md px-3 py-1.5 rounded-lg border border-emerald-500/30 shadow-xs">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-1.5 sm:gap-2.5 text-[10.5px] sm:text-xs font-semibold text-slate-200 pt-0.5">
+              <div className="flex items-center gap-1.5 bg-slate-900/80 backdrop-blur-md px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg border border-emerald-500/30 shadow-xs">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                 <span>{language === 'bn' ? activeSlide.pill1Bn : activeSlide.pill1En}</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-slate-900/80 backdrop-blur-md px-3 py-1.5 rounded-lg border border-emerald-500/30 shadow-xs">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <div className="flex items-center gap-1.5 bg-slate-900/80 backdrop-blur-md px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg border border-emerald-500/30 shadow-xs">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                 <span>{language === 'bn' ? activeSlide.pill2Bn : activeSlide.pill2En}</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-slate-900/80 backdrop-blur-md px-3 py-1.5 rounded-lg border border-emerald-500/30 shadow-xs">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <div className="flex items-center gap-1.5 bg-slate-900/80 backdrop-blur-md px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg border border-emerald-500/30 shadow-xs">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                 <span>{language === 'bn' ? activeSlide.pill3Bn : activeSlide.pill3En}</span>
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 pt-3">
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-2 sm:gap-3 pt-1 sm:pt-2">
               {/* Primary: Membership Application */}
               <button
                 onClick={() => setShowApplyModal(true)}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 text-sm sm:text-base font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl transition shadow-xl shadow-emerald-950/60 cursor-pointer active:scale-98 border border-emerald-400/40"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4.5 py-2.5 sm:px-5 sm:py-2.5 text-xs sm:text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl transition shadow-lg shadow-emerald-950/60 cursor-pointer active:scale-98 border border-emerald-400/40"
               >
-                <UserPlus className="w-5 h-5" />
+                <UserPlus className="w-4 h-4" />
                 <span>{language === 'bn' ? 'সদস্য হতে আবেদন করুন' : 'Apply for Membership'}</span>
-                <ChevronRight className="w-4 h-4 ml-0.5" />
+                <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
               </button>
 
               {/* Secondary: Member Login */}
               <button
                 onClick={() => setShowLoginModal(true)}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3.5 text-sm sm:text-base font-bold text-emerald-300 hover:text-white bg-slate-900/80 hover:bg-slate-800 border border-emerald-600/50 rounded-xl transition cursor-pointer backdrop-blur-md"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:px-4.5 sm:py-2.5 text-xs sm:text-sm font-bold text-emerald-300 hover:text-white bg-slate-900/80 hover:bg-slate-800 border border-emerald-600/50 rounded-xl transition cursor-pointer backdrop-blur-md"
               >
-                <LogIn className="w-5 h-5 text-emerald-400" />
+                <LogIn className="w-4 h-4 text-emerald-400" />
                 <span>{language === 'bn' ? 'সদস্য লগইন' : 'Member Login'}</span>
               </button>
 
               {/* Tertiary: Public Verification */}
               <button
                 onClick={() => setShowVerifyModal(true)}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4.5 py-3.5 text-sm font-semibold text-slate-300 hover:text-white bg-slate-950/60 hover:bg-slate-800/80 border border-slate-700/80 rounded-xl transition cursor-pointer backdrop-blur-md"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-semibold text-slate-300 hover:text-white bg-slate-950/60 hover:bg-slate-800/80 border border-slate-700/80 rounded-xl transition cursor-pointer backdrop-blur-md"
               >
-                <Search className="w-4 h-4 text-emerald-400" />
-                <span>{language === 'bn' ? 'আইডি ও কিউআর যাচাই' : 'Verify Member ID'}</span>
+                <Search className="w-3.5 h-3.5 text-emerald-400" />
+                <span>{language === 'bn' ? 'আইডি যাচাই' : 'Verify ID'}</span>
               </button>
             </div>
 
             {/* Direct Assurance Notice */}
-            <p className="text-[11px] text-slate-400 pt-1">
+            <p className="text-[10px] sm:text-[11px] text-slate-400 pt-0.5">
               {language === 'bn' 
                 ? '✓ সরকারি নিয়মানুযায়ী নিবন্ধিত অলাভজনক চালক কল্যাণ সংস্থা • কোনো মধ্যস্বত্বভোগী ছাড়া সরাসরি সেবা।' 
                 : '✓ Registered non-profit driver welfare trust • Direct verification and instant member assistance.'}
@@ -279,51 +281,51 @@ export const HeroSection: React.FC = () => {
 
           {/* Right Column: Digital ID Card Showcase with Live Slide Badge */}
           <div className="lg:col-span-5 relative hidden md:block">
-            <div className="relative mx-auto max-w-md">
+            <div className="relative mx-auto max-w-[320px] sm:max-w-[340px] xl:max-w-[360px]">
               
               {/* Dynamic Slide Accent Badge */}
-              <div className="absolute -top-5 -right-3 z-30 bg-emerald-950/90 border border-emerald-500/60 rounded-2xl p-3 shadow-2xl backdrop-blur-md flex items-center gap-3 transition-all duration-300">
-                <div className="p-2 bg-emerald-600/30 text-emerald-300 rounded-xl">
-                  <BadgeIcon className="w-5 h-5" />
+              <div className="absolute -top-3 -right-2 z-30 bg-emerald-950/95 border border-emerald-500/60 rounded-xl p-2 sm:p-2.5 shadow-xl backdrop-blur-md flex items-center gap-2.5 transition-all duration-300">
+                <div className="p-1.5 bg-emerald-600/30 text-emerald-300 rounded-lg">
+                  <BadgeIcon className="w-4 h-4" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-white">{language === 'bn' ? activeSlide.badgeBn : activeSlide.badgeEn}</p>
-                  <p className="text-[10px] text-emerald-300 font-medium">{language === 'bn' ? 'ডিডব্লিউএফ নিশ্চয়তা' : 'DWF Guarantee'}</p>
+                  <p className="text-[11px] font-bold text-white leading-tight">{language === 'bn' ? activeSlide.badgeBn : activeSlide.badgeEn}</p>
+                  <p className="text-[9px] text-emerald-300 font-medium">{language === 'bn' ? 'ডিডব্লিউএফ নিশ্চয়তা' : 'DWF Guarantee'}</p>
                 </div>
               </div>
 
               {/* Official Digital Smart ID Card Mockup */}
-              <div className="relative z-20 rounded-2xl p-6 bg-gradient-to-br from-emerald-900/90 via-slate-900/95 to-slate-950/95 border border-emerald-500/40 shadow-2xl shadow-emerald-950/90 text-white backdrop-blur-lg">
+              <div className="relative z-20 rounded-2xl p-4 sm:p-5 bg-gradient-to-br from-emerald-900/90 via-slate-900/95 to-slate-950/95 border border-emerald-500/40 shadow-2xl shadow-emerald-950/90 text-white backdrop-blur-lg">
                 
                 {/* Header with Seal */}
-                <div className="flex items-center justify-between border-b border-emerald-700/60 pb-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center p-1 shadow-sm">
-                      <ShieldCheck className="w-6 h-6 text-emerald-700" />
+                <div className="flex items-center justify-between border-b border-emerald-700/60 pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center p-1 shadow-xs">
+                      <ShieldCheck className="w-5 h-5 text-emerald-700" />
                     </div>
                     <div>
-                      <h4 className="text-xs font-bold leading-tight">ড্রাইভার্স ওয়েলফেয়ার ফাউন্ডেশন</h4>
-                      <p className="text-[10px] text-emerald-300 font-medium">DRIVERS WELFARE FOUNDATION</p>
+                      <h4 className="text-[11px] font-bold leading-tight">ড্রাইভার্স ওয়েলফেয়ার ফাউন্ডেশন</h4>
+                      <p className="text-[9px] text-emerald-300 font-medium tracking-wide">DRIVERS WELFARE FOUNDATION</p>
                     </div>
                   </div>
-                  <span className="bg-red-600 text-white font-bold text-[9px] px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-xs">
+                  <span className="bg-red-600 text-white font-bold text-[8px] px-2 py-0.5 rounded-full uppercase tracking-wider shadow-xs">
                     ডিজিটাল স্মার্ট কার্ড
                   </span>
                 </div>
 
                 {/* Card Body */}
-                <div className="mt-4 flex gap-4 items-center">
+                <div className="mt-3 flex gap-3.5 items-center">
                   <img
                     src="https://images.unsplash.com/photo-1544717305-2782549b5136?w=400&auto=format&fit=crop&q=80"
                     alt="Sample Member"
-                    className="w-16 h-20 rounded-xl object-cover border-2 border-emerald-400 shadow-md shrink-0"
+                    className="w-14 h-18 rounded-lg object-cover border-2 border-emerald-400 shadow-sm shrink-0"
                   />
-                  <div className="space-y-1 text-xs">
-                    <p className="font-bold text-base text-white">মোঃ কামাল হোসেন</p>
-                    <p className="text-emerald-200 text-[11px]">সদস্য আইডি: <span className="font-mono font-bold text-white">DWF-000142</span></p>
-                    <p className="text-slate-300 text-[11px]">পেশা: দূরপাল্লার ভারী বাস চালক</p>
-                    <div className="flex items-center gap-3 pt-1 text-[11px]">
-                      <span className="bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-700">
+                  <div className="space-y-0.5 text-xs">
+                    <p className="font-bold text-sm text-white">মোঃ কামাল হোসেন</p>
+                    <p className="text-emerald-200 text-[10.5px]">সদস্য আইডি: <span className="font-mono font-bold text-white">DWF-000142</span></p>
+                    <p className="text-slate-300 text-[10.5px]">পেশা: দূরপাল্লার ভারী বাস চালক</p>
+                    <div className="flex items-center gap-2.5 pt-0.5 text-[10px]">
+                      <span className="bg-emerald-950 text-emerald-300 px-1.5 py-0.5 rounded border border-emerald-700">
                         রক্ত: <strong className="text-white">B+</strong>
                       </span>
                       <span className="text-emerald-300 font-mono">মেয়াদ: ২০২৭</span>
@@ -332,27 +334,27 @@ export const HeroSection: React.FC = () => {
                 </div>
 
                 {/* Card Footer with QR & Verification Guarantee */}
-                <div className="mt-4 pt-3 border-t border-emerald-700/60 flex items-center justify-between text-[10px] text-emerald-200">
+                <div className="mt-3 pt-2.5 border-t border-emerald-700/60 flex items-center justify-between text-[9px] text-emerald-200">
                   <div className="space-y-0.5">
                     <p className="font-semibold text-white">ডিজিটাল স্মার্ট কিউআর ভেরিফাইড</p>
-                    <p className="text-slate-400">সুরক্ষিত চালক – নিরাপদ সড়ক</p>
+                    <p className="text-slate-400 text-[8.5px]">সুরক্ষিত চালক – নিরাপদ সড়ক</p>
                   </div>
-                  <div className="w-10 h-10 bg-white p-1 rounded-md shadow flex items-center justify-center">
-                    <div className="w-full h-full bg-slate-900 rounded-sm flex items-center justify-center text-[7px] text-white font-mono font-bold">
-                      QR-DWF
+                  <div className="w-8 h-8 bg-white p-0.5 rounded shadow flex items-center justify-center">
+                    <div className="w-full h-full bg-slate-900 rounded-xs flex items-center justify-center text-[6.5px] text-white font-mono font-bold">
+                      QR
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Floating Benefit Tag Bottom */}
-              <div className="absolute -bottom-5 -left-4 z-30 bg-slate-950/90 border border-emerald-500/50 rounded-2xl p-3 shadow-xl backdrop-blur-md flex items-center gap-3">
-                <div className="p-2 bg-emerald-500/20 text-emerald-400 rounded-xl">
-                  <Sparkles className="w-5 h-5" />
+              <div className="absolute -bottom-3 -left-2 z-30 bg-slate-950/95 border border-emerald-500/50 rounded-xl p-2 sm:p-2.5 shadow-xl backdrop-blur-md flex items-center gap-2.5">
+                <div className="p-1.5 bg-emerald-500/20 text-emerald-400 rounded-lg">
+                  <Sparkles className="w-4 h-4" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-white">অনলাইন ডাটাবেস নিবন্ধিত</p>
-                  <p className="text-[10px] text-emerald-400">১০০% নমিনি ও জীবন নিরাপত্তা</p>
+                  <p className="text-[11px] font-bold text-white leading-tight">অনলাইন ডাটাবেস নিবন্ধিত</p>
+                  <p className="text-[9px] text-emerald-400">১০০% নমিনি ও জীবন নিরাপত্তা</p>
                 </div>
               </div>
 
@@ -361,30 +363,30 @@ export const HeroSection: React.FC = () => {
 
         </div>
 
-        {/* Slider Bottom Navigation & Controls */}
-        <div className="mt-12 pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4">
+        {/* Slider Bottom Navigation & Controls - Docked compactly at the bottom */}
+        <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-slate-800/70 flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4 shrink-0">
           
           {/* Slide Indicator Buttons / Progress */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto max-w-full py-0.5">
             {slides.map((slide, idx) => {
               const isSelected = idx === currentSlide;
               return (
                 <button
                   key={slide.id}
                   onClick={() => setCurrentSlide(idx)}
-                  className={`group relative py-1.5 px-3 rounded-xl transition cursor-pointer flex items-center gap-2 border ${
+                  className={`group relative py-1 px-2 sm:py-1.5 sm:px-2.5 rounded-lg transition cursor-pointer flex items-center gap-1.5 border ${
                     isSelected
                       ? 'bg-emerald-950/90 border-emerald-500/70 text-white'
                       : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
                   }`}
                   aria-label={`Go to slide ${idx + 1}`}
                 >
-                  <span className="font-mono text-xs font-bold">0{idx + 1}</span>
-                  <span className="hidden md:inline text-[11px] font-medium max-w-[120px] truncate">
+                  <span className="font-mono text-[10px] sm:text-xs font-bold">0{idx + 1}</span>
+                  <span className="hidden md:inline text-[10px] sm:text-[11px] font-medium max-w-[110px] truncate">
                     {language === 'bn' ? slide.titleBn.split('–')[0] : slide.titleEn.split('–')[0]}
                   </span>
                   {isSelected && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
                   )}
                 </button>
               );
@@ -392,27 +394,27 @@ export const HeroSection: React.FC = () => {
           </div>
 
           {/* Arrow Controls & Pause Indicator */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <button
               onClick={prevSlide}
-              className="p-2.5 rounded-xl bg-slate-900/80 hover:bg-emerald-900/80 border border-slate-700/80 text-white transition cursor-pointer active:scale-95 shadow-xs"
+              className="p-1.5 sm:p-2 rounded-lg bg-slate-900/80 hover:bg-emerald-900/80 border border-slate-700/80 text-white transition cursor-pointer active:scale-95 shadow-xs"
               aria-label="Previous Slide"
               title="পূর্ববর্তী স্লাইড"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
 
-            <span className="text-[11px] font-mono text-slate-400 px-2">
+            <span className="text-[10px] sm:text-[11px] font-mono text-slate-400 px-1.5">
               0{currentSlide + 1} / 0{slides.length}
             </span>
 
             <button
               onClick={nextSlide}
-              className="p-2.5 rounded-xl bg-slate-900/80 hover:bg-emerald-900/80 border border-slate-700/80 text-white transition cursor-pointer active:scale-95 shadow-xs"
+              className="p-1.5 sm:p-2 rounded-lg bg-slate-900/80 hover:bg-emerald-900/80 border border-slate-700/80 text-white transition cursor-pointer active:scale-95 shadow-xs"
               aria-label="Next Slide"
               title="পরবর্তী স্লাইড"
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
           </div>
 
