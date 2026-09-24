@@ -75,7 +75,7 @@ export const LoginModal: React.FC = () => {
             onClick={() => setActiveTab('MEMBER')}
             className={`py-2 text-xs font-bold rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 ${
               activeTab === 'MEMBER'
-                ? 'bg-white text-emerald-800 shadow-xs'
+                ? 'bg-white text-red-700 shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -87,7 +87,7 @@ export const LoginModal: React.FC = () => {
             onClick={() => setActiveTab('ADMIN')}
             className={`py-2 text-xs font-bold rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 ${
               activeTab === 'ADMIN'
-                ? 'bg-white text-amber-800 shadow-xs'
+                ? 'bg-white text-slate-900 shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -109,7 +109,7 @@ export const LoginModal: React.FC = () => {
                   required
                   value={memberIdInput}
                   onChange={(e) => setMemberIdInput(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl font-mono text-xs focus:ring-2 focus:ring-emerald-600 focus:outline-none"
+                  className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl font-mono text-xs focus:ring-2 focus:ring-red-600 focus:outline-none"
                 />
                 <UserCheck className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
               </div>
@@ -125,7 +125,7 @@ export const LoginModal: React.FC = () => {
                   required
                   value={passwordInput}
                   onChange={(e) => setPasswordInput(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl font-mono text-xs focus:ring-2 focus:ring-emerald-600 focus:outline-none"
+                  className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl font-mono text-xs focus:ring-2 focus:ring-red-600 focus:outline-none"
                 />
                 <KeyRound className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
               </div>
@@ -133,7 +133,7 @@ export const LoginModal: React.FC = () => {
 
             <button
               type="submit"
-              className="w-full py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl transition cursor-pointer shadow-sm flex items-center justify-center gap-1.5"
+              className="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl transition cursor-pointer shadow-md shadow-red-600/20 flex items-center justify-center gap-1.5 active:scale-95"
             >
               <span>{language === 'bn' ? 'লগইন করুন' : 'Sign In'}</span>
               <ArrowRight className="w-4 h-4" />

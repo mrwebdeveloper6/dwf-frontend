@@ -12,11 +12,12 @@ import {
   Users, 
   Search, 
   MapPin,
-  Sparkles
+  Sparkles,
+  ChevronRight
 } from 'lucide-react';
 
 export const CentralCommitteeSection: React.FC = () => {
-  const { language, committeeMembers } = useDwf();
+  const { language, committeeMembers, setActiveView } = useDwf();
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<'ALL' | 'PRESIDIUM' | 'SECRETARY' | 'SPECIALIZED'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
@@ -45,12 +46,12 @@ export const CentralCommitteeSection: React.FC = () => {
   });
 
   return (
-    <section id="central-committee" className="py-16 sm:py-20 bg-slate-200/80 border-y border-slate-300/90">
+    <section id="central-committee" className="py-16 sm:py-20 bg-slate-50 border-y border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-3 mb-10 sm:mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100/90 text-emerald-950 border border-emerald-300 text-xs font-bold shadow-2xs">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-950 border border-emerald-300 text-xs font-bold shadow-2xs">
             <ShieldCheck className="w-4 h-4 text-emerald-700" />
             <span>{language === 'bn' ? 'সাংগঠনিক পরিচালনা পর্ষদ' : 'Central Governing Body'}</span>
           </div>
@@ -59,7 +60,7 @@ export const CentralCommitteeSection: React.FC = () => {
             {language === 'bn' ? 'কেন্দ্রীয় কমিটি' : 'Central Executive Committee'}
           </h2>
 
-          <p className="text-sm sm:text-base text-slate-700 leading-relaxed font-medium">
+          <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-medium">
             {language === 'bn'
               ? 'ড্রাইভার্স ওয়েলফেয়ার ফাউন্ডেশনের সম্মানিত কেন্দ্রীয় পরিচালনা পর্ষদ ও দায়িত্বপ্রাপ্ত কর্মকর্তাবৃন্দ — সার্বক্ষণিক চালক ভাইদের সেবায় নিবেদিতপ্রাণ।'
               : 'The designated leaders and executive board officers of Drivers Welfare Foundation, dedicated 24/7 to the welfare and rights of commercial drivers.'}
@@ -144,7 +145,7 @@ export const CentralCommitteeSection: React.FC = () => {
                 {/* Top Badge for Key Leaders */}
                 {member.isKeyLeader && (
                   <div className="absolute top-3 right-3 z-10">
-                    <span className="bg-emerald-700 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-xs flex items-center gap-1">
+                    <span className="bg-red-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-xs flex items-center gap-1">
                       <Sparkles className="w-2.5 h-2.5" />
                       <span>{language === 'bn' ? 'শীর্ষ নেতৃত্ব' : 'Key Leader'}</span>
                     </span>
@@ -215,8 +216,8 @@ export const CentralCommitteeSection: React.FC = () => {
                       title={language === 'bn' ? 'নাম্বার কপি করুন' : 'Copy number'}
                       className={`p-1.5 rounded-lg border transition cursor-pointer ${
                         isCopied
-                          ? 'bg-emerald-600 text-white border-emerald-600'
-                          : 'bg-white text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 border-slate-200'
+                          ? 'bg-red-600 text-white border-red-600'
+                          : 'bg-white text-slate-600 hover:text-red-700 hover:bg-red-50 border-slate-200'
                       }`}
                     >
                       {isCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
@@ -226,7 +227,7 @@ export const CentralCommitteeSection: React.FC = () => {
                     <a
                       href={`tel:${member.cleanPhone}`}
                       title={language === 'bn' ? 'সরাসরি কল করুন' : 'Direct Call'}
-                      className="px-2.5 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold flex items-center gap-1 shadow-2xs transition active:scale-95"
+                      className="px-2.5 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold flex items-center gap-1 shadow-2xs transition active:scale-95"
                     >
                       <PhoneCall className="w-3 h-3" />
                       <span>{language === 'bn' ? 'কল' : 'Call'}</span>
@@ -278,6 +279,20 @@ export const CentralCommitteeSection: React.FC = () => {
             <Phone className="w-4 h-4 text-emerald-700" />
             <span>হটলাইন: ১৬৭৮৯ (টোল-ফ্রি)</span>
           </a>
+        </div>
+
+        {/* Dedicated Page Link CTA */}
+        <div className="text-center pt-6">
+          <button
+            onClick={() => {
+              setActiveView('central-committee');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold text-xs sm:text-sm rounded-xl transition shadow-md shadow-red-600/20 active:scale-95 cursor-pointer"
+          >
+            <span>{language === 'bn' ? 'পূর্ণাঙ্গ কেন্দ্রীয় কমিটি ও ডিরেক্টরি পেইজ দেখুন' : 'View Full Central Committee Page'}</span>
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
 
       </div>

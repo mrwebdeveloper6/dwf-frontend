@@ -196,8 +196,8 @@ export const HeroSection: React.FC = () => {
           <div className="lg:col-span-7 space-y-3 sm:space-y-4 lg:space-y-3.5 text-center lg:text-left">
             
             {/* Tag Badge */}
-            <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 rounded-full bg-emerald-900/70 border border-emerald-500/50 text-emerald-300 text-[10px] sm:text-xs font-bold shadow-md backdrop-blur-md">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0" />
+            <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 rounded-full bg-emerald-950/90 border border-emerald-500/60 text-emerald-200 text-[10px] sm:text-xs font-bold shadow-md backdrop-blur-md">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping shrink-0" />
               <span className="truncate max-w-[280px] xs:max-w-none">{language === 'bn' ? activeSlide.tagBn : activeSlide.tagEn}</span>
             </div>
 
@@ -245,7 +245,7 @@ export const HeroSection: React.FC = () => {
               {/* Primary: Membership Application */}
               <button
                 onClick={() => setShowApplyModal(true)}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4.5 py-2.5 sm:px-5 sm:py-2.5 text-xs sm:text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl transition shadow-lg shadow-emerald-950/60 cursor-pointer active:scale-98 border border-emerald-400/40"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 sm:px-6 sm:py-3 text-xs sm:text-sm font-black text-white bg-red-600 hover:bg-red-700 rounded-xl transition shadow-xl shadow-red-950/60 cursor-pointer active:scale-98 border border-red-400/40"
               >
                 <UserPlus className="w-4 h-4" />
                 <span>{language === 'bn' ? 'সদস্য হতে আবেদন করুন' : 'Apply for Membership'}</span>
@@ -255,18 +255,18 @@ export const HeroSection: React.FC = () => {
               {/* Secondary: Member Login */}
               <button
                 onClick={() => setShowLoginModal(true)}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:px-4.5 sm:py-2.5 text-xs sm:text-sm font-bold text-emerald-300 hover:text-white bg-slate-900/80 hover:bg-slate-800 border border-emerald-600/50 rounded-xl transition cursor-pointer backdrop-blur-md"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:px-4.5 sm:py-2.5 text-xs sm:text-sm font-bold text-white hover:text-white bg-red-950/70 hover:bg-red-900/80 border border-red-500/60 rounded-xl transition cursor-pointer backdrop-blur-md"
               >
-                <LogIn className="w-4 h-4 text-emerald-400" />
+                <LogIn className="w-4 h-4 text-red-400" />
                 <span>{language === 'bn' ? 'সদস্য লগইন' : 'Member Login'}</span>
               </button>
 
               {/* Tertiary: Public Verification */}
               <button
                 onClick={() => setShowVerifyModal(true)}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-semibold text-slate-300 hover:text-white bg-slate-950/60 hover:bg-slate-800/80 border border-slate-700/80 rounded-xl transition cursor-pointer backdrop-blur-md"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-semibold text-slate-200 hover:text-white bg-slate-950/70 hover:bg-slate-800/80 border border-red-500/40 hover:border-red-400 rounded-xl transition cursor-pointer backdrop-blur-md"
               >
-                <Search className="w-3.5 h-3.5 text-emerald-400" />
+                <Search className="w-3.5 h-3.5 text-red-400" />
                 <span>{language === 'bn' ? 'আইডি যাচাই' : 'Verify ID'}</span>
               </button>
             </div>
@@ -284,8 +284,8 @@ export const HeroSection: React.FC = () => {
             <div className="relative mx-auto max-w-[320px] sm:max-w-[340px] xl:max-w-[360px]">
               
               {/* Dynamic Slide Accent Badge */}
-              <div className="absolute -top-3 -right-2 z-30 bg-emerald-950/95 border border-emerald-500/60 rounded-xl p-2 sm:p-2.5 shadow-xl backdrop-blur-md flex items-center gap-2.5 transition-all duration-300">
-                <div className="p-1.5 bg-emerald-600/30 text-emerald-300 rounded-lg">
+              <div className="absolute -top-3 -right-2 z-30 bg-emerald-950/95 border border-red-500/60 rounded-xl p-2 sm:p-2.5 shadow-xl backdrop-blur-md flex items-center gap-2.5 transition-all duration-300">
+                <div className="p-1.5 bg-red-600/30 text-red-300 rounded-lg">
                   <BadgeIcon className="w-4 h-4" />
                 </div>
                 <div>
@@ -376,7 +376,7 @@ export const HeroSection: React.FC = () => {
                   onClick={() => setCurrentSlide(idx)}
                   className={`group relative py-1 px-2 sm:py-1.5 sm:px-2.5 rounded-lg transition cursor-pointer flex items-center gap-1.5 border ${
                     isSelected
-                      ? 'bg-emerald-950/90 border-emerald-500/70 text-white'
+                      ? 'bg-red-950/90 border-red-500/80 text-white shadow-md'
                       : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
                   }`}
                   aria-label={`Go to slide ${idx + 1}`}
@@ -386,7 +386,7 @@ export const HeroSection: React.FC = () => {
                     {language === 'bn' ? slide.titleBn.split('–')[0] : slide.titleEn.split('–')[0]}
                   </span>
                   {isSelected && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shrink-0" />
                   )}
                 </button>
               );
@@ -397,7 +397,7 @@ export const HeroSection: React.FC = () => {
           <div className="flex items-center gap-1.5 sm:gap-2">
             <button
               onClick={prevSlide}
-              className="p-1.5 sm:p-2 rounded-lg bg-slate-900/80 hover:bg-emerald-900/80 border border-slate-700/80 text-white transition cursor-pointer active:scale-95 shadow-xs"
+              className="p-1.5 sm:p-2 rounded-lg bg-slate-900/80 hover:bg-red-900/80 border border-slate-700/80 hover:border-red-600 text-white transition cursor-pointer active:scale-95 shadow-xs"
               aria-label="Previous Slide"
               title="পূর্ববর্তী স্লাইড"
             >
@@ -410,7 +410,7 @@ export const HeroSection: React.FC = () => {
 
             <button
               onClick={nextSlide}
-              className="p-1.5 sm:p-2 rounded-lg bg-slate-900/80 hover:bg-emerald-900/80 border border-slate-700/80 text-white transition cursor-pointer active:scale-95 shadow-xs"
+              className="p-1.5 sm:p-2 rounded-lg bg-slate-900/80 hover:bg-red-900/80 border border-slate-700/80 hover:border-red-600 text-white transition cursor-pointer active:scale-95 shadow-xs"
               aria-label="Next Slide"
               title="পরবর্তী স্লাইড"
             >

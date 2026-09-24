@@ -8,11 +8,12 @@ import {
   Send, 
   CheckCircle2, 
   AlertCircle, 
-  HelpCircle 
+  HelpCircle,
+  ArrowRight 
 } from 'lucide-react';
 
 export const ContactSection: React.FC = () => {
-  const { language, t } = useDwf();
+  const { language, t, setActiveView } = useDwf();
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -73,20 +74,20 @@ export const ContactSection: React.FC = () => {
           
           {/* Organization Contact Details (Left Column) */}
           <div className="lg:col-span-5 space-y-6">
-            <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-800 space-y-6">
+            <div className="bg-gradient-to-br from-slate-950 via-emerald-950 to-slate-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-emerald-800/80 space-y-6">
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950 px-2.5 py-1 rounded border border-emerald-800">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-300 bg-emerald-900/80 px-2.5 py-1 rounded border border-emerald-700">
                   {language === 'bn' ? 'প্রধান প্রশাসনিক কার্যালয়' : 'Headquarters'}
                 </span>
                 <h3 className="text-xl font-bold mt-2">
                   {t.orgName}
                 </h3>
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-slate-300 mt-1">
                   {t.tagline}
                 </p>
               </div>
 
-              <div className="space-y-4 text-xs sm:text-sm text-slate-300">
+              <div className="space-y-4 text-xs sm:text-sm text-slate-200">
                 <div className="flex items-start gap-3">
                   <MapPin className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
                   <div>
@@ -98,11 +99,14 @@ export const ContactSection: React.FC = () => {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <Phone className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                  <Phone className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
                   <div>
                     <p className="font-semibold text-white">{language === 'bn' ? 'টোল-ফ্রি হেল্পলাইন:' : 'Helpline:'}</p>
-                    <p className="text-emerald-300 font-bold font-mono text-base">১৬৭৮৯</p>
-                    <p className="text-slate-400 text-xs">জরুরি দুর্ঘটনা ডেস্ক: ০১৭০০-০০০০০০</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-white font-black font-mono text-lg bg-red-600 px-2 py-0.5 rounded shadow-2xs">১৬৭৮৯</span>
+                      <span className="text-xs text-emerald-300 font-medium">২৪/৭ সার্বক্ষণিক</span>
+                    </div>
+                    <p className="text-slate-400 text-xs mt-1">জরুরি দুর্ঘটনা ডেস্ক: ০১৭০০-০০০০০০</p>
                   </div>
                 </div>
 
@@ -230,14 +234,14 @@ export const ContactSection: React.FC = () => {
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
                       placeholder={language === 'bn' ? 'আপনার প্রশ্ন বা সমস্যার বিবরণ লিখুন...' : 'Write details of your query...'}
-                      className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent"
+                      className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
                     />
                   </div>
 
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full inline-flex items-center justify-center gap-2 py-3 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm rounded-xl transition cursor-pointer shadow-sm disabled:opacity-50"
+                    className="w-full inline-flex items-center justify-center gap-2 py-3 bg-red-600 hover:bg-red-700 text-white font-bold text-xs sm:text-sm rounded-xl transition cursor-pointer shadow-md shadow-red-600/20 active:scale-95 disabled:opacity-50"
                   >
                     {isSubmitting ? (
                       <span>{language === 'bn' ? 'পাঠানো হচ্ছে...' : 'Submitting...'}</span>
@@ -253,6 +257,20 @@ export const ContactSection: React.FC = () => {
             </div>
           </div>
 
+        </div>
+
+        {/* Dedicated Page Link CTA */}
+        <div className="text-center pt-10">
+          <button
+            onClick={() => {
+              setActiveView('contact');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold text-xs sm:text-sm rounded-xl transition shadow-md shadow-red-600/20 active:scale-95 cursor-pointer"
+          >
+            <span>{language === 'bn' ? 'সকল বিভাগীয় শাখা কার্যালয় ও পূর্ণাঙ্গ ডিরেক্টরি দেখুন' : 'View Full Nationwide Branches & Directory Page'}</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
 
       </div>

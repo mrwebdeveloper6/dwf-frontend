@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 
 export const ProgramsSection: React.FC = () => {
-  const { language, t, setShowApplyModal } = useDwf();
+  const { language, t, setShowApplyModal, setActiveView } = useDwf();
 
   const programs = [
     {
@@ -20,8 +20,8 @@ export const ProgramsSection: React.FC = () => {
       title: t.progHealthCard,
       description: t.progHealthCardDesc,
       tag: language === 'bn' ? '৫০,০০০৳ অনুদান' : '50k BDT Grant',
-      badgeColor: 'bg-rose-100 text-rose-800 border-rose-200',
-      iconBg: 'bg-rose-50 text-rose-600',
+      badgeColor: 'bg-red-100 text-red-800 border-red-200',
+      iconBg: 'bg-red-50 text-red-600',
       actionText: language === 'bn' ? 'কার্ডের সুবিধা দেখুন' : 'View Card Benefits'
     },
     {
@@ -40,8 +40,8 @@ export const ProgramsSection: React.FC = () => {
       title: t.progLegal,
       description: t.progLegalDesc,
       tag: language === 'bn' ? '২৪/৭ সাপোর্ট' : '24/7 Support',
-      badgeColor: 'bg-amber-100 text-amber-800 border-amber-200',
-      iconBg: 'bg-amber-50 text-amber-600',
+      badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+      iconBg: 'bg-emerald-50 text-emerald-700',
       actionText: language === 'bn' ? 'আইনজীবী প্যানেল' : 'Legal Panel'
     },
     {
@@ -51,7 +51,7 @@ export const ProgramsSection: React.FC = () => {
       description: t.progTrainingDesc,
       tag: language === 'bn' ? 'বিআরটিএ মান' : 'Certified',
       badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-      iconBg: 'bg-emerald-50 text-emerald-600',
+      iconBg: 'bg-emerald-50 text-emerald-700',
       actionText: language === 'bn' ? 'প্রশিক্ষণ ক্যালেন্ডার' : 'Training Schedule'
     },
     {
@@ -60,8 +60,8 @@ export const ProgramsSection: React.FC = () => {
       title: t.progRehab,
       description: t.progRehabDesc,
       tag: language === 'bn' ? 'স্থায়ী তহবিল' : 'Long-term',
-      badgeColor: 'bg-blue-100 text-blue-800 border-blue-200',
-      iconBg: 'bg-blue-50 text-blue-600',
+      badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+      iconBg: 'bg-emerald-50 text-emerald-700',
       actionText: language === 'bn' ? 'পুনর্বাসন প্রকল্প' : 'Rehab Details'
     },
     {
@@ -70,8 +70,8 @@ export const ProgramsSection: React.FC = () => {
       title: t.progHajj,
       description: t.progHajjDesc,
       tag: language === 'bn' ? 'সম্পূর্ণ ফ্রি' : 'Sponsored',
-      badgeColor: 'bg-purple-100 text-purple-800 border-purple-200',
-      iconBg: 'bg-purple-50 text-purple-600',
+      badgeColor: 'bg-red-100 text-red-800 border-red-200',
+      iconBg: 'bg-red-50 text-red-600',
       actionText: language === 'bn' ? 'লটারি নীতি ও যোগ্যতা' : 'Lottery Criteria'
     }
   ];
@@ -120,7 +120,7 @@ export const ProgramsSection: React.FC = () => {
               <div className="pt-6 mt-4 border-t border-slate-100 flex items-center justify-between">
                 <button
                   onClick={() => setShowApplyModal(true)}
-                  className="text-xs font-semibold text-emerald-700 group-hover:text-emerald-800 flex items-center gap-1.5 transition cursor-pointer"
+                  className="text-xs font-bold text-red-600 group-hover:text-red-700 flex items-center gap-1.5 transition cursor-pointer"
                 >
                   <span>{prog.actionText}</span>
                   <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
@@ -129,6 +129,20 @@ export const ProgramsSection: React.FC = () => {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Dedicated Page Link CTA */}
+        <div className="text-center pt-12">
+          <button
+            onClick={() => {
+              setActiveView('programs');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold text-xs sm:text-sm rounded-xl transition shadow-md shadow-red-600/20 active:scale-95 cursor-pointer"
+          >
+            <span>{language === 'bn' ? 'সকল সেবার বিস্তারিত নিয়মাবলী ও অনুদান পেইজ দেখুন' : 'View Full Welfare Programs Page'}</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
       </div>
     </section>

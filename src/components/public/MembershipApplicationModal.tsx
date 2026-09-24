@@ -260,9 +260,9 @@ export const MembershipApplicationModal: React.FC = () => {
                   <div
                     className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-bold transition ${
                       step === s
-                        ? 'bg-emerald-700 text-white shadow-md'
+                        ? 'bg-red-600 text-white shadow-md ring-2 ring-red-300'
                         : step > s
-                        ? 'bg-emerald-100 text-emerald-800'
+                        ? 'bg-emerald-700 text-white shadow-xs'
                         : 'bg-slate-100 text-slate-400'
                     }`}
                   >
@@ -723,7 +723,7 @@ export const MembershipApplicationModal: React.FC = () => {
                 {step < 5 ? (
                   <button
                     type="submit"
-                    className="flex items-center gap-1.5 px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-xl transition cursor-pointer"
+                    className="flex items-center gap-1.5 px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition cursor-pointer shadow-md shadow-red-600/20 active:scale-95"
                   >
                     <span>{language === 'bn' ? 'পরবর্তী ধাপ' : 'Next Step'}</span>
                     <ArrowRight className="w-4 h-4" />
@@ -731,7 +731,7 @@ export const MembershipApplicationModal: React.FC = () => {
                 ) : (
                   <button
                     type="submit"
-                    className="flex items-center gap-1.5 px-6 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-xl transition cursor-pointer shadow-md"
+                    className="flex items-center gap-1.5 px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition cursor-pointer shadow-lg shadow-red-600/30 active:scale-95"
                   >
                     <ShieldCheck className="w-4 h-4" />
                     <span>{language === 'bn' ? 'আবেদন চূড়ান্ত জমা দিন' : 'Submit Final Application'}</span>

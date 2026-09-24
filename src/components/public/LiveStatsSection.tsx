@@ -35,7 +35,7 @@ export const LiveStatsSection: React.FC = () => {
       icon: Users,
       color: 'text-emerald-700',
       bgColor: 'bg-emerald-50',
-      borderColor: 'border-emerald-100'
+      borderColor: 'border-emerald-200'
     },
     {
       id: 'active-members',
@@ -43,9 +43,9 @@ export const LiveStatsSection: React.FC = () => {
       value: toBengaliNumber(metrics.activeMembers),
       suffix: language === 'bn' ? ' জন' : '+',
       icon: UserCheck,
-      color: 'text-blue-700',
-      bgColor: 'bg-blue-50',
-      borderColor: 'border-blue-100'
+      color: 'text-red-700',
+      bgColor: 'bg-red-50',
+      borderColor: 'border-red-200'
     },
     {
       id: 'welfare-fund',
@@ -63,9 +63,9 @@ export const LiveStatsSection: React.FC = () => {
       value: `৳ ${toBengaliNumber(metrics.totalMedicalAssistance)}`,
       suffix: '',
       icon: HeartPulse,
-      color: 'text-rose-700',
-      bgColor: 'bg-rose-50',
-      borderColor: 'border-rose-100'
+      color: 'text-red-700',
+      bgColor: 'bg-red-50',
+      borderColor: 'border-red-200'
     },
     {
       id: 'accident-assistance',
@@ -73,9 +73,9 @@ export const LiveStatsSection: React.FC = () => {
       value: `৳ ${toBengaliNumber(metrics.totalAccidentAssistance)}`,
       suffix: '',
       icon: Car,
-      color: 'text-amber-700',
-      bgColor: 'bg-amber-50',
-      borderColor: 'border-amber-100'
+      color: 'text-rose-700',
+      bgColor: 'bg-rose-50',
+      borderColor: 'border-rose-200'
     },
     {
       id: 'trained-members',
@@ -83,9 +83,9 @@ export const LiveStatsSection: React.FC = () => {
       value: toBengaliNumber(metrics.trainedMembers),
       suffix: language === 'bn' ? ' জন' : '+',
       icon: GraduationCap,
-      color: 'text-indigo-700',
-      bgColor: 'bg-indigo-50',
-      borderColor: 'border-indigo-100'
+      color: 'text-emerald-800',
+      bgColor: 'bg-emerald-50',
+      borderColor: 'border-emerald-200'
     }
   ];
 
@@ -102,7 +102,7 @@ export const LiveStatsSection: React.FC = () => {
             </h3>
           </div>
           <div className="text-xs text-slate-500 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse shrink-0" />
             <span>{language === 'bn' ? 'সরাসরি ডাটাবেস থেকে হালনাগাদকৃত' : 'Live synced from Core Ledger'}</span>
           </div>
         </div>

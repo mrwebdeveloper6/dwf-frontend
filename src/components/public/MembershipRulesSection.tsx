@@ -7,11 +7,12 @@ import {
   ShieldCheck, 
   FileCheck, 
   CreditCard, 
-  Users 
+  Users,
+  ArrowRight 
 } from 'lucide-react';
 
 export const MembershipRulesSection: React.FC = () => {
-  const { language, t, setShowApplyModal } = useDwf();
+  const { language, t, setShowApplyModal, setActiveView } = useDwf();
 
   const eligibilityList = [
     t.rulesElig1,
@@ -131,7 +132,7 @@ export const MembershipRulesSection: React.FC = () => {
           <div className="lg:col-span-5 space-y-6">
             
             {/* Welfare Fund & Fees Card */}
-            <div className="bg-gradient-to-br from-emerald-900 to-slate-900 text-white rounded-2xl p-6 sm:p-8 shadow-lg border border-emerald-700/50">
+            <div className="bg-gradient-to-br from-emerald-950 via-emerald-900 to-slate-950 text-white rounded-2xl p-6 sm:p-8 shadow-xl border border-emerald-700/60">
               <div className="flex items-center gap-3 border-b border-emerald-800/80 pb-4">
                 <div className="p-2.5 rounded-xl bg-emerald-700 text-white">
                   <CreditCard className="w-6 h-6" />
@@ -144,28 +145,28 @@ export const MembershipRulesSection: React.FC = () => {
 
               <div className="mt-6 space-y-4 text-xs sm:text-sm text-slate-200">
                 <div className="flex items-start gap-2.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-2 shrink-0" />
+                  <span className="w-2 h-2 rounded-full bg-red-500 mt-1.5 shrink-0" />
                   <p>{t.rulesFund1}</p>
                 </div>
                 <div className="flex items-start gap-2.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-2 shrink-0" />
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
                   <p>{t.rulesFund2}</p>
                 </div>
                 <div className="flex items-start gap-2.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-2 shrink-0" />
+                  <span className="w-2 h-2 rounded-full bg-red-500 mt-1.5 shrink-0" />
                   <p>{t.rulesFund3}</p>
                 </div>
               </div>
 
               {/* Fee Breakdown Box */}
-              <div className="mt-6 pt-4 border-t border-emerald-800/80 bg-emerald-950/60 rounded-xl p-4">
+              <div className="mt-6 pt-4 border-t border-emerald-800/80 bg-emerald-950/80 rounded-xl p-4 border border-emerald-800/60">
                 <div className="flex justify-between items-center text-xs pb-2 border-b border-emerald-900">
                   <span className="text-slate-300">মাসিক কল্যাণ চাঁদা:</span>
                   <span className="font-bold text-white font-mono">৳ ৩০০.০০ / মাস</span>
                 </div>
                 <div className="flex justify-between items-center text-xs pt-2">
                   <span className="text-slate-300">বাৎসরিক এককালীন:</span>
-                  <span className="font-bold text-amber-300 font-mono">৳ ৩,৬০০.০০ (অগ্রিম)</span>
+                  <span className="font-bold text-emerald-300 font-mono">৳ ৩,৬০০.০০ (অগ্রিম)</span>
                 </div>
               </div>
 
@@ -199,6 +200,20 @@ export const MembershipRulesSection: React.FC = () => {
 
           </div>
 
+        </div>
+
+        {/* Dedicated Page Link CTA */}
+        <div className="text-center pt-10">
+          <button
+            onClick={() => {
+              setActiveView('rules');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold text-xs sm:text-sm rounded-xl transition shadow-md shadow-red-600/20 active:scale-95 cursor-pointer"
+          >
+            <span>{language === 'bn' ? 'সম্পূর্ণ সাংগঠনিক সংবিধান ও উপবিধি পেইজ পড়ুন' : 'Read Full Constitution & Bylaws Page'}</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
 
       </div>

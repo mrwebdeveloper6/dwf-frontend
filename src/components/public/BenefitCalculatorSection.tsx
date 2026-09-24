@@ -8,11 +8,12 @@ import {
   Clock, 
   CheckCircle2, 
   TrendingUp, 
-  HelpCircle 
+  HelpCircle,
+  ArrowRight 
 } from 'lucide-react';
 
 export const BenefitCalculatorSection: React.FC = () => {
-  const { language, setShowApplyModal } = useDwf();
+  const { language, setShowApplyModal, setActiveView } = useDwf();
 
   const [age, setAge] = useState<number>(34);
   const [membershipYears, setMembershipYears] = useState<number>(10);
@@ -189,16 +190,16 @@ export const BenefitCalculatorSection: React.FC = () => {
             </div>
 
             {/* Calculated Output Right Column */}
-            <div className="lg:col-span-6 p-6 sm:p-10 bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900 text-white flex flex-col justify-between">
+            <div className="lg:col-span-6 p-6 sm:p-10 bg-gradient-to-br from-emerald-950 via-slate-950 to-emerald-950 text-white flex flex-col justify-between border-t lg:border-t-0 lg:border-l border-emerald-900/80">
               <div>
-                <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider bg-emerald-950/80 px-2.5 py-1 rounded border border-emerald-800/80">
+                <span className="text-xs font-bold text-emerald-300 uppercase tracking-wider bg-emerald-900/80 px-2.5 py-1 rounded border border-emerald-700/80">
                   {language === 'bn' ? 'প্রাক্কলিত কল্যাণ ও আর্থিক হিসাব' : 'Estimated Benefit Summary'}
                 </span>
 
                 <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Medical Grant */}
-                  <div className="p-4 rounded-xl bg-slate-800/60 border border-emerald-800/50">
-                    <div className="flex items-center gap-2 text-rose-400 mb-1">
+                  <div className="p-4 rounded-xl bg-slate-900/80 border border-red-800/60 shadow-xs">
+                    <div className="flex items-center gap-2 text-red-400 mb-1">
                       <HeartPulse className="w-4 h-4" />
                       <span className="text-xs font-semibold">{language === 'bn' ? 'বার্ষিক চিকিৎসা অনুদান' : 'Annual Medical Grant'}</span>
                     </div>
@@ -211,8 +212,8 @@ export const BenefitCalculatorSection: React.FC = () => {
                   </div>
 
                   {/* Accident Grant */}
-                  <div className="p-4 rounded-xl bg-slate-800/60 border border-emerald-800/50">
-                    <div className="flex items-center gap-2 text-amber-400 mb-1">
+                  <div className="p-4 rounded-xl bg-slate-900/80 border border-red-800/60 shadow-xs">
+                    <div className="flex items-center gap-2 text-red-400 mb-1">
                       <ShieldCheck className="w-4 h-4" />
                       <span className="text-xs font-semibold">{language === 'bn' ? 'সর্বোচ্চ দুর্ঘটনা ক্ষতিপূরণ' : 'Max Accident Cover'}</span>
                     </div>
@@ -225,8 +226,8 @@ export const BenefitCalculatorSection: React.FC = () => {
                   </div>
 
                   {/* Total Contribution */}
-                  <div className="p-4 rounded-xl bg-slate-800/60 border border-emerald-800/50">
-                    <div className="flex items-center gap-2 text-blue-400 mb-1">
+                  <div className="p-4 rounded-xl bg-slate-900/80 border border-emerald-800/60 shadow-xs">
+                    <div className="flex items-center gap-2 text-emerald-400 mb-1">
                       <Coins className="w-4 h-4" />
                       <span className="text-xs font-semibold">{language === 'bn' ? 'আপনার সর্বমোট চাঁদা' : 'Total Contributed'}</span>
                     </div>
@@ -239,15 +240,15 @@ export const BenefitCalculatorSection: React.FC = () => {
                   </div>
 
                   {/* Maturity Savings */}
-                  <div className="p-4 rounded-xl bg-emerald-950/70 border border-emerald-600/60">
+                  <div className="p-4 rounded-xl bg-emerald-950/90 border-2 border-emerald-500 shadow-md">
                     <div className="flex items-center gap-2 text-emerald-300 mb-1">
                       <TrendingUp className="w-4 h-4" />
                       <span className="text-xs font-semibold">{language === 'bn' ? 'আনুমানিক সমাপ্তি তহবিল' : 'Projected Maturity Fund'}</span>
                     </div>
-                    <p className="text-xl sm:text-2xl font-black text-emerald-300 font-mono">
+                    <p className="text-xl sm:text-2xl font-black text-emerald-200 font-mono">
                       ৳ {toBn(results.totalMaturityBenefit)}
                     </p>
-                    <p className="text-[10px] text-slate-300 mt-1">
+                    <p className="text-[10px] text-emerald-300/80 mt-1">
                       {language === 'bn' ? 'মূল চাঁদা + লভ্যাংশ সমেত' : 'Principal + Welfare Dividend'}
                     </p>
                   </div>
@@ -263,7 +264,7 @@ export const BenefitCalculatorSection: React.FC = () => {
                 </p>
                 <button
                   onClick={() => setShowApplyModal(true)}
-                  className="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition cursor-pointer shrink-0"
+                  className="w-full sm:w-auto px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs font-black rounded-xl transition cursor-pointer shrink-0 shadow-lg shadow-red-950/60 active:scale-95 border border-red-400/30"
                 >
                   {language === 'bn' ? 'এখনই সদস্য আবেদন করুন' : 'Apply For Membership'}
                 </button>
@@ -271,6 +272,20 @@ export const BenefitCalculatorSection: React.FC = () => {
             </div>
 
           </div>
+        </div>
+
+        {/* Dedicated Page Link CTA */}
+        <div className="text-center pt-8">
+          <button
+            onClick={() => {
+              setActiveView('calculator');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold text-xs sm:text-sm rounded-xl transition shadow-md shadow-red-600/20 active:scale-95 cursor-pointer"
+          >
+            <span>{language === 'bn' ? 'পূর্ণাঙ্গ অনুদান ও সঞ্চয় সিমুলেটর পেইজ দেখুন' : 'Open Full Interactive Calculator Page'}</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
 
       </div>

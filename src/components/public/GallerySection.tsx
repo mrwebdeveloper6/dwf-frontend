@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDwf } from '../../context/DwfContext';
-import { X, ZoomIn, Calendar, Tag } from 'lucide-react';
+import { X, ZoomIn, Calendar, Tag, ArrowRight } from 'lucide-react';
 
 interface GalleryItem {
   id: string;
@@ -13,7 +13,7 @@ interface GalleryItem {
 }
 
 export const GallerySection: React.FC = () => {
-  const { language } = useDwf();
+  const { language, setActiveView } = useDwf();
   const [activeImage, setActiveImage] = useState<GalleryItem | null>(null);
 
   const galleryItems: GalleryItem[] = [
@@ -132,6 +132,20 @@ export const GallerySection: React.FC = () => {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Dedicated Page Link CTA */}
+        <div className="text-center pt-10">
+          <button
+            onClick={() => {
+              setActiveView('gallery');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold text-xs sm:text-sm rounded-xl transition shadow-md shadow-red-600/20 active:scale-95 cursor-pointer"
+          >
+            <span>{language === 'bn' ? 'সম্পূর্ণ ফটো গ্যালারি ও হাই-রেজ্যুলুশন অ্যালবাম দেখুন' : 'View Full Visual Archive & Gallery Page'}</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
 
         {/* Lightbox Modal */}

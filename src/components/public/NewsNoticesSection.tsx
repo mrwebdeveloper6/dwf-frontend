@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 
 export const NewsNoticesSection: React.FC = () => {
-  const { language, notices } = useDwf();
+  const { language, notices, setActiveView } = useDwf();
   const [activeCategory, setActiveCategory] = useState<string>('ALL');
   const [selectedNotice, setSelectedNotice] = useState<NoticeItem | null>(null);
 
@@ -48,9 +48,9 @@ export const NewsNoticesSection: React.FC = () => {
               <button
                 key={c.id}
                 onClick={() => setActiveCategory(c.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition cursor-pointer ${
                   activeCategory === c.id
-                    ? 'bg-emerald-800 text-white shadow-xs'
+                    ? 'bg-red-600 text-white shadow-xs'
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }`}
               >
@@ -69,7 +69,11 @@ export const NewsNoticesSection: React.FC = () => {
             >
               <div>
                 <div className="flex items-center justify-between mb-3 text-xs">
-                  <span className="bg-emerald-100 text-emerald-800 font-bold px-2.5 py-0.5 rounded-full text-[10px]">
+                  <span className={`font-bold px-2.5 py-0.5 rounded-full text-[10px] border ${
+                    notice.isUrgent
+                      ? 'bg-red-100 text-red-800 border-red-200'
+                      : 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                  }`}>
                     {notice.category}
                   </span>
                   <div className="flex items-center gap-1 text-slate-500 text-[11px]">
@@ -79,8 +83,8 @@ export const NewsNoticesSection: React.FC = () => {
                 </div>
 
                 {notice.isUrgent && (
-                  <div className="mb-2 flex items-center gap-1 text-red-600 text-xs font-bold">
-                    <AlertCircle className="w-3.5 h-3.5" />
+                  <div className="mb-2 inline-flex items-center gap-1.5 text-red-700 bg-red-50 border border-red-200/80 px-2 py-0.5 rounded-md text-[11px] font-bold">
+                    <AlertCircle className="w-3.5 h-3.5 text-red-600" />
                     <span>{language === 'bn' ? 'জরুরি বিজ্ঞপ্তি' : 'Urgent Notice'}</span>
                   </div>
                 )}
@@ -96,7 +100,7 @@ export const NewsNoticesSection: React.FC = () => {
               <div className="pt-4 mt-4 border-t border-slate-200/80">
                 <button
                   onClick={() => setSelectedNotice(notice)}
-                  className="text-xs font-bold text-emerald-700 hover:text-emerald-900 flex items-center gap-1 cursor-pointer"
+                  className="text-xs font-bold text-red-600 hover:text-red-700 flex items-center gap-1 cursor-pointer"
                 >
                   <span>{language === 'bn' ? 'সম্পূর্ণ বিজ্ঞপ্তি পড়ুন' : 'Read Full Circular'}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -104,6 +108,20 @@ export const NewsNoticesSection: React.FC = () => {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Dedicated Page Link CTA */}
+        <div className="text-center pt-8">
+          <button
+            onClick={() => {
+              setActiveView('news');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold text-xs sm:text-sm rounded-xl transition shadow-md shadow-red-600/20 active:scale-95 cursor-pointer"
+          >
+            <span>{language === 'bn' ? 'সকল প্রাতিষ্ঠানিক বিজ্ঞপ্তি ও সার্কুলার আর্কাইভ দেখুন' : 'View Full Notices & Circulars Archive Page'}</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
 
         {/* Notice Details Modal */}

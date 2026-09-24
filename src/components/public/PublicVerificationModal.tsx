@@ -77,12 +77,12 @@ export const PublicVerificationModal: React.FC = () => {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t.verifyPlaceholder}
-              className="w-full pl-11 pr-24 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent font-medium"
+              className="w-full pl-11 pr-24 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent font-medium"
             />
             <Search className="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5" />
             <button
               type="submit"
-              className="absolute right-1.5 top-1.5 bottom-1.5 px-4 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-lg transition cursor-pointer"
+              className="absolute right-1.5 top-1.5 bottom-1.5 px-4 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-lg transition cursor-pointer shadow-xs active:scale-95"
             >
               {t.verifyButton}
             </button>
@@ -94,21 +94,21 @@ export const PublicVerificationModal: React.FC = () => {
             <button
               type="button"
               onClick={() => handleSampleSearch('DWF-000142')}
-              className="px-2 py-0.5 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 rounded font-mono text-[11px] border border-slate-200 cursor-pointer"
+              className="px-2 py-0.5 bg-slate-100 hover:bg-red-50 hover:text-red-700 hover:border-red-300 rounded font-mono text-[11px] border border-slate-200 cursor-pointer"
             >
               DWF-000142
             </button>
             <button
               type="button"
               onClick={() => handleSampleSearch('DWF-000143')}
-              className="px-2 py-0.5 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 rounded font-mono text-[11px] border border-slate-200 cursor-pointer"
+              className="px-2 py-0.5 bg-slate-100 hover:bg-red-50 hover:text-red-700 hover:border-red-300 rounded font-mono text-[11px] border border-slate-200 cursor-pointer"
             >
               DWF-000143
             </button>
             <button
               type="button"
               onClick={() => handleSampleSearch('HC-DWF-78401')}
-              className="px-2 py-0.5 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 rounded font-mono text-[11px] border border-slate-200 cursor-pointer"
+              className="px-2 py-0.5 bg-slate-100 hover:bg-red-50 hover:text-red-700 hover:border-red-300 rounded font-mono text-[11px] border border-slate-200 cursor-pointer"
             >
               HC-DWF-78401
             </button>

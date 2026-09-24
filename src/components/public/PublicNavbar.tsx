@@ -15,7 +15,10 @@ import {
   Calculator, 
   Phone,
   Home,
-  ShieldCheck
+  ShieldCheck,
+  ShoppingBag,
+  BookOpen,
+  Image as ImageIcon
 } from 'lucide-react';
 
 export const PublicNavbar: React.FC = () => {
@@ -54,26 +57,26 @@ export const PublicNavbar: React.FC = () => {
   const scrollToSection = (id: string) => {
     setMenuOpen(false);
     setActiveView(id);
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const navLinks = [
     { id: 'home', labelBn: 'মূল পাতা', labelEn: 'Home', icon: Home, descBn: 'ফাউন্ডেশন পরিচিতি ও প্রধান কার্যক্রম', descEn: 'Overview & Main Highlights' },
-    { id: 'central-committee', labelBn: 'কেন্দ্রীয় কমিটি', labelEn: 'Committee', icon: Users, descBn: 'কেন্দ্রীয় পরিচালনা পর্ষদের সদস্যবৃন্দ', descEn: 'Central Executive Leadership' },
+    { id: 'store', labelBn: 'ডিজিটাল স্টোর', labelEn: 'Digital Store', icon: ShoppingBag, descBn: 'ই-বুক, আইন নির্দেশিকা ও ফটো অ্যালবাম', descEn: 'E-Books & 4K Photo Packs' },
     { id: 'programs', labelBn: 'কল্যাণ সেবা', labelEn: 'Programs', icon: HeartPulse, descBn: 'চিকিৎসা, দুর্ঘটনা ও জরুরি সহায়তা', descEn: 'Medical, Accident & Support' },
-    { id: 'calculator', labelBn: 'অনুদান হিসাব', labelEn: 'Calculator', icon: Calculator, descBn: 'কল্যাণ সুবিধা ও অনুদান সিমুলেটর', descEn: 'Aid & Grant Estimator' },
+    { id: 'central-committee', labelBn: 'কেন্দ্রীয় কমিটি', labelEn: 'Committee', icon: Users, descBn: 'কেন্দ্রীয় পরিচালনা পর্ষদের সদস্যবৃন্দ', descEn: 'Central Executive Leadership' },
+    { id: 'rules', labelBn: 'উপবিধি ও সংবিধান', labelEn: 'Bylaws & Rules', icon: BookOpen, descBn: 'চাঁদা ও নমিনি আইনি নীতিমালা', descEn: 'Contribution & Nominee Rules' },
+    { id: 'calculator', labelBn: 'অনুদান হিসাব', labelEn: 'Calculator', icon: Calculator, descBn: 'কল্যাণ সুবিধা ও পেনশন সিমুলেটর', descEn: 'Aid & Pension Simulator' },
     { id: 'news', labelBn: 'সংবাদ ও বিজ্ঞপ্তি', labelEn: 'Notices', icon: Bell, descBn: 'জরুরি নোটিশ, সার্কুলার ও সংবাদ', descEn: 'Official Circulars & News' },
-    { id: 'contact', labelBn: 'যোগাযোগ', labelEn: 'Contact', icon: Phone, descBn: 'শাখা অফিস, হেল্পলাইন ও ঠিকানা', descEn: 'Branch Network & Office' }
+    { id: 'gallery', labelBn: 'ফটো গ্যালারি', labelEn: 'Gallery', icon: ImageIcon, descBn: 'মাঠপর্যায়ের কার্যক্রম ও সমাবেশ চিত্র', descEn: 'Visual Archive & Photo Gallery' },
+    { id: 'contact', labelBn: 'যোগাযোগ ও শাখা', labelEn: 'Contact', icon: Phone, descBn: 'দেশব্যাপী শাখা অফিস ও হেল্পলাইন', descEn: 'Branch Network & 24/7 Helpline' }
   ];
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
+      <header className="sticky top-0 z-40 bg-gradient-to-r from-red-700 via-red-600 to-red-700 text-white border-b border-red-800 shadow-md">
+        {/* National Green Accent Ribbon Line at very top of navbar */}
+        <div className="h-1 w-full bg-gradient-to-r from-emerald-600 via-emerald-400 to-emerald-600" />
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 sm:h-16">
             
@@ -83,8 +86,8 @@ export const PublicNavbar: React.FC = () => {
               className="cursor-pointer transition hover:opacity-90 shrink-0 py-1"
               title="ড্রাইভার্স ওয়েলফেয়ার ফাউন্ডেশন (DWF)"
             >
-              <DwfLogo size="sm" className="sm:hidden" />
-              <DwfLogo size="md" className="hidden sm:flex" />
+              <DwfLogo size="sm" variant="light" className="sm:hidden" />
+              <DwfLogo size="md" variant="light" className="hidden sm:flex" />
             </div>
 
             {/* Right: Actions (Tablet/Compact style across all screen sizes) */}
@@ -93,10 +96,10 @@ export const PublicNavbar: React.FC = () => {
               {/* Member Verification Button (সদস্য যাচাই) */}
               <button
                 onClick={() => setShowVerifyModal(true)}
-                className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 text-[11px] sm:text-xs font-bold text-emerald-800 hover:text-emerald-950 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/90 rounded-xl transition cursor-pointer shadow-2xs shrink-0 active:scale-95"
+                className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 text-[11px] sm:text-xs font-bold text-red-700 hover:text-red-800 bg-white hover:bg-red-50 border border-white/90 rounded-xl transition cursor-pointer shadow-xs shrink-0 active:scale-95"
                 title={language === 'bn' ? 'সদস্যপদ ও কার্ড যাচাই করুন' : 'Verify Member ID & Card'}
               >
-                <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 shrink-0" />
+                <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-600 shrink-0" />
                 <span className="hidden xs:inline sm:inline">{language === 'bn' ? 'সদস্য যাচাই' : 'Verify Member'}</span>
                 <span className="xs:hidden sm:hidden">{language === 'bn' ? 'যাচাই' : 'Verify'}</span>
               </button>
@@ -105,7 +108,7 @@ export const PublicNavbar: React.FC = () => {
               {user ? (
                 <button
                   onClick={() => setActiveView(user.role === 'MEMBER' ? 'member-portal' : 'admin-panel')}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 text-[11px] sm:text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl transition cursor-pointer shadow-xs shrink-0"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 text-[11px] sm:text-xs font-bold text-white bg-red-800 hover:bg-red-900 border border-red-500/50 rounded-xl transition cursor-pointer shadow-xs shrink-0"
                 >
                   <UserCheck className="w-3.5 h-3.5" />
                   <span>{user.role === 'MEMBER' ? (language === 'bn' ? 'ড্যাশবোর্ড' : 'Portal') : (language === 'bn' ? 'এডমিন' : 'Admin')}</span>
@@ -113,9 +116,9 @@ export const PublicNavbar: React.FC = () => {
               ) : (
                 <button
                   onClick={() => setShowLoginModal(true)}
-                  className="hidden sm:flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl transition cursor-pointer shrink-0"
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-white hover:text-white bg-red-800/80 hover:bg-red-800 border border-red-400/50 rounded-xl transition cursor-pointer shrink-0"
                 >
-                  <LogIn className="w-3.5 h-3.5 text-slate-600" />
+                  <LogIn className="w-3.5 h-3.5 text-white" />
                   <span>{language === 'bn' ? 'লগইন' : 'Login'}</span>
                 </button>
               )}
@@ -123,9 +126,9 @@ export const PublicNavbar: React.FC = () => {
               {/* Apply CTA Button */}
               <button
                 onClick={() => setShowApplyModal(true)}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3.5 sm:py-2 text-[11px] sm:text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl transition cursor-pointer shadow-xs shrink-0 active:scale-95"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3.5 sm:py-2 text-[11px] sm:text-xs font-bold text-red-700 hover:text-red-800 bg-white hover:bg-red-50 border border-white rounded-xl transition cursor-pointer shadow-md shrink-0 active:scale-95"
               >
-                <UserPlus className="w-3.5 h-3.5" />
+                <UserPlus className="w-3.5 h-3.5 text-red-600" />
                 <span className="hidden sm:inline">{language === 'bn' ? 'সদস্য আবেদন' : 'Apply'}</span>
                 <span className="sm:hidden">{language === 'bn' ? 'আবেদন' : 'Apply'}</span>
               </button>
@@ -133,14 +136,14 @@ export const PublicNavbar: React.FC = () => {
               {/* Menu Toggle Button (Tablet style available across all screens) */}
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                className="flex items-center justify-center p-1.5 sm:p-2 rounded-xl text-slate-800 hover:text-emerald-900 bg-slate-100 hover:bg-slate-200 border border-slate-300 transition cursor-pointer shrink-0 active:scale-95"
+                className="flex items-center justify-center p-1.5 sm:p-2 rounded-xl text-white hover:text-white bg-red-800/80 hover:bg-red-800 border border-red-500/50 transition cursor-pointer shrink-0 active:scale-95"
                 aria-label={menuOpen ? 'মেনু বন্ধ করুন' : 'মেনু খুলুন'}
                 title={menuOpen ? 'মেনু বন্ধ করুন' : 'মেনু খুলুন'}
               >
                 {menuOpen ? (
-                  <X className="w-5 h-5 text-red-600" />
+                  <X className="w-5 h-5 text-white" />
                 ) : (
-                  <Menu className="w-5 h-5 text-emerald-800" />
+                  <Menu className="w-5 h-5 text-white" />
                 )}
               </button>
 
@@ -164,23 +167,23 @@ export const PublicNavbar: React.FC = () => {
               <div className="max-w-7xl mx-auto space-y-4">
                 
                 {/* Top Banner inside menu */}
-                <div className="p-3.5 sm:p-4 bg-gradient-to-r from-emerald-900 via-emerald-800 to-slate-900 text-white rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="p-3.5 sm:p-4 bg-gradient-to-r from-red-950 via-red-900 to-red-950 text-white rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border border-red-800/80 shadow-md">
                   <div>
-                    <p className="text-[10px] font-bold tracking-wider text-emerald-300 uppercase">ড্রাইভার্স ওয়েলফেয়ার ফাউন্ডেশন (DWF)</p>
+                    <p className="text-[10px] font-black tracking-wider text-red-300 uppercase">ড্রাইভার্স ওয়েলফেয়ার ফাউন্ডেশন (DWF)</p>
                     <p className="text-xs sm:text-sm font-bold text-white">সুরক্ষিত চালক – সমৃদ্ধ পরিবার – নিরাপদ বাংলাদেশ</p>
                   </div>
                   <div className="flex items-center gap-2 self-end sm:self-auto">
                     <button
                       onClick={() => { setShowVerifyModal(true); setMenuOpen(false); }}
-                      className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition cursor-pointer border border-white/15"
+                      className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition cursor-pointer border border-white/20"
                     >
-                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-300" />
+                      <ShieldCheck className="w-3.5 h-3.5 text-red-300" />
                       <span>{language === 'bn' ? 'সদস্য যাচাই' : 'Verify'}</span>
                     </button>
                     {!user && (
                       <button
                         onClick={() => { setShowLoginModal(true); setMenuOpen(false); }}
-                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition cursor-pointer shadow-xs"
+                        className="px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition cursor-pointer shadow-xs border border-red-400/40"
                       >
                         <LogIn className="w-3.5 h-3.5" />
                         <span>{language === 'bn' ? 'লগইন' : 'Login'}</span>
@@ -195,17 +198,17 @@ export const PublicNavbar: React.FC = () => {
                     <button
                       key={link.id}
                       onClick={() => scrollToSection(link.id)}
-                      className="group flex items-start gap-3 p-3.5 rounded-2xl bg-slate-50 hover:bg-emerald-50/90 border border-slate-200/80 hover:border-emerald-300 transition text-left cursor-pointer shadow-2xs"
+                      className="group flex items-start gap-3 p-3.5 rounded-2xl bg-slate-50 hover:bg-red-50/90 border border-slate-200/80 hover:border-red-300 transition text-left cursor-pointer shadow-2xs"
                     >
-                      <div className="p-2.5 rounded-xl bg-white text-emerald-700 border border-slate-200 group-hover:border-emerald-200 group-hover:bg-emerald-600 group-hover:text-white transition shrink-0">
+                      <div className="p-2.5 rounded-xl bg-white text-red-600 border border-slate-200 group-hover:border-red-200 group-hover:bg-red-600 group-hover:text-white transition shrink-0">
                         <link.icon className="w-4 h-4 sm:w-5 sm:h-5" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <p className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-emerald-900 transition">
+                          <p className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-red-700 transition">
                             {language === 'bn' ? link.labelBn : link.labelEn}
                           </p>
-                          <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-600 group-hover:translate-x-0.5 transition" />
+                          <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-red-600 group-hover:translate-x-0.5 transition" />
                         </div>
                         <p className="text-[11px] text-slate-500 mt-0.5 line-clamp-1">
                           {language === 'bn' ? link.descBn : link.descEn}
@@ -219,7 +222,7 @@ export const PublicNavbar: React.FC = () => {
                 <div className="pt-3 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <button
                     onClick={() => { setShowApplyModal(true); setMenuOpen(false); }}
-                    className="w-full py-2.5 px-4 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 shadow-xs transition cursor-pointer active:scale-95"
+                    className="w-full py-2.5 px-4 bg-red-600 hover:bg-red-700 text-white font-bold text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 shadow-xs transition cursor-pointer active:scale-95"
                   >
                     <UserPlus className="w-4 h-4" />
                     <span>{language === 'bn' ? 'নতুন চালক সদস্যপদ অনলাইন আবেদন' : 'Apply for Online Membership'}</span>
@@ -227,7 +230,7 @@ export const PublicNavbar: React.FC = () => {
 
                   <a
                     href="tel:16789"
-                    className="w-full py-2.5 px-4 bg-red-600 hover:bg-red-700 text-white font-bold text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 shadow-xs transition active:scale-95"
+                    className="w-full py-2.5 px-4 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 shadow-xs transition active:scale-95"
                   >
                     <PhoneCall className="w-4 h-4 animate-pulse" />
                     <span>{language === 'bn' ? 'জরুরি কল: ১৬৭৮৯ (টোল-ফ্রি ২৪/৭)' : 'Emergency Helpline: 16789'}</span>
