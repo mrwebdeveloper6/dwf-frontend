@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useDwf } from '../../context/DwfContext';
-import { NoticeItem } from '../../types/dwf';
+import { NoticeItem, StorageOption } from '../../types/dwf';
+import { FileUploadZone } from '../common/FileUploadZone';
 import { 
   Bell, 
   Plus, 
@@ -15,11 +16,25 @@ import {
   AlertCircle, 
   FileText,
   Eye,
-  Sparkles
+  Sparkles,
+  FolderArchive,
+  Download,
+  Video as VideoIcon,
+  ExternalLink,
+  Paperclip
 } from 'lucide-react';
 
 export const AdminNoticeManager: React.FC = () => {
-  const { notices, addNotice, updateNotice, deleteNotice, language } = useDwf();
+  const { 
+    notices, 
+    addNotice, 
+    updateNotice, 
+    deleteNotice, 
+    uploadFileRecord,
+    setShowDocumentVaultModal,
+    setDocumentVaultCategoryFilter,
+    language 
+  } = useDwf();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
@@ -30,6 +45,7 @@ export const AdminNoticeManager: React.FC = () => {
   const [previewNotice, setPreviewNotice] = useState<NoticeItem | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [bannerInputMode, setBannerInputMode] = useState<'UPLOAD' | 'URL'>('UPLOAD');
 
   // Form state
   const [formData, setFormData] = useState({
@@ -42,7 +58,13 @@ export const AdminNoticeManager: React.FC = () => {
     excerpt: '',
     contentBn: '',
     content: '',
-    image: ''
+    image: '',
+    attachmentUrl: '',
+    attachmentName: '',
+    attachmentType: '',
+    attachmentSize: 0,
+    videoUrl: '',
+    documentVaultId: ''
   });
 
   const categories = [
@@ -55,6 +77,7 @@ export const AdminNoticeManager: React.FC = () => {
 
   const openAddModal = () => {
     setEditingNotice(null);
+    setBannerInputMode('UPLOAD');
     setFormData({
       titleBn: '',
       title: '',
@@ -65,13 +88,20 @@ export const AdminNoticeManager: React.FC = () => {
       excerpt: '',
       contentBn: '',
       content: '',
-      image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=800&q=80'
+      image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=800&q=80',
+      attachmentUrl: '',
+      attachmentName: '',
+      attachmentType: '',
+      attachmentSize: 0,
+      videoUrl: '',
+      documentVaultId: ''
     });
     setIsModalOpen(true);
   };
 
   const openEditModal = (notice: NoticeItem) => {
     setEditingNotice(notice);
+    setBannerInputMode(notice.image && notice.image.startsWith('data:') ? 'UPLOAD' : 'URL');
     setFormData({
       titleBn: notice.titleBn || '',
       title: notice.title || '',
@@ -82,7 +112,13 @@ export const AdminNoticeManager: React.FC = () => {
       excerpt: notice.excerpt || '',
       contentBn: notice.contentBn || '',
       content: notice.content || '',
-      image: notice.image || ''
+      image: notice.image || '',
+      attachmentUrl: notice.attachmentUrl || '',
+      attachmentName: notice.attachmentName || '',
+      attachmentType: notice.attachmentType || '',
+      attachmentSize: notice.attachmentSize || 0,
+      videoUrl: notice.videoUrl || '',
+      documentVaultId: notice.documentVaultId || ''
     });
     setIsModalOpen(true);
   };
@@ -146,13 +182,28 @@ export const AdminNoticeManager: React.FC = () => {
           </p>
         </div>
 
-        <button
-          onClick={openAddModal}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-950 transition cursor-pointer shrink-0"
-        >
-          <Plus className="w-4 h-4" />
-          <span>নতুন বিজ্ঞপ্তি প্রকাশ করুন</span>
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => {
+              setDocumentVaultCategoryFilter('CIRCULAR_DOC');
+              setShowDocumentVaultModal(true);
+            }}
+            className="flex items-center gap-1.5 px-3.5 py-2.5 bg-slate-900 hover:bg-slate-850 text-emerald-400 text-xs font-bold rounded-xl border border-slate-700 transition cursor-pointer"
+            title="সার্কুলার ও নোটিশের ভল্ট ফাইল দেখুন"
+          >
+            <FolderArchive className="w-4 h-4" />
+            <span className="hidden sm:inline">সার্কুলার ডকুমেন্ট ভল্ট</span>
+          </button>
+
+          <button
+            onClick={openAddModal}
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-950 transition cursor-pointer shrink-0"
+          >
+            <Plus className="w-4 h-4" />
+            <span>নতুন বিজ্ঞপ্তি প্রকাশ করুন</span>
+          </button>
+        </div>
       </div>
 
       {/* Success Notification */}
@@ -270,6 +321,36 @@ export const AdminNoticeManager: React.FC = () => {
                   <p className="text-xs text-slate-400 line-clamp-2">
                     {notice.excerptBn}
                   </p>
+
+                  {/* Attached Media & Vault Badges */}
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    {notice.attachmentUrl && (
+                      <a
+                        href={notice.attachmentUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        download={notice.attachmentName || 'circular-doc'}
+                        className="inline-flex items-center gap-1 text-[11px] text-emerald-400 hover:text-emerald-300 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/80 font-medium"
+                      >
+                        <Paperclip className="w-3 h-3 text-emerald-400 shrink-0" />
+                        <span className="truncate max-w-[150px]">{notice.attachmentName || 'সংযুক্ত সার্কুলার (PDF)'}</span>
+                      </a>
+                    )}
+
+                    {notice.videoUrl && (
+                      <span className="inline-flex items-center gap-1 text-[11px] text-rose-300 bg-rose-950/60 px-2 py-0.5 rounded border border-rose-800/80 font-medium">
+                        <VideoIcon className="w-3 h-3 text-rose-400 shrink-0" />
+                        <span>ভিডিও ক্লিপ</span>
+                      </span>
+                    )}
+
+                    {notice.documentVaultId && (
+                      <span className="inline-flex items-center gap-1 text-[10px] text-emerald-300 bg-emerald-950/90 px-1.5 py-0.2 rounded border border-emerald-800 font-mono">
+                        <FolderArchive className="w-2.5 h-2.5" />
+                        ভল্ট আইডি: {notice.documentVaultId.slice(0, 12)}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -307,9 +388,9 @@ export const AdminNoticeManager: React.FC = () => {
 
       {/* Notice Preview Modal */}
       {previewNotice && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-xl w-full p-6 space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xs flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl sm:rounded-3xl max-w-xl w-full max-h-[92vh] sm:max-h-[90vh] p-4 sm:p-6 space-y-3.5 sm:space-y-4 shadow-2xl overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800 shrink-0">
               <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5" />
                 পাবলিক পোর্টাল প্রিভিউ
@@ -326,12 +407,24 @@ export const AdminNoticeManager: React.FC = () => {
               <img 
                 src={previewNotice.image} 
                 alt={previewNotice.titleBn} 
-                className="w-full h-48 object-cover rounded-2xl border border-slate-800" 
+                className="w-full h-40 sm:h-48 object-cover rounded-xl sm:rounded-2xl border border-slate-800" 
               />
             )}
 
+            {previewNotice.videoUrl && (
+              <div className="rounded-xl sm:rounded-2xl overflow-hidden border border-slate-800 bg-black">
+                <video
+                  src={previewNotice.videoUrl}
+                  controls
+                  className="w-full max-h-56"
+                >
+                  ভিডিও প্লেয়ার সমর্থন করছে না
+                </video>
+              </div>
+            )}
+
             <div className="space-y-2">
-              <div className="flex items-center gap-2 text-xs text-slate-400 font-mono">
+              <div className="flex items-center gap-2 text-xs text-slate-400 font-mono flex-wrap">
                 <span className="bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-800 text-[10px] font-bold">
                   {previewNotice.category}
                 </span>
@@ -341,7 +434,7 @@ export const AdminNoticeManager: React.FC = () => {
                 )}
               </div>
 
-              <h2 className="text-lg font-bold text-white leading-snug">
+              <h2 className="text-base sm:text-lg font-bold text-white leading-snug">
                 {previewNotice.titleBn}
               </h2>
               {previewNotice.title && (
@@ -355,6 +448,30 @@ export const AdminNoticeManager: React.FC = () => {
               {previewNotice.contentBn && (
                 <div className="text-xs text-slate-300 leading-relaxed whitespace-pre-line pt-2">
                   {previewNotice.contentBn}
+                </div>
+              )}
+
+              {previewNotice.attachmentUrl && (
+                <div className="mt-3 p-3 bg-slate-950 rounded-xl border border-emerald-800/80 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <FileText className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-white truncate">
+                        {previewNotice.attachmentName || 'অফিসিয়াল সার্কুলার সংযুক্তি'}
+                      </p>
+                      <p className="text-[10px] text-slate-400">সেন্ট্রাল ডকুমেন্ট ভল্ট হতে সংরক্ষিত</p>
+                    </div>
+                  </div>
+                  <a
+                    href={previewNotice.attachmentUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    download={previewNotice.attachmentName || 'circular-doc'}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition shrink-0"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>ডাউনলোড / দেখুন</span>
+                  </a>
                 </div>
               )}
             </div>
@@ -373,8 +490,8 @@ export const AdminNoticeManager: React.FC = () => {
 
       {/* Delete Confirmation Dialog */}
       {deleteConfirmId && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 max-w-sm w-full space-y-4 shadow-2xl">
             <div className="w-12 h-12 rounded-full bg-red-950/80 border border-red-800 flex items-center justify-center mx-auto text-red-400">
               <AlertTriangle className="w-6 h-6" />
             </div>
@@ -404,146 +521,331 @@ export const AdminNoticeManager: React.FC = () => {
 
       {/* Add / Edit Notice Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-xl w-full p-6 space-y-5 shadow-2xl my-8">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <Bell className="w-5 h-5 text-emerald-400" />
-                {editingNotice ? 'বিজ্ঞপ্তি সংশোধন করুন' : 'নতুন বিজ্ঞপ্তি প্রকাশ করুন'}
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-in fade-in duration-150">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl sm:rounded-3xl max-w-xl w-full max-h-[94vh] sm:max-h-[90vh] flex flex-col shadow-2xl overflow-hidden my-auto">
+            <div className="p-3.5 sm:p-5 flex items-center justify-between border-b border-slate-800 shrink-0 bg-slate-900">
+              <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2 truncate">
+                <Bell className="w-5 h-5 text-emerald-400 shrink-0" />
+                <span className="truncate">{editingNotice ? 'বিজ্ঞপ্তি সংশোধন করুন' : 'নতুন বিজ্ঞপ্তি প্রকাশ করুন'}</span>
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+                className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 shrink-0 ml-2"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleFormSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">
-                  বিজ্ঞপ্তির শিরোনাম (বাংলা) <span className="text-rose-400">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.titleBn}
-                  onChange={(e) => setFormData({ ...formData, titleBn: e.target.value })}
-                  placeholder="উদা: ঢাকা-চট্টগ্রাম মহাসড়কে চালকদের বিনামূল্যে চিকিৎসা ক্যাম্প"
-                  className="w-full bg-slate-950 text-xs text-white px-3 py-2.5 rounded-xl border border-slate-800 focus:outline-none focus:border-emerald-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">
-                  শিরোনাম (English)
-                </label>
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="e.g. Free Medical Camp for Highway Drivers"
-                  className="w-full bg-slate-950 text-xs text-white px-3 py-2.5 rounded-xl border border-slate-800 focus:outline-none focus:border-emerald-500"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <form onSubmit={handleFormSubmit} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+              <div className="p-3.5 sm:p-5 overflow-y-auto space-y-3.5 flex-1">
                 <div>
                   <label className="block text-xs font-bold text-slate-300 mb-1">
-                    ক্যাটাগরি <span className="text-rose-400">*</span>
-                  </label>
-                  <select
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
-                    className="w-full bg-slate-950 text-xs text-white px-3 py-2.5 rounded-xl border border-slate-800 focus:outline-none focus:border-emerald-500"
-                  >
-                    <option value="NOTICE">জরুরি নোটিশ (NOTICE)</option>
-                    <option value="MEDICAL">স্বাস্থ্য ও চিকিৎসা (MEDICAL)</option>
-                    <option value="TRAINING">ড্রাইভিং প্রশিক্ষণ (TRAINING)</option>
-                    <option value="WELFARE">কল্যাণ তহবিল (WELFARE)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1">
-                    তারিখ <span className="text-rose-400">*</span>
+                    বিজ্ঞপ্তির শিরোনাম (বাংলা) <span className="text-rose-400">*</span>
                   </label>
                   <input
                     type="text"
                     required
-                    value={formData.date}
-                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    placeholder="২০২৪-০৩-১৫"
-                    className="w-full bg-slate-950 text-xs text-white px-3 py-2.5 rounded-xl border border-slate-800 focus:outline-none focus:border-emerald-500 font-mono"
+                    value={formData.titleBn}
+                    onChange={(e) => setFormData({ ...formData, titleBn: e.target.value })}
+                    placeholder="উদা: ঢাকা-চট্টগ্রাম মহাসড়কে চালকদের বিনামূল্যে চিকিৎসা ক্যাম্প"
+                    className="w-full bg-slate-950 text-xs text-white px-3 py-2 sm:py-2.5 rounded-xl border border-slate-800 focus:outline-none focus:border-emerald-500"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">
+                    শিরোনাম (English)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    placeholder="e.g. Free Medical Camp for Highway Drivers"
+                    className="w-full bg-slate-950 text-xs text-white px-3 py-2 sm:py-2.5 rounded-xl border border-slate-800 focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-300 mb-1">
+                      ক্যাটাগরি <span className="text-rose-400">*</span>
+                    </label>
+                    <select
+                      value={formData.category}
+                      onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
+                      className="w-full bg-slate-950 text-xs text-white px-3 py-2 sm:py-2.5 rounded-xl border border-slate-800 focus:outline-none focus:border-emerald-500"
+                    >
+                      <option value="NOTICE">জরুরি নোটিশ (NOTICE)</option>
+                      <option value="MEDICAL">স্বাস্থ্য ও চিকিৎসা (MEDICAL)</option>
+                      <option value="TRAINING">ড্রাইভিং প্রশিক্ষণ (TRAINING)</option>
+                      <option value="WELFARE">কল্যাণ তহবিল (WELFARE)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-300 mb-1">
+                      তারিখ <span className="text-rose-400">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.date}
+                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                      placeholder="২০২৪-০৩-১৫"
+                      className="w-full bg-slate-950 text-xs text-white px-3 py-2 sm:py-2.5 rounded-xl border border-slate-800 focus:outline-none focus:border-emerald-500 font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">
+                    সংক্ষিপ্ত বিবরণ (Excerpt - বাংলা) <span className="text-rose-400">*</span>
+                  </label>
+                  <textarea
+                    required
+                    rows={2}
+                    value={formData.excerptBn}
+                    onChange={(e) => setFormData({ ...formData, excerptBn: e.target.value })}
+                    placeholder="হোমপেজ ও কার্ডে প্রদর্শনের সংক্ষিপ্ত সারমর্ম লিখুন..."
+                    className="w-full bg-slate-950 text-xs text-white px-3 py-2 rounded-xl border border-slate-800 focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">
+                    বিস্তারিত বিষয়বস্তু (Full Content - বাংলা)
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={formData.contentBn}
+                    onChange={(e) => setFormData({ ...formData, contentBn: e.target.value })}
+                    placeholder="সম্পূর্ণ নোটিশ বা বিজ্ঞপ্তির বিস্তারিত বিবরণ লিখুন..."
+                    className="w-full bg-slate-950 text-xs text-white px-3 py-2 rounded-xl border border-slate-800 focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+
+                {/* Banner Image with Direct Database & Vault upload */}
+                <div className="space-y-2 p-2.5 sm:p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                  <div className="flex items-center justify-between flex-wrap gap-1">
+                    <label className="text-xs font-bold text-slate-200">
+                      ব্যানার ছবি / মিডিয়া (Banner Image)
+                    </label>
+                    <div className="flex items-center bg-slate-950 p-0.5 rounded-lg border border-slate-800 text-[9px] sm:text-[10px]">
+                      <button
+                        type="button"
+                        onClick={() => setBannerInputMode('UPLOAD')}
+                        className={`px-2 py-0.5 rounded cursor-pointer font-bold ${
+                          bannerInputMode === 'UPLOAD'
+                            ? 'bg-emerald-600 text-white'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        ফাইল আপলোড
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setBannerInputMode('URL')}
+                        className={`px-2 py-0.5 rounded cursor-pointer font-bold ${
+                          bannerInputMode === 'URL'
+                            ? 'bg-emerald-600 text-white'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        ওয়েব URL
+                      </button>
+                    </div>
+                  </div>
+
+                  {bannerInputMode === 'UPLOAD' ? (
+                    <FileUploadZone
+                      label="ব্যানার ছবি নির্বাচন করুন"
+                      category="NOTICE_MEDIA"
+                      accept="image/*"
+                      compact
+                      currentValue={formData.image}
+                      onFileSelect={async (file, dataUrl, storageOption) => {
+                        try {
+                          const res = await uploadFileRecord(file, {
+                            category: 'NOTICE_MEDIA',
+                            preferredStorage: storageOption,
+                            description: `বিজ্ঞপ্তি ব্যানার মিডিয়া: ${formData.titleBn || file.name}`
+                          });
+                          if (res.success) {
+                            setFormData(prev => ({ ...prev, image: res.file.url }));
+                          } else {
+                            setFormData(prev => ({ ...prev, image: dataUrl }));
+                          }
+                        } catch {
+                          setFormData(prev => ({ ...prev, image: dataUrl }));
+                        }
+                      }}
+                      onFileClear={() => setFormData(prev => ({ ...prev, image: '' }))}
+                    />
+                  ) : (
+                    <div className="flex gap-2 items-center">
+                      <input
+                        type="text"
+                        value={formData.image}
+                        onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                        placeholder="https://images.unsplash.com/..."
+                        className="flex-1 bg-slate-950 text-xs text-white px-3 py-2 rounded-xl border border-slate-800 focus:outline-none focus:border-emerald-500"
+                      />
+                      {formData.image && (
+                        <img 
+                          src={formData.image} 
+                          alt="Preview" 
+                          className="w-10 h-8 rounded-lg object-cover border border-slate-700 shrink-0" 
+                        />
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Official Circular / Document Attachment (PDF, DOC/DOCX) */}
+                <div className="space-y-1.5 p-2.5 sm:p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <label className="text-xs font-bold text-slate-200">
+                        অফিসিয়াল সার্কুলার / গেজেট সংযুক্তি (PDF / Docs)
+                      </label>
+                      <p className="text-[10px] text-slate-400">
+                        সরাসরি সেন্ট্রাল ভল্টে যুক্ত হবে
+                      </p>
+                    </div>
+                    {formData.attachmentUrl && (
+                      <span className="text-[9px] font-bold text-emerald-400 bg-emerald-950 px-1.5 py-0.2 rounded border border-emerald-800 shrink-0">
+                        সংযুক্ত
+                      </span>
+                    )}
+                  </div>
+
+                  <FileUploadZone
+                    label="সার্কুলার ফাইল আপলোড (PDF, Word, Excel)"
+                    category="CIRCULAR_DOC"
+                    accept="application/pdf,.doc,.docx,.xls,.xlsx,image/*"
+                    compact
+                    currentValue={formData.attachmentUrl}
+                    currentFileName={formData.attachmentName}
+                    onFileSelect={async (file, dataUrl, storageOption) => {
+                      try {
+                        const res = await uploadFileRecord(file, {
+                          category: 'CIRCULAR_DOC',
+                          preferredStorage: storageOption,
+                          description: `বিজ্ঞপ্তি সংযুক্তি সার্কুলার: ${formData.titleBn || file.name}`
+                        });
+                        if (res.success) {
+                          setFormData(prev => ({
+                            ...prev,
+                            attachmentUrl: res.file.url,
+                            attachmentName: res.file.name,
+                            attachmentType: res.file.type,
+                            attachmentSize: res.file.size,
+                            documentVaultId: res.file.id
+                          }));
+                        } else {
+                          setFormData(prev => ({
+                            ...prev,
+                            attachmentUrl: dataUrl,
+                            attachmentName: file.name,
+                            attachmentType: file.type,
+                            attachmentSize: file.size
+                          }));
+                        }
+                      } catch {
+                        setFormData(prev => ({
+                          ...prev,
+                          attachmentUrl: dataUrl,
+                          attachmentName: file.name,
+                          attachmentType: file.type,
+                          attachmentSize: file.size
+                        }));
+                      }
+                    }}
+                    onFileClear={() => setFormData(prev => ({
+                      ...prev,
+                      attachmentUrl: '',
+                      attachmentName: '',
+                      attachmentType: '',
+                      attachmentSize: 0,
+                      documentVaultId: ''
+                    }))}
+                  />
+                </div>
+
+                {/* News & Circular Video Media (MP4 / WebM / Link) */}
+                <div className="space-y-1.5 p-2.5 sm:p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                  <div>
+                    <label className="text-xs font-bold text-slate-200">
+                      বিজ্ঞপ্তি / প্রেস রিলিজ ভিডিও ফুটেজ (MP4 / WebM)
+                    </label>
+                    <p className="text-[10px] text-slate-400">
+                      ভিডিও বক্তব্য সরাসরি আপলোড করুন
+                    </p>
+                  </div>
+
+                  <FileUploadZone
+                    label="ভিডিও ক্লিপ আপলোড"
+                    category="VIDEO_MEDIA"
+                    accept="video/*"
+                    compact
+                    currentValue={formData.videoUrl}
+                    onFileSelect={async (file, dataUrl, storageOption) => {
+                      try {
+                        const res = await uploadFileRecord(file, {
+                          category: 'VIDEO_MEDIA',
+                          preferredStorage: storageOption,
+                          description: `বিজ্ঞপ্তির ভিডিও ফুটেজ: ${formData.titleBn || file.name}`
+                        });
+                        if (res.success) {
+                          setFormData(prev => ({ ...prev, videoUrl: res.file.url }));
+                        } else {
+                          setFormData(prev => ({ ...prev, videoUrl: dataUrl }));
+                        }
+                      } catch {
+                        setFormData(prev => ({ ...prev, videoUrl: dataUrl }));
+                      }
+                    }}
+                    onFileClear={() => setFormData(prev => ({ ...prev, videoUrl: '' }))}
+                  />
+
+                  <div className="pt-0.5">
+                    <input
+                      type="url"
+                      value={formData.videoUrl}
+                      onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
+                      placeholder="অথবা ভিডিও লিংক দিন: https://example.com/press.mp4"
+                      className="w-full bg-slate-950 text-xs text-white px-3 py-1.5 rounded-xl border border-slate-800 focus:outline-none focus:border-emerald-500 font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    type="checkbox"
+                    id="isUrgent"
+                    checked={formData.isUrgent}
+                    onChange={(e) => setFormData({ ...formData, isUrgent: e.target.checked })}
+                    className="rounded border-slate-700 bg-slate-950 text-rose-600 focus:ring-rose-500 w-4 h-4 cursor-pointer"
+                  />
+                  <label htmlFor="isUrgent" className="text-xs font-semibold text-rose-300 cursor-pointer flex items-center gap-1.5">
+                    <AlertCircle className="w-3.5 h-3.5" />
+                    জরুরি নোটিশ হিসেবে চিহ্নিত করুন (Mark as Urgent Notice)
+                  </label>
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">
-                  সংক্ষিপ্ত বিবরণ (Excerpt - বাংলা) <span className="text-rose-400">*</span>
-                </label>
-                <textarea
-                  required
-                  rows={2}
-                  value={formData.excerptBn}
-                  onChange={(e) => setFormData({ ...formData, excerptBn: e.target.value })}
-                  placeholder="হোমপেজ ও কার্ডে প্রদর্শনের সংক্ষিপ্ত সারমর্ম লিখুন..."
-                  className="w-full bg-slate-950 text-xs text-white px-3 py-2 rounded-xl border border-slate-800 focus:outline-none focus:border-emerald-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">
-                  বিস্তারিত বিষয়বস্তু (Full Content - বাংলা)
-                </label>
-                <textarea
-                  rows={4}
-                  value={formData.contentBn}
-                  onChange={(e) => setFormData({ ...formData, contentBn: e.target.value })}
-                  placeholder="সম্পূর্ণ নোটিশ বা বিজ্ঞপ্তির বিস্তারিত বিবরণ লিখুন..."
-                  className="w-full bg-slate-950 text-xs text-white px-3 py-2 rounded-xl border border-slate-800 focus:outline-none focus:border-emerald-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">
-                  ব্যানার ছবি URL (Banner Image)
-                </label>
-                <input
-                  type="text"
-                  value={formData.image}
-                  onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                  placeholder="https://images.unsplash.com/..."
-                  className="w-full bg-slate-950 text-xs text-white px-3 py-2.5 rounded-xl border border-slate-800 focus:outline-none focus:border-emerald-500"
-                />
-              </div>
-
-              <div className="flex items-center gap-2 pt-1">
-                <input
-                  type="checkbox"
-                  id="isUrgent"
-                  checked={formData.isUrgent}
-                  onChange={(e) => setFormData({ ...formData, isUrgent: e.target.checked })}
-                  className="rounded border-slate-700 bg-slate-950 text-rose-600 focus:ring-rose-500 w-4 h-4 cursor-pointer"
-                />
-                <label htmlFor="isUrgent" className="text-xs font-semibold text-rose-300 cursor-pointer flex items-center gap-1.5">
-                  <AlertCircle className="w-3.5 h-3.5" />
-                  জরুরি নোটিশ হিসেবে চিহ্নিত করুন (Mark as Urgent Notice)
-                </label>
-              </div>
-
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+              {/* Pinned Responsive Modal Footer */}
+              <div className="p-3 sm:p-4 border-t border-slate-800 shrink-0 bg-slate-900/95 flex items-center justify-end gap-2.5">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition cursor-pointer"
                 >
                   বাতিল
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-950 transition cursor-pointer"
+                  className="px-5 sm:px-6 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-950 transition cursor-pointer"
                 >
                   {editingNotice ? 'সংরক্ষণ করুন' : 'প্রকাশ করুন'}
                 </button>

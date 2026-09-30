@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { useDwf } from '../../context/DwfContext';
 import { FileUploadZone } from './FileUploadZone';
-import { formatFileSize } from '../../lib/storage';
+import { formatFileSize, getFileTypeGroup, getFileCategoryBanglaLabel } from '../../lib/storage';
 import { 
   X, 
   UploadCloud, 
   FolderArchive, 
   FileText, 
   Image as ImageIcon, 
+  Video as VideoIcon,
+  FileCode,
   Cloud, 
   HardDrive, 
   Download, 
@@ -20,7 +22,8 @@ import {
   ShieldCheck,
   Calendar,
   User,
-  Lock
+  Lock,
+  Play
 } from 'lucide-react';
 import type { StoredFile, FileCategory, StorageOption } from '../../types/dwf';
 
@@ -41,6 +44,7 @@ export const DocumentVaultModal: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'FILES' | 'UPLOAD'>('FILES');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>(documentVaultCategoryFilter || 'ALL');
+  const [selectedTypeGroup, setSelectedTypeGroup] = useState<string>('ALL');
   const [previewFile, setPreviewFile] = useState<StoredFile | null>(null);
 
   // New Upload Form State
@@ -107,6 +111,9 @@ export const DocumentVaultModal: React.FC = () => {
       return false;
     }
     const matchesCategory = selectedCategory === 'ALL' || f.category === selectedCategory;
+    const typeGroup = getFileTypeGroup(f.type, f.name);
+    const matchesTypeGroup = selectedTypeGroup === 'ALL' || typeGroup === selectedTypeGroup;
+
     const q = searchQuery.toLowerCase();
     const matchesSearch = !q || 
       f.name.toLowerCase().includes(q) || 
@@ -114,7 +121,7 @@ export const DocumentVaultModal: React.FC = () => {
       (f.description && f.description.toLowerCase().includes(q)) ||
       (f.memberId && f.memberId.toLowerCase().includes(q));
 
-    return matchesCategory && matchesSearch;
+    return matchesCategory && matchesTypeGroup && matchesSearch;
   });
 
   // Calculate statistics
@@ -165,103 +172,94 @@ export const DocumentVaultModal: React.FC = () => {
   };
 
   const getCategoryLabel = (cat: FileCategory) => {
-    switch (cat) {
-      case 'MEMBER_PHOTO': return 'সদস্যের ছবি / ফটো';
-      case 'DRIVING_LICENSE': return 'ড্রাইভিং লাইসেন্স স্ক্যান';
-      case 'NID_CARD': return 'জাতীয় পরিচয়পত্র (NID)';
-      case 'MEDICAL_DOC': return 'চিকিৎসা ও হাসপাতাল ভাউচার';
-      case 'ACCIDENT_PROOF': return 'দুর্ঘটনা ও ক্ষতিপূরণ প্রমাণ';
-      case 'PAYMENT_SLIP': return 'চাঁদা বা ব্যাংকিং রসিদ';
-      case 'INSURANCE': return 'বীমা ও নিরাপত্তা সনদ';
-      default: return 'অন্যান্য প্রাতিষ্ঠানিক নথি';
-    }
+    return getFileCategoryBanglaLabel(cat);
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200">
       <div 
-        className="bg-white rounded-2xl max-w-4xl w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]"
+        className="bg-white rounded-xl sm:rounded-2xl max-w-4xl w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[94vh] sm:max-h-[90vh]"
         role="dialog"
         aria-modal="true"
       >
         {/* Modal Header */}
-        <div className="bg-slate-900 text-white p-4 sm:p-5 flex items-center justify-between border-b border-slate-800">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-600/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
-              <FolderArchive className="w-5 h-5" />
+        <div className="bg-slate-900 text-white p-3 sm:p-4 flex items-center justify-between border-b border-slate-800 shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-600/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
+              <FolderArchive className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div>
-              <h3 className="font-bold text-base sm:text-lg flex items-center gap-2">
-                <span>{language === 'bn' ? 'নথিপত্র ও ফাইল স্টোরেজ ভল্ট' : 'Document Vault & Storage'}</span>
-                <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] px-2 py-0.5 rounded font-mono font-medium">
-                  {storedFiles.length} {language === 'bn' ? 'টি নথি' : 'Files'}
+            <div className="min-w-0">
+              <h3 className="font-bold text-sm sm:text-base flex items-center gap-2 truncate">
+                <span className="truncate">{language === 'bn' ? 'নথিপত্র ও ফাইল ভল্ট' : 'Document Vault & Storage'}</span>
+                <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[9px] sm:text-[10px] px-1.5 py-0.2 rounded font-mono font-medium shrink-0">
+                  {storedFiles.length} {language === 'bn' ? 'নথি' : 'Files'}
                 </span>
               </h3>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-[10px] sm:text-xs text-slate-400 truncate">
                 {language === 'bn' 
-                  ? 'চালকদের এনআইডি, লাইসেন্স, চিকিৎসা ভাউচার ও ক্লাউড ব্যাকআপ সিস্টেম' 
-                  : 'Encrypted document management with Google Firebase & Local Storage options'}
+                  ? 'চালকদের এনআইডি, লাইসেন্স, চিকিৎসা ভাউচার ও ক্লাউড ব্যাকআপ' 
+                  : 'Encrypted document management with Google Firebase & Local Storage'}
               </p>
             </div>
           </div>
 
           <button
             onClick={() => setShowDocumentVaultModal(false)}
-            className="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 transition cursor-pointer"
+            className="text-slate-400 hover:text-white p-1.5 sm:p-2 rounded-xl hover:bg-slate-800 transition cursor-pointer shrink-0 ml-2"
             title="বন্ধ করুন"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
 
         {/* Top Metric Strip & Storage Targets */}
-        <div className="bg-slate-50 border-b border-slate-200 px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="flex items-center gap-1.5 text-slate-700 font-medium">
-              <Cloud className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Firebase Cloud:</span>
+        <div className="bg-slate-50 border-b border-slate-200 px-3 sm:px-4 py-2 flex flex-wrap items-center justify-between gap-2 text-xs shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap text-[11px] sm:text-xs">
+            <div className="flex items-center gap-1 text-slate-700 font-medium">
+              <Cloud className="w-3 h-3 text-emerald-600" />
+              <span>Firebase:</span>
               <span className="font-bold text-emerald-800">{cloudCount}</span>
             </div>
             <span className="text-slate-300">|</span>
-            <div className="flex items-center gap-1.5 text-slate-700 font-medium">
-              <HardDrive className="w-3.5 h-3.5 text-indigo-600" />
-              <span>Local Offline Vault:</span>
+            <div className="flex items-center gap-1 text-slate-700 font-medium">
+              <HardDrive className="w-3 h-3 text-indigo-600" />
+              <span>Local:</span>
               <span className="font-bold text-indigo-800">{localCount}</span>
             </div>
-            <span className="text-slate-300">|</span>
-            <div className="text-slate-500 text-[11px]">
-              মোট ব্যবহৃত স্থান: <span className="font-semibold text-slate-800">{formatFileSize(totalBytes)}</span>
+            <span className="text-slate-300 hidden sm:inline">|</span>
+            <div className="text-slate-500 text-[10px] sm:text-[11px] hidden sm:block">
+              মোট: <span className="font-semibold text-slate-800">{formatFileSize(totalBytes)}</span>
             </div>
           </div>
 
           {/* Tab Switcher */}
-          <div className="flex items-center bg-slate-200/80 p-0.5 rounded-lg text-xs font-semibold">
+          <div className="flex items-center bg-slate-200/80 p-0.5 rounded-lg text-[11px] sm:text-xs font-semibold">
             <button
               onClick={() => setActiveTab('FILES')}
-              className={`px-3 py-1 rounded-md transition cursor-pointer ${
+              className={`px-2.5 py-1 rounded-md transition cursor-pointer ${
                 activeTab === 'FILES'
                   ? 'bg-white text-emerald-800 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              সংরক্ষিত ফাইলসমূহ
+              ফাইলসমূহ
             </button>
             <button
               onClick={() => setActiveTab('UPLOAD')}
-              className={`flex items-center gap-1 px-3 py-1 rounded-md transition cursor-pointer ${
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-md transition cursor-pointer ${
                 activeTab === 'UPLOAD'
                   ? 'bg-emerald-600 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <Plus className="w-3.5 h-3.5" />
-              নতুন আপলোড
+              <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+              আপলোড
             </button>
           </div>
         </div>
 
         {/* Modal Body */}
-        <div className="p-4 sm:p-6 overflow-y-auto flex-1">
+        <div className="p-3 sm:p-5 overflow-y-auto flex-1">
           {activeTab === 'FILES' ? (
             <div className="space-y-4">
               {/* Search & Category Filter Bar */}
@@ -291,9 +289,39 @@ export const DocumentVaultModal: React.FC = () => {
                     <option value="MEDICAL_DOC">চিকিৎসা ভাউচার</option>
                     <option value="ACCIDENT_PROOF">দুর্ঘটনা প্রমাণ</option>
                     <option value="PAYMENT_SLIP">পেমেন্ট রসিদ</option>
+                    <option value="COMMITTEE_PHOTO">পরিচালনা পর্ষদের ছবি</option>
+                    <option value="COMMITTEE_DOC">কমিটি রেজুলেশন ও অনুমোদনপত্র</option>
+                    <option value="CIRCULAR_DOC">অফিসিয়াল সার্কুলার ও পরিপত্র</option>
+                    <option value="NOTICE_ATTACHMENT">বিজ্ঞপ্তি সংযুক্তি (PDF/Doc)</option>
+                    <option value="NOTICE_MEDIA">বিজ্ঞপ্তি ব্যানার ও মিডিয়া</option>
+                    <option value="VIDEO_MEDIA">ভিডিও ক্লিপ ও প্রেস রেকর্ড</option>
+                    <option value="GENERAL_DOCUMENT">সাধারণ প্রাতিষ্ঠানিক নথি</option>
                     <option value="OTHER">অন্যান্য</option>
                   </select>
                 </div>
+              </div>
+
+              {/* Quick Type Filter Tabs */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+                {[
+                  { id: 'ALL', label: 'সকল ফাইল ধরন' },
+                  { id: 'IMAGE', label: 'ছবি (Images)' },
+                  { id: 'VIDEO', label: 'ভিডিও (Videos)' },
+                  { id: 'PDF', label: 'পিডিএফ (PDFs)' },
+                  { id: 'DOC', label: 'ডকুমেন্টস (Docs/Word)' }
+                ].map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => setSelectedTypeGroup(t.id)}
+                    className={`px-3 py-1 rounded-lg font-medium whitespace-nowrap transition cursor-pointer ${
+                      selectedTypeGroup === t.id
+                        ? 'bg-emerald-700 text-white font-bold shadow-xs'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
               </div>
 
               {/* Files Grid / List */}
@@ -306,7 +334,12 @@ export const DocumentVaultModal: React.FC = () => {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
                   {filteredFiles.map((file) => {
-                    const isImg = file.type.startsWith('image/') || file.url.match(/\.(jpeg|jpg|png|webp|gif)/i);
+                    const group = getFileTypeGroup(file.type, file.name);
+                    const isImg = group === 'IMAGE';
+                    const isVid = group === 'VIDEO';
+                    const isPdf = group === 'PDF';
+                    const isDoc = group === 'DOC';
+
                     return (
                       <div 
                         key={file.id}
@@ -314,7 +347,10 @@ export const DocumentVaultModal: React.FC = () => {
                       >
                         {/* Card Top: Preview + Badges */}
                         <div>
-                          <div className="relative h-28 rounded-lg overflow-hidden bg-slate-100 border border-slate-150 mb-2.5 flex items-center justify-center">
+                          <div 
+                            onClick={() => setPreviewFile(file)}
+                            className="relative h-28 rounded-lg overflow-hidden bg-slate-100 border border-slate-150 mb-2.5 flex items-center justify-center cursor-pointer select-none"
+                          >
                             {isImg ? (
                               <img 
                                 src={file.url} 
@@ -322,10 +358,27 @@ export const DocumentVaultModal: React.FC = () => {
                                 referrerPolicy="no-referrer"
                                 className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                               />
+                            ) : isVid ? (
+                              <div className="flex flex-col items-center justify-center text-rose-600 space-y-1">
+                                <div className="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center">
+                                  <Play className="w-5 h-5 fill-rose-600 text-rose-600 ml-0.5" />
+                                </div>
+                                <span className="text-[10px] uppercase font-bold text-rose-700 font-mono">ভিডিও রেকর্ড</span>
+                              </div>
+                            ) : isPdf ? (
+                              <div className="flex flex-col items-center justify-center text-red-600 space-y-1">
+                                <FileText className="w-9 h-9 text-red-600" />
+                                <span className="text-[10px] uppercase font-bold text-red-700 font-mono">PDF ডকুমেন্ট</span>
+                              </div>
+                            ) : isDoc ? (
+                              <div className="flex flex-col items-center justify-center text-blue-600 space-y-1">
+                                <FileCode className="w-9 h-9 text-blue-600" />
+                                <span className="text-[10px] uppercase font-bold text-blue-700 font-mono">Word / অফিস</span>
+                              </div>
                             ) : (
                               <div className="flex flex-col items-center justify-center text-slate-500 space-y-1">
                                 <FileText className="w-8 h-8 text-emerald-600" />
-                                <span className="text-[10px] uppercase font-bold text-slate-400">{file.type.split('/')[1] || 'PDF'}</span>
+                                <span className="text-[10px] uppercase font-bold text-slate-400">{file.type.split('/')[1] || 'FILE'}</span>
                               </div>
                             )}
 
@@ -445,6 +498,13 @@ export const DocumentVaultModal: React.FC = () => {
                   <option value="MEDICAL_DOC">হাসপাতাল ডিসচার্জ / চিকিৎসা ভাউচার (Medical Voucher)</option>
                   <option value="ACCIDENT_PROOF">দুর্ঘটনা জিডি কপি / ক্ষতির ছবি (Accident Proof)</option>
                   <option value="PAYMENT_SLIP">ব্যাংক / বিকাশ জমা স্লিপ (Payment Slip)</option>
+                  <option value="COMMITTEE_PHOTO">পরিচালনা পর্ষদ কর্মকর্তার ছবি (Committee Photo)</option>
+                  <option value="COMMITTEE_DOC">কমিটি রেজুলেশন / অনুমোদনপত্র / সিভি (Committee Doc)</option>
+                  <option value="CIRCULAR_DOC">অফিসিয়াল সার্কুলার ও গেজেট (Official Circular)</option>
+                  <option value="NOTICE_ATTACHMENT">নোটিশ ও বিজ্ঞপ্তি সংযুক্তি (Notice Attachment)</option>
+                  <option value="NOTICE_MEDIA">নোটিশ ব্যানার ও মিডিয়া (Notice Media)</option>
+                  <option value="VIDEO_MEDIA">ভিডিও বার্তা ও প্রেস রেকর্ড (Video Media)</option>
+                  <option value="GENERAL_DOCUMENT">সাধারণ প্রাতিষ্ঠানিক নথি (General Document)</option>
                   <option value="OTHER">অন্যান্য সনদ ও কাগজপত্র (Other Document)</option>
                 </select>
               </div>
@@ -452,10 +512,10 @@ export const DocumentVaultModal: React.FC = () => {
               {/* File Drop & Upload Zone */}
               <div>
                 <FileUploadZone
-                  label="ডকুমেন্ট বা ছবি ফাইল যুক্ত করুন"
+                  label="ডকুমেন্ট, ভিডিও বা ছবি ফাইল যুক্ত করুন"
                   subLabel="ড্র্যাগ এবং ড্রপ করুন বা ক্লিক করে নির্বাচন করুন"
                   category={uploadCategory}
-                  maxSizeMb={10}
+                  maxSizeMb={25}
                   onFileSelect={(file, dataUrl, option) => {
                     setPendingFile(file);
                     setPendingDataUrl(dataUrl);
@@ -535,23 +595,35 @@ export const DocumentVaultModal: React.FC = () => {
 
       {/* Floating Single File Preview Modal */}
       {previewFile && (
-        <div className="fixed inset-0 z-60 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-            <div className="p-3.5 bg-slate-900 text-white flex items-center justify-between">
-              <div className="flex items-center gap-2 truncate">
+        <div className="fixed inset-0 z-60 bg-black/85 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
+          <div className="bg-white rounded-xl sm:rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl flex flex-col max-h-[94vh] sm:max-h-[90vh]">
+            <div className="p-3 sm:p-3.5 bg-slate-900 text-white flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2 truncate min-w-0 pr-2">
                 <FileText className="w-4 h-4 text-emerald-400 flex-shrink-0" />
                 <span className="font-semibold text-xs truncate">{previewFile.name}</span>
               </div>
               <button 
                 onClick={() => setPreviewFile(null)}
-                className="text-slate-400 hover:text-white p-1 rounded-lg cursor-pointer"
+                className="text-slate-400 hover:text-white p-1 rounded-lg cursor-pointer shrink-0"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
 
-            <div className="p-4 flex-1 overflow-auto flex items-center justify-center bg-slate-950">
-              {previewFile.type.startsWith('image/') || previewFile.url.match(/\.(jpeg|jpg|png|webp|gif)/i) ? (
+            <div className="p-2 sm:p-4 flex-1 overflow-auto flex items-center justify-center bg-slate-950">
+              {getFileTypeGroup(previewFile.type, previewFile.name) === 'VIDEO' ? (
+                <div className="w-full flex flex-col items-center justify-center space-y-2">
+                  <video 
+                    src={previewFile.url} 
+                    controls 
+                    autoPlay 
+                    className="max-h-[65vh] max-w-full rounded-lg shadow-lg"
+                  >
+                    ভিডিও প্লেয়ার সমর্থন করছে না
+                  </video>
+                  <p className="text-xs text-slate-400 font-mono">{previewFile.name} ({formatFileSize(previewFile.size)})</p>
+                </div>
+              ) : previewFile.type.startsWith('image/') || previewFile.url.match(/\.(jpeg|jpg|png|webp|gif)/i) ? (
                 <img 
                   src={previewFile.url} 
                   alt={previewFile.name}

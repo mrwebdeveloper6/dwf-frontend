@@ -29,6 +29,7 @@ export const MemberProfileEditor: React.FC<MemberProfileEditorProps> = ({ member
   const { 
     profileUpdateRequests, 
     submitProfileUpdateRequest, 
+    uploadFileRecord,
     language 
   } = useDwf();
 
@@ -69,18 +70,32 @@ export const MemberProfileEditor: React.FC<MemberProfileEditorProps> = ({ member
   const memberRequests = profileUpdateRequests.filter(r => r.memberId === member.memberId);
   const pendingRequest = memberRequests.find(r => r.status === 'PENDING');
 
-  // Handle Photo Upload (Base64 file reader)
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle Photo Upload (Base64 file reader and Database/Vault sync)
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        setErrorMsg('ছবির সাইজ সর্বোচ্চ ২ মেগাবাইট (MB) হতে হবে');
+      if (file.size > 5 * 1024 * 1024) {
+        setErrorMsg('ছবির সাইজ সর্বোচ্চ ৫ মেগাবাইট (MB) হতে হবে');
         return;
       }
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhotoUrl(reader.result as string);
+      reader.onloadend = async () => {
+        const dataUrl = reader.result as string;
+        setPhotoUrl(dataUrl);
         setErrorMsg(null);
+        try {
+          const res = await uploadFileRecord(file, {
+            category: 'MEMBER_PHOTO',
+            memberId: member.memberId,
+            memberName: member.nameBn || member.name,
+            description: `সদস্য প্রোফাইল ছবি: ${member.nameBn || member.name} (${member.memberId})`
+          });
+          if (res.success && res.file?.url) {
+            setPhotoUrl(res.file.url);
+          }
+        } catch {
+          // Keep local dataUrl as fallback
+        }
       };
       reader.readAsDataURL(file);
     }

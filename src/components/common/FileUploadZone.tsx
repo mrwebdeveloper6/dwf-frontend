@@ -3,6 +3,8 @@ import {
   UploadCloud, 
   FileText, 
   Image as ImageIcon, 
+  Video as VideoIcon,
+  FileCode,
   CheckCircle2, 
   X, 
   AlertCircle, 
@@ -10,7 +12,7 @@ import {
   HardDrive, 
   Loader2 
 } from 'lucide-react';
-import { formatFileSize, readFileAsDataUrl } from '../../lib/storage';
+import { formatFileSize, readFileAsDataUrl, getFileTypeGroup } from '../../lib/storage';
 import type { StorageOption, FileCategory } from '../../types/dwf';
 
 interface FileUploadZoneProps {
@@ -31,8 +33,8 @@ export const FileUploadZone: React.FC<FileUploadZoneProps> = ({
   label,
   subLabel,
   category,
-  accept = 'image/*,application/pdf',
-  maxSizeMb = 10,
+  accept = 'image/*,video/*,application/pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,text/plain',
+  maxSizeMb = 25,
   currentValue,
   currentFileName,
   onFileSelect,
@@ -121,9 +123,15 @@ export const FileUploadZone: React.FC<FileUploadZoneProps> = ({
     }
   };
 
-  const isImage = selectedFile 
-    ? selectedFile.type.startsWith('image/') 
-    : (previewUrl && (previewUrl.startsWith('data:image/') || previewUrl.match(/\.(jpeg|jpg|png|webp|gif)/i)));
+  const fileGroup = getFileTypeGroup(
+    selectedFile ? selectedFile.type : '', 
+    fileName || (previewUrl ? previewUrl.split('?')[0] : '')
+  );
+
+  const isImage = fileGroup === 'IMAGE';
+  const isVideo = fileGroup === 'VIDEO';
+  const isPdf = fileGroup === 'PDF';
+  const isDoc = fileGroup === 'DOC';
 
   return (
     <div className="space-y-1.5 w-full">
@@ -135,22 +143,22 @@ export const FileUploadZone: React.FC<FileUploadZoneProps> = ({
         </label>
 
         {/* Storage Option Selector */}
-        <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-250 text-[10px]">
+        <div className="flex items-center bg-slate-150 p-0.5 rounded-lg border border-slate-250 text-[9px] sm:text-[10px] shrink-0">
           <button
             type="button"
             onClick={() => {
               setStorageOption('FIREBASE_STORAGE');
               if (selectedFile && previewUrl) onFileSelect(selectedFile, previewUrl, 'FIREBASE_STORAGE');
             }}
-            className={`flex items-center gap-1 px-2 py-0.5 rounded cursor-pointer font-medium transition ${
+            className={`flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded cursor-pointer font-medium transition ${
               storageOption === 'FIREBASE_STORAGE'
                 ? 'bg-emerald-600 text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
             title="গুগল ফায়ারবেস ক্লাউড স্টোরেজে আপলোড হবে"
           >
-            <Cloud className="w-3 h-3" />
-            <span>Firebase Cloud</span>
+            <Cloud className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+            <span>Firebase</span>
           </button>
           <button
             type="button"
@@ -158,14 +166,14 @@ export const FileUploadZone: React.FC<FileUploadZoneProps> = ({
               setStorageOption('LOCAL_VAULT');
               if (selectedFile && previewUrl) onFileSelect(selectedFile, previewUrl, 'LOCAL_VAULT');
             }}
-            className={`flex items-center gap-1 px-2 py-0.5 rounded cursor-pointer font-medium transition ${
+            className={`flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded cursor-pointer font-medium transition ${
               storageOption === 'LOCAL_VAULT'
                 ? 'bg-slate-700 text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
             title="অফলাইন নিরাপদ লোকাল স্টোরেজ ভল্ট"
           >
-            <HardDrive className="w-3 h-3" />
+            <HardDrive className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
             <span>Local Vault</span>
           </button>
         </div>
@@ -183,7 +191,7 @@ export const FileUploadZone: React.FC<FileUploadZoneProps> = ({
             : previewUrl
             ? 'border-emerald-300 bg-emerald-50/30 hover:border-emerald-400'
             : 'border-slate-300 bg-slate-50/70 hover:border-slate-400 hover:bg-slate-100/60'
-        } ${compact ? 'p-3' : 'p-4'}`}
+        } p-2.5 sm:p-3`}
       >
         <input
           ref={fileInputRef}
@@ -195,14 +203,14 @@ export const FileUploadZone: React.FC<FileUploadZoneProps> = ({
         />
 
         {isProcessing ? (
-          <div className="flex flex-col items-center justify-center py-4 text-slate-600 space-y-2">
-            <Loader2 className="w-6 h-6 animate-spin text-emerald-600" />
+          <div className="flex items-center justify-center py-2 text-slate-600 space-x-2">
+            <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />
             <span className="text-xs font-medium">ফাইল প্রসেস হচ্ছে...</span>
           </div>
         ) : previewUrl ? (
-          <div className="flex items-center gap-3">
-            {/* Thumbnail Preview */}
-            <div className="relative w-14 h-14 rounded-lg overflow-hidden border border-slate-200 bg-white flex-shrink-0 flex items-center justify-center">
+          <div className="flex items-center gap-2.5">
+            {/* Compact Thumbnail / Type Preview */}
+            <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-lg overflow-hidden border border-slate-200 bg-slate-50 flex-shrink-0 flex items-center justify-center">
               {isImage ? (
                 <img
                   src={previewUrl}
@@ -210,62 +218,80 @@ export const FileUploadZone: React.FC<FileUploadZoneProps> = ({
                   referrerPolicy="no-referrer"
                   className="w-full h-full object-cover"
                 />
+              ) : isVideo ? (
+                <div className="flex flex-col items-center justify-center text-rose-600">
+                  <VideoIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="text-[8px] font-bold font-mono">VID</span>
+                </div>
+              ) : isPdf ? (
+                <div className="flex flex-col items-center justify-center text-red-600">
+                  <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="text-[8px] font-bold font-mono">PDF</span>
+                </div>
+              ) : isDoc ? (
+                <div className="flex flex-col items-center justify-center text-blue-600">
+                  <FileCode className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="text-[8px] font-bold font-mono">DOC</span>
+                </div>
               ) : (
-                <FileText className="w-7 h-7 text-emerald-600" />
+                <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />
               )}
             </div>
 
             {/* File Info */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5 text-emerald-800 font-semibold text-xs truncate">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+              <div className="flex items-center gap-1 text-emerald-800 font-semibold text-xs truncate">
+                <CheckCircle2 className="w-3 h-3 text-emerald-600 shrink-0" />
                 <span className="truncate">{fileName || 'সংযুক্ত ফাইল'}</span>
               </div>
-              <div className="flex items-center gap-2 text-[11px] text-slate-500 mt-0.5">
+              <div className="flex items-center gap-1.5 text-[10px] text-slate-500 mt-0.5 flex-wrap">
                 {fileSize > 0 && <span>{formatFileSize(fileSize)}</span>}
-                <span className="inline-flex items-center gap-1 font-medium text-emerald-700 bg-emerald-100/70 px-1.5 py-0.2 rounded text-[10px]">
+                <span className="inline-flex items-center gap-0.5 font-medium text-emerald-700 bg-emerald-100/70 px-1 py-0.2 rounded text-[9px]">
                   {storageOption === 'FIREBASE_STORAGE' ? (
                     <>
-                      <Cloud className="w-2.5 h-2.5" />
-                      Cloud Storage
+                      <Cloud className="w-2 h-2" />
+                      Firebase
                     </>
                   ) : (
                     <>
-                      <HardDrive className="w-2.5 h-2.5" />
-                      Local Storage
+                      <HardDrive className="w-2 h-2" />
+                      Local
                     </>
                   )}
                 </span>
+                <span className="text-[9px] font-bold px-1 py-0.2 rounded bg-slate-200 text-slate-700 font-mono">
+                  {fileGroup}
+                </span>
               </div>
-              <span className="text-[10px] text-slate-400 block mt-0.5">
-                ক্লিক বা ড্র্যাগ করে পরিবর্তন করুন
-              </span>
             </div>
 
             {/* Remove / Clear Button */}
             <button
               type="button"
               onClick={handleClear}
-              className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-full transition cursor-pointer"
+              className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-full transition cursor-pointer shrink-0"
               title="ফাইলটি বাতিল করুন"
             >
-              <X className="w-4 h-4" />
+              <X className="w-3.5 h-3.5" />
             </button>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center text-center space-y-1.5 py-2">
-            <div className="w-10 h-10 rounded-full bg-emerald-100/80 flex items-center justify-center text-emerald-700">
-              <UploadCloud className="w-5 h-5" />
+          <div className="flex items-center justify-center gap-2 sm:gap-2.5 py-1 text-center">
+            {/* Small File Upload Icon */}
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-emerald-100/80 border border-emerald-200/60 flex items-center justify-center text-emerald-700 shrink-0 shadow-2xs">
+              <UploadCloud className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
-            <div className="text-xs">
-              <span className="font-semibold text-emerald-700 hover:underline">
-                ফাইল নির্বাচন করুন
-              </span>{' '}
-              <span className="text-slate-500">বা এখানে ড্রপ করুন</span>
+            <div className="text-left min-w-0">
+              <div className="text-[11px] sm:text-xs">
+                <span className="font-bold text-emerald-700 hover:underline">
+                  সরাসরি ফাইল আপলোড
+                </span>{' '}
+                <span className="text-slate-500 hidden sm:inline">বা ড্রপ করুন</span>
+              </div>
+              <p className="text-[9px] sm:text-[10px] text-slate-400 truncate">
+                ছবি, ভিডিও, PDF, Word নথি (সর্বোচ্চ {maxSizeMb}MB)
+              </p>
             </div>
-            <p className="text-[10px] text-slate-400">
-              সমর্থিত: JPG, PNG, WEBP, PDF (সর্বোচ্চ {maxSizeMb}MB)
-            </p>
           </div>
         )}
       </div>

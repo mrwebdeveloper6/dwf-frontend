@@ -61,7 +61,7 @@ export const AdminPanel: React.FC = () => {
   } = useDwf();
 
   const [activeTab, setActiveTab] = useState<
-    'dashboard' | 'committee' | 'notices' | 'applications' | 'profile-requests' | 'members' | 'payments' | 'medical' | 'accident' | 'welfare' | 'audit'
+    'dashboard' | 'committee' | 'notices' | 'vault' | 'applications' | 'profile-requests' | 'members' | 'payments' | 'medical' | 'accident' | 'welfare' | 'audit'
   >('dashboard');
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -118,6 +118,16 @@ export const AdminPanel: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
+          <a
+            href="/dist-site.zip"
+            download="dwf-custom-domain-build.zip"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-950/70 hover:bg-blue-900 text-blue-300 text-xs font-bold rounded-lg border border-blue-800 transition cursor-pointer"
+            title="কাস্টম ডোমেইনের জন্য প্রডাকশন বিল্ড জিপ ডাউনলোড করুন (npm run build)"
+          >
+            <Download className="w-3.5 h-3.5 text-blue-400" />
+            <span className="hidden md:inline">ডোমেইন বিল্ড ZIP</span>
+          </a>
+
           <button
             onClick={() => setShowDocumentVaultModal(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-950/70 hover:bg-emerald-900 text-emerald-300 text-xs font-bold rounded-lg border border-emerald-800 transition cursor-pointer"
@@ -155,6 +165,7 @@ export const AdminPanel: React.FC = () => {
             { id: 'dashboard', label: 'ড্যাশবোর্ড ওভারভিউ', icon: LayoutDashboard, badge: null },
             { id: 'committee', label: 'কেন্দ্রীয় কমিটি পরিচালনা', icon: Award, badge: committeeMembers.length },
             { id: 'notices', label: 'সংবাদ ও নোটিশ বোর্ড', icon: Bell, badge: notices.length },
+            { id: 'vault', label: 'ডকুমেন্ট ও ফাইল ভল্ট', icon: FolderArchive, badge: storedFiles.length },
             { id: 'applications', label: 'সদস্যপদ আবেদনপত্র', icon: FileCheck, badge: pendingApps },
             { id: 'profile-requests', label: 'প্রোফাইল পরিবর্তন আবেদন', icon: UserCog, badge: pendingProfileRequests },
             { id: 'members', label: 'নিবন্ধিত চালক তালিকা', icon: Users, badge: totalActiveMembers },
@@ -684,6 +695,114 @@ export const AdminPanel: React.FC = () => {
 
           {/* TAB: NOTICES & CIRCULARS MANAGEMENT */}
           {activeTab === 'notices' && <AdminNoticeManager />}
+
+          {/* TAB: CENTRAL DOCUMENT & FILE VAULT */}
+          {activeTab === 'vault' && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div>
+                  <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                    <FolderArchive className="w-5 h-5 text-emerald-400" />
+                    কেন্দ্রীয় ডকুমেন্ট ও ফাইল ভল্ট ব্যবস্থাপনা
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-1">
+                    সকল মডিউলের আপলোডকৃত ছবি, ভিডিও ফুটেজ, অফিসিয়াল গেজেট, সার্কুলার ও চালক নথিপত্র কেন্দ্রীয়ভাবে সংরক্ষিত।
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowDocumentVaultModal(true)}
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md transition cursor-pointer flex items-center gap-1.5"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>ভল্টে সরাসরি ফাইল আপলোড ও পরিচালনা</span>
+                </button>
+              </div>
+
+              {/* Quick stats strip */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                  <span className="text-xs text-slate-400">সর্বমোট সংরক্ষিত ফাইল</span>
+                  <p className="text-2xl font-black text-emerald-400 font-mono mt-1">{storedFiles.length}</p>
+                </div>
+                <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                  <span className="text-xs text-slate-400">Google Firebase Cloud</span>
+                  <p className="text-2xl font-black text-emerald-300 font-mono mt-1">
+                    {storedFiles.filter(f => f.storageType === 'FIREBASE_STORAGE').length}
+                  </p>
+                </div>
+                <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                  <span className="text-xs text-slate-400">Local Offline Vault</span>
+                  <p className="text-2xl font-black text-indigo-300 font-mono mt-1">
+                    {storedFiles.filter(f => f.storageType === 'LOCAL_VAULT').length}
+                  </p>
+                </div>
+              </div>
+
+              {/* Vault files table */}
+              <div className="bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden shadow-lg">
+                <div className="p-4 border-b border-slate-800 flex justify-between items-center">
+                  <span className="text-xs font-bold text-slate-300">ভল্ট ফাইল রেজিস্টার</span>
+                  <button
+                    onClick={() => setShowDocumentVaultModal(true)}
+                    className="text-xs font-bold text-emerald-400 hover:text-emerald-300"
+                  >
+                    পূর্ণাঙ্গ ভল্ট মোডাল খুলুন →
+                  </button>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-800 text-slate-400 bg-slate-900/60">
+                        <th className="p-3">ফাইলের নাম</th>
+                        <th className="p-3">ক্যাটাগরি</th>
+                        <th className="p-3">স্টোরেজ মাধ্যম</th>
+                        <th className="p-3">আপলোড তারিখ</th>
+                        <th className="p-3">সংযুক্ত সত্তা / ব্যক্তি</th>
+                        <th className="p-3 text-right">একশন</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-800/70">
+                      {storedFiles.map((file) => (
+                        <tr key={file.id} className="hover:bg-slate-900/50">
+                          <td className="p-3">
+                            <div className="font-semibold text-white truncate max-w-xs">{file.name}</div>
+                            {file.description && <div className="text-[10px] text-slate-500 truncate max-w-xs">{file.description}</div>}
+                          </td>
+                          <td className="p-3">
+                            <span className="bg-emerald-950 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-800">
+                              {file.category}
+                            </span>
+                          </td>
+                          <td className="p-3">
+                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${
+                              file.storageType === 'FIREBASE_STORAGE'
+                                ? 'bg-emerald-950 text-emerald-400'
+                                : 'bg-indigo-950 text-indigo-400'
+                            }`}>
+                              {file.storageType === 'FIREBASE_STORAGE' ? 'Firebase Cloud' : 'Local Vault'}
+                            </span>
+                          </td>
+                          <td className="p-3 text-slate-400 font-mono text-[11px]">{file.uploadedAt}</td>
+                          <td className="p-3 text-slate-300">{file.memberName || file.memberId || '-'}</td>
+                          <td className="p-3 text-right">
+                            <a
+                              href={file.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              download={file.name}
+                              className="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-emerald-400 rounded text-[11px] font-bold border border-slate-700"
+                            >
+                              ডাউনলোড / দেখুন
+                            </a>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* TAB: ACCIDENT CLAIMS */}
           {activeTab === 'accident' && (

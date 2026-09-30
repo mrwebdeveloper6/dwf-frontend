@@ -261,6 +261,12 @@ export interface NoticeItem {
   date: string;
   isUrgent?: boolean;
   image?: string;
+  attachmentUrl?: string;
+  attachmentName?: string;
+  attachmentType?: string;
+  attachmentSize?: number;
+  videoUrl?: string;
+  documentVaultId?: string;
 }
 
 export interface CommitteeMember {
@@ -279,6 +285,12 @@ export interface CommitteeMember {
   tenureEn: string;
   isKeyLeader?: boolean;
   order?: number;
+  attachmentUrl?: string;
+  attachmentName?: string;
+  attachmentType?: string;
+  attachmentSize?: number;
+  documentVaultId?: string;
+  videoGreetingUrl?: string;
 }
 
 export interface Branch {
@@ -317,6 +329,13 @@ export type FileCategory =
   | 'ACCIDENT_PROOF' 
   | 'PAYMENT_SLIP' 
   | 'INSURANCE' 
+  | 'COMMITTEE_PHOTO'
+  | 'COMMITTEE_DOC'
+  | 'NOTICE_ATTACHMENT'
+  | 'NOTICE_MEDIA'
+  | 'CIRCULAR_DOC'
+  | 'VIDEO_MEDIA'
+  | 'GENERAL_DOCUMENT'
   | 'OTHER';
 
 export interface StoredFile {

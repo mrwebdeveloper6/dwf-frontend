@@ -13,7 +13,9 @@ import {
   Search, 
   MapPin,
   Sparkles,
-  ChevronRight
+  ChevronRight,
+  FileText,
+  Video as VideoIcon
 } from 'lucide-react';
 
 export const CentralCommitteeSection: React.FC = () => {
@@ -195,6 +197,37 @@ export const CentralCommitteeSection: React.FC = () => {
                       {language === 'bn' ? member.tenureBn : member.tenureEn}
                     </span>
                   </div>
+
+                  {/* Attached Media / Document */}
+                  {(member.attachmentUrl || member.videoGreetingUrl) && (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {member.attachmentUrl && (
+                        <a
+                          href={member.attachmentUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          download={member.attachmentName || 'committee-doc'}
+                          className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2 py-0.5 rounded-lg transition"
+                          title="অনুমোদনপত্র / রেজুলেশন"
+                        >
+                          <FileText className="w-3 h-3 text-emerald-600" />
+                          <span className="truncate max-w-[120px]">{member.attachmentName || 'অনুমোদনপত্র (PDF)'}</span>
+                        </a>
+                      )}
+
+                      {member.videoGreetingUrl && (
+                        <a
+                          href={member.videoGreetingUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2 py-0.5 rounded-lg transition"
+                        >
+                          <VideoIcon className="w-3 h-3 text-rose-600" />
+                          <span>ভিডিও বার্তা</span>
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Card Bottom: Phone Number & Instant Actions */}

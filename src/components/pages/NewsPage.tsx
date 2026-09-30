@@ -11,7 +11,8 @@ import {
   X, 
   Download, 
   FileText,
-  Share2
+  Share2,
+  Video as VideoIcon
 } from 'lucide-react';
 
 export const NewsPage: React.FC = () => {
@@ -148,6 +149,24 @@ export const NewsPage: React.FC = () => {
                 <p className="text-xs text-slate-600 line-clamp-3 leading-relaxed">
                   {language === 'bn' ? notice.excerptBn : notice.excerpt}
                 </p>
+
+                {/* Attached media indicators */}
+                {(notice.attachmentUrl || notice.videoUrl) && (
+                  <div className="pt-2 flex flex-wrap items-center gap-1.5">
+                    {notice.attachmentUrl && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
+                        <FileText className="w-3 h-3 text-emerald-600" />
+                        <span>{notice.attachmentName ? notice.attachmentName.slice(0, 20) : (language === 'bn' ? 'সংযুক্ত সার্কুলার (PDF)' : 'Attachment (PDF)')}</span>
+                      </span>
+                    )}
+                    {notice.videoUrl && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-800 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-md">
+                        <VideoIcon className="w-3 h-3 text-rose-600" />
+                        <span>{language === 'bn' ? 'ভিডিও ক্লিপ' : 'Video Clip'}</span>
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between">
@@ -168,8 +187,8 @@ export const NewsPage: React.FC = () => {
 
       {/* Notice Details Modal */}
       {selectedNotice && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-slate-950/80 backdrop-blur-xs animate-in fade-in duration-150 overflow-y-auto">
+          <div className="bg-white rounded-2xl sm:rounded-3xl max-w-xl w-full p-4 sm:p-7 shadow-2xl border border-slate-200 space-y-4 max-h-[94vh] sm:max-h-[90vh] overflow-y-auto my-auto">
             <div className="flex justify-between items-start border-b border-slate-100 pb-3">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
@@ -190,6 +209,26 @@ export const NewsPage: React.FC = () => {
               </button>
             </div>
 
+            {selectedNotice.image && (
+              <img
+                src={selectedNotice.image}
+                alt={selectedNotice.titleBn}
+                className="w-full h-48 sm:h-56 object-cover rounded-2xl border border-slate-200"
+              />
+            )}
+
+            {selectedNotice.videoUrl && (
+              <div className="rounded-2xl overflow-hidden border border-slate-200 bg-black">
+                <video
+                  src={selectedNotice.videoUrl}
+                  controls
+                  className="w-full max-h-56"
+                >
+                  ভিডিও প্লেয়ার সমর্থন করছে না
+                </video>
+              </div>
+            )}
+
             <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3">
               <p className="font-semibold text-slate-900">
                 {language === 'bn' ? selectedNotice.excerptBn : selectedNotice.excerpt}
@@ -199,14 +238,56 @@ export const NewsPage: React.FC = () => {
               </p>
             </div>
 
+            {/* Attached Document Section */}
+            {selectedNotice.attachmentUrl && (
+              <div className="p-3 bg-emerald-50 rounded-2xl border border-emerald-200 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700 shrink-0">
+                    <FileText className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-slate-900 truncate">
+                      {selectedNotice.attachmentName || (language === 'bn' ? 'অফিসিয়াল গেজেট / সার্কুলার সংযুক্তি' : 'Official Circular Attachment')}
+                    </p>
+                    <p className="text-[10px] text-emerald-800">
+                      {language === 'bn' ? 'সরাসরি সেন্ট্রাল ডকুমেন্ট ভল্ট হতে প্রস্তুতকৃত' : 'Central Vault Verified File'}
+                    </p>
+                  </div>
+                </div>
+                <a
+                  href={selectedNotice.attachmentUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  download={selectedNotice.attachmentName || 'dwf-circular.pdf'}
+                  className="px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition shrink-0 shadow-2xs"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>{language === 'bn' ? 'সংযুক্তি ডাউনলোড' : 'Download File'}</span>
+                </a>
+              </div>
+            )}
+
             <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-              <button
-                onClick={() => alert(language === 'bn' ? 'অফিসিয়াল পিডিএফ বিজ্ঞপ্তি ডাউনলোড হচ্ছে...' : 'Downloading PDF circular...')}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>পিডিএফ ডাউনলোড</span>
-              </button>
+              {selectedNotice.attachmentUrl ? (
+                <a
+                  href={selectedNotice.attachmentUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  download={selectedNotice.attachmentName || 'circular.pdf'}
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>{language === 'bn' ? 'পিডিএফ ডাউনলোড' : 'Download PDF'}</span>
+                </a>
+              ) : (
+                <button
+                  onClick={() => alert(language === 'bn' ? 'ডিজিটাল কপি প্রস্তুত আছে।' : 'Digital copy ready.')}
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer"
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  <span>{language === 'bn' ? 'সার্কুলার কপি' : 'Circular Copy'}</span>
+                </button>
+              )}
               <button
                 onClick={() => setSelectedNotice(null)}
                 className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl cursor-pointer"

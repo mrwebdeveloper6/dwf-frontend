@@ -265,32 +265,32 @@ export const ProfileRequestsManager: React.FC = () => {
 
       {/* REVIEW & APPROVAL COMPARISON MODAL */}
       {selectedRequest && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-sm overflow-y-auto animate-in fade-in">
-          <div className="bg-slate-900 border-2 border-emerald-600/80 rounded-3xl w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-6 bg-black/85 backdrop-blur-sm overflow-y-auto animate-in fade-in">
+          <div className="bg-slate-900 border-2 border-emerald-600/80 rounded-2xl sm:rounded-3xl w-full max-w-3xl max-h-[94vh] sm:max-h-[90vh] flex flex-col shadow-2xl overflow-hidden my-auto">
             
             {/* Modal Header */}
-            <div className="p-4 sm:p-5 bg-slate-950 border-b border-slate-800 flex justify-between items-center shrink-0">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-base font-bold text-white">প্রোফাইল পরিবর্তন আবেদন যাচাই ও অনুমোদন</h3>
-                  <span className="font-mono text-xs font-bold text-amber-400 bg-amber-950/80 border border-amber-700/80 px-2 py-0.5 rounded">
+            <div className="p-3.5 sm:p-5 bg-slate-950 border-b border-slate-800 flex justify-between items-center shrink-0">
+              <div className="min-w-0 pr-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="text-sm sm:text-base font-bold text-white truncate">প্রোফাইল পরিবর্তন আবেদন যাচাই</h3>
+                  <span className="font-mono text-[11px] font-bold text-amber-400 bg-amber-950/80 border border-amber-700/80 px-1.5 py-0.2 rounded shrink-0">
                     {selectedRequest.requestId}
                   </span>
                 </div>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  সদস্য: {selectedRequest.memberNameBn} ({selectedRequest.memberId}) • আবেদনের তারিখ: {selectedRequest.submittedAt}
+                <p className="text-[11px] text-slate-400 mt-0.5 truncate">
+                  সদস্য: {selectedRequest.memberNameBn} ({selectedRequest.memberId}) • {selectedRequest.submittedAt}
                 </p>
               </div>
               <button
                 onClick={() => setSelectedRequest(null)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer shrink-0"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Modal Content / Comparison View */}
-            <div className="p-5 sm:p-6 overflow-y-auto space-y-6 text-xs flex-1">
+            <div className="p-3.5 sm:p-6 overflow-y-auto space-y-4 sm:space-y-6 text-xs flex-1">
               
               {/* Member Reason */}
               {selectedRequest.reason && (

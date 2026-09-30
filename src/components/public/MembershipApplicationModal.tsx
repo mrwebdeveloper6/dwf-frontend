@@ -189,27 +189,27 @@ export const MembershipApplicationModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/75 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 max-h-[92vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/80 backdrop-blur-xs animate-in fade-in duration-150 overflow-y-auto">
+      <div className="bg-white rounded-2xl sm:rounded-3xl max-w-2xl w-full p-4 sm:p-7 shadow-2xl border border-slate-200 space-y-4 sm:space-y-6 max-h-[94vh] sm:max-h-[92vh] overflow-y-auto my-auto">
         
         {/* Header */}
-        <div className="flex justify-between items-start border-b border-slate-100 pb-4">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-emerald-100 text-emerald-800 rounded-2xl">
-              <UserPlus className="w-6 h-6" />
+        <div className="flex justify-between items-center border-b border-slate-100 pb-3 sm:pb-4 shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 pr-2">
+            <div className="p-2 sm:p-2.5 bg-emerald-100 text-emerald-800 rounded-xl sm:rounded-2xl shrink-0">
+              <UserPlus className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <div>
-              <h3 className="text-lg sm:text-xl font-bold text-slate-900">
-                {language === 'bn' ? 'ডিডব্লিউএফ প্রাতিষ্ঠানিক সদস্যপদ আবেদন' : 'DWF Membership Application'}
+            <div className="min-w-0">
+              <h3 className="text-base sm:text-xl font-bold text-slate-900 truncate">
+                {language === 'bn' ? 'সদস্যপদ অনলাইন আবেদন' : 'DWF Membership Application'}
               </h3>
-              <p className="text-xs text-slate-500">
+              <p className="text-[10px] sm:text-xs text-slate-500 truncate">
                 {language === 'bn' ? 'ধাপভিত্তিক অনলাইন ফর্ম — জাতীয় ডাটাবেস অন্তর্ভুক্তি' : '5-Step Verified Driver Registration Form'}
               </p>
             </div>
           </div>
           <button
             onClick={handleClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer"
+            className="p-1 sm:p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer shrink-0"
           >
             <X className="w-5 h-5" />
           </button>

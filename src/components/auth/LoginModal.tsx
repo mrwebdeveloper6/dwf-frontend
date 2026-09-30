@@ -42,27 +42,27 @@ export const LoginModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-slate-900/80 backdrop-blur-xs animate-in fade-in duration-150 overflow-y-auto">
+      <div className="bg-white rounded-2xl sm:rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl border border-slate-200 space-y-4 sm:space-y-5 max-h-[94vh] sm:max-h-[90vh] overflow-y-auto my-auto">
         
         {/* Header */}
-        <div className="flex justify-between items-start border-b border-slate-100 pb-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-emerald-100 text-emerald-800 rounded-2xl">
-              <LogIn className="w-6 h-6" />
+        <div className="flex justify-between items-center border-b border-slate-100 pb-3 shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0 pr-2">
+            <div className="p-2 bg-emerald-100 text-emerald-800 rounded-xl sm:rounded-2xl shrink-0">
+              <LogIn className="w-5 h-5" />
             </div>
-            <div>
-              <h3 className="text-lg font-bold text-slate-900">
+            <div className="min-w-0">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 truncate">
                 {language === 'bn' ? 'ডিডব্লিউএফ সিকিউর লগইন' : 'DWF Secure Sign-In'}
               </h3>
-              <p className="text-xs text-slate-500">
+              <p className="text-[10px] sm:text-xs text-slate-500 truncate">
                 {language === 'bn' ? 'সদস্য পোর্টাল ও প্রশাসনিক এক্সেস' : 'Driver Portal & Staff Access'}
               </p>
             </div>
           </div>
           <button
             onClick={() => setShowLoginModal(false)}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer"
+            className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer shrink-0"
           >
             <X className="w-5 h-5" />
           </button>

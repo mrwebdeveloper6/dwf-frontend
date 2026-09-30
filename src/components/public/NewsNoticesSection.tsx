@@ -7,7 +7,10 @@ import {
   ArrowRight, 
   AlertCircle, 
   X,
-  FileText 
+  FileText,
+  Download,
+  Video as VideoIcon,
+  Paperclip 
 } from 'lucide-react';
 
 export const NewsNoticesSection: React.FC = () => {
@@ -95,6 +98,24 @@ export const NewsNoticesSection: React.FC = () => {
                 <p className="text-xs text-slate-600 mt-2 line-clamp-3 leading-relaxed">
                   {language === 'bn' ? notice.excerptBn : notice.excerpt}
                 </p>
+
+                {/* Attached media tags */}
+                {(notice.attachmentUrl || notice.videoUrl) && (
+                  <div className="mt-2.5 flex flex-wrap gap-1.5">
+                    {notice.attachmentUrl && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
+                        <Paperclip className="w-2.5 h-2.5 text-emerald-600" />
+                        <span>সার্কুলার সংযুক্তি (PDF)</span>
+                      </span>
+                    )}
+                    {notice.videoUrl && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-800 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-md">
+                        <VideoIcon className="w-2.5 h-2.5 text-rose-600" />
+                        <span>ভিডিও ফুটেজ</span>
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="pt-4 mt-4 border-t border-slate-200/80">
@@ -126,8 +147,8 @@ export const NewsNoticesSection: React.FC = () => {
 
         {/* Notice Details Modal */}
         {selectedNotice && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
-            <div className="bg-white rounded-2xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-slate-900/80 backdrop-blur-xs animate-in fade-in duration-150 overflow-y-auto">
+            <div className="bg-white rounded-2xl sm:rounded-3xl max-w-xl w-full p-4 sm:p-7 shadow-2xl border border-slate-200 space-y-4 max-h-[94vh] sm:max-h-[90vh] overflow-y-auto my-auto">
               <div className="flex justify-between items-start border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2">
                   <span className="bg-emerald-100 text-emerald-800 font-bold text-xs px-2.5 py-0.5 rounded">
@@ -147,6 +168,26 @@ export const NewsNoticesSection: React.FC = () => {
                 {language === 'bn' ? selectedNotice.titleBn : selectedNotice.title}
               </h3>
 
+              {selectedNotice.image && (
+                <img
+                  src={selectedNotice.image}
+                  alt={selectedNotice.titleBn}
+                  className="w-full h-44 object-cover rounded-xl border border-slate-200"
+                />
+              )}
+
+              {selectedNotice.videoUrl && (
+                <div className="rounded-xl overflow-hidden border border-slate-200 bg-black">
+                  <video
+                    src={selectedNotice.videoUrl}
+                    controls
+                    className="w-full max-h-48"
+                  >
+                    ভিডিও প্লেয়ার সমর্থন করছে না
+                  </video>
+                </div>
+              )}
+
               <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3">
                 <p className="font-semibold text-slate-800">
                   {language === 'bn' ? selectedNotice.excerptBn : selectedNotice.excerpt}
@@ -155,6 +196,28 @@ export const NewsNoticesSection: React.FC = () => {
                   {language === 'bn' ? selectedNotice.contentBn : selectedNotice.content}
                 </p>
               </div>
+
+              {/* Attachment Download Button */}
+              {selectedNotice.attachmentUrl && (
+                <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <FileText className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span className="text-xs font-bold text-slate-900 truncate">
+                      {selectedNotice.attachmentName || 'অফিসিয়াল সার্কুলার ফাইল'}
+                    </span>
+                  </div>
+                  <a
+                    href={selectedNotice.attachmentUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    download={selectedNotice.attachmentName || 'notice-attachment.pdf'}
+                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg flex items-center gap-1 shrink-0 transition shadow-2xs"
+                  >
+                    <Download className="w-3 h-3" />
+                    <span>ডাউনলোড</span>
+                  </a>
+                </div>
+              )}
 
               <div className="flex justify-end pt-2">
                 <button
