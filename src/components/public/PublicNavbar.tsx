@@ -116,10 +116,12 @@ export const PublicNavbar: React.FC = () => {
               ) : (
                 <button
                   onClick={() => setShowLoginModal(true)}
-                  className="hidden sm:flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-white hover:text-white bg-red-800/80 hover:bg-red-800 border border-red-400/50 rounded-xl transition cursor-pointer shrink-0"
+                  className="flex items-center gap-1 sm:gap-1.5 px-2 py-1.5 sm:px-3 sm:py-2 text-[11px] sm:text-xs font-bold text-white hover:text-white bg-red-800/90 hover:bg-red-800 border border-red-400/50 rounded-xl transition cursor-pointer shrink-0"
+                  title="লগইন বা ফ্রি সাইন-আপ"
                 >
                   <LogIn className="w-3.5 h-3.5 text-white" />
-                  <span>{language === 'bn' ? 'লগইন' : 'Login'}</span>
+                  <span className="hidden xs:inline">{language === 'bn' ? 'লগইন / সাইন-আপ' : 'Login / Sign Up'}</span>
+                  <span className="xs:hidden">{language === 'bn' ? 'লগইন' : 'Login'}</span>
                 </button>
               )}
 

@@ -8,13 +8,18 @@ export type UserRole =
   | 'MEDICAL_OFFICER' 
   | 'BRANCH_MANAGER';
 
+export type MembershipTier = 'FREE' | 'PREMIUM';
+
 export interface UserSession {
   id: string;
   name: string;
   phone: string;
+  email?: string;
+  username?: string;
   role: 'MEMBER' | 'ADMIN' | 'GUEST';
   adminRole?: UserRole;
   memberId?: string; // e.g. 'DWF-000142'
+  membershipTier?: MembershipTier;
   avatar?: string;
   branch?: string;
 }
@@ -73,6 +78,9 @@ export interface Member {
   vehicleRegNo: string;
   photoUrl: string;
   status: MembershipStatus;
+  membershipTier?: MembershipTier;
+  username?: string;
+  password?: string;
   joinedDate: string;
   healthCardNo: string; // e.g. HC-DWF-78401
   healthCardExpiry: string;

@@ -18,7 +18,9 @@ import {
   ShieldCheck, 
   Info,
   History,
-  UploadCloud
+  UploadCloud,
+  Crown,
+  Sparkles
 } from 'lucide-react';
 
 interface MemberProfileEditorProps {
@@ -30,6 +32,8 @@ export const MemberProfileEditor: React.FC<MemberProfileEditorProps> = ({ member
     profileUpdateRequests, 
     submitProfileUpdateRequest, 
     uploadFileRecord,
+    updateFreeUserProfile,
+    setShowPremiumUpgradeModal,
     language 
   } = useDwf();
 
@@ -40,6 +44,11 @@ export const MemberProfileEditor: React.FC<MemberProfileEditorProps> = ({ member
   // Form State
   const [nameBn, setNameBn] = useState(member.nameBn || '');
   const [name, setName] = useState(member.name || '');
+  const [fatherName, setFatherName] = useState(member.fatherName || '');
+  const [motherName, setMotherName] = useState(member.motherName || '');
+  const [nid, setNid] = useState(member.nid || '');
+  const [dob, setDob] = useState(member.dob || '');
+  const [profession, setProfession] = useState(member.profession || 'পেশাদার মোটরযান চালক');
   const [phone, setPhone] = useState(member.phone || '');
   const [whatsapp, setWhatsapp] = useState(member.whatsapp || '');
   const [bloodGroup, setBloodGroup] = useState(member.bloodGroup || 'B+');
@@ -139,6 +148,36 @@ export const MemberProfileEditor: React.FC<MemberProfileEditorProps> = ({ member
     setErrorMsg(null);
     setSuccessMsg(null);
 
+    // If Free member, directly update profile without requiring admin approval queue
+    if (member.membershipTier === 'FREE') {
+      const res = updateFreeUserProfile(member.memberId, {
+        nameBn: nameBn.trim(),
+        name: name.trim(),
+        fatherName: fatherName.trim(),
+        motherName: motherName.trim(),
+        nid: nid.trim(),
+        dob: dob.trim(),
+        profession: profession.trim(),
+        phone: phone.trim(),
+        whatsapp: whatsapp.trim(),
+        bloodGroup,
+        photoUrl: photoUrl || member.photoUrl,
+        currentAddress: currentAddress.trim(),
+        permanentAddress: permanentAddress.trim(),
+        drivingLicenseNo: drivingLicenseNo.trim(),
+        vehicleType,
+        vehicleRegNo: vehicleRegNo.trim()
+      });
+
+      if (res.success) {
+        setSuccessMsg(language === 'bn' ? 'প্রোফাইল তথ্য (পিতা, মাতা, এনআইডি ও ঠিকানা) সফলভাবে সংরক্ষিত হয়েছে!' : 'Profile details saved successfully!');
+        setIsEditing(false);
+      } else {
+        setErrorMsg(res.message);
+      }
+      return;
+    }
+
     // Validate nominees total percentage
     const totalPercentage = nominees.reduce((acc, curr) => acc + (Number(curr.percentage) || 0), 0);
     if (totalPercentage !== 100) {
@@ -204,6 +243,36 @@ export const MemberProfileEditor: React.FC<MemberProfileEditorProps> = ({ member
 
   return (
     <div className="space-y-6">
+
+      {/* Free Member Upgrade Banner */}
+      {member.membershipTier === 'FREE' && (
+        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-950 via-slate-900 to-amber-950 border-2 border-amber-500/60 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className="p-2.5 bg-amber-500/20 rounded-xl border border-amber-500/40 text-amber-400 shrink-0">
+              <Crown className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="font-bold text-sm text-white">আপনি বর্তমানে ফ্রি সদস্য (Free Member) হিসেবে যুক্ত আছেন</h4>
+                <span className="bg-amber-500 text-slate-950 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">
+                  আপগ্রেড উপলব্ধ
+                </span>
+              </div>
+              <p className="text-xs text-slate-300 mt-1">
+                নিচে আপনার পিতা, মাতা, এনআইডি ও ঠিকানা তথ্য পূরণ করুন। এরপর মনিনি (নমিনী) ফরম পূরণ করে ৬টি আজীবন কল্যাণ সেবা (স্বাস্থ্য কার্ড, চিকিৎসা ও দুর্ঘটনা দাবি ইত্যাদি) চালু করুন।
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowPremiumUpgradeModal(true)}
+            className="w-full sm:w-auto px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs rounded-xl shadow-lg transition cursor-pointer flex items-center justify-center gap-1.5 shrink-0"
+          >
+            <Crown className="w-4 h-4 fill-slate-950" />
+            <span>প্রিমিয়াম সদস্যত্বে আপগ্রেড</span>
+          </button>
+        </div>
+      )}
       
       {/* Pending Request Notification Banner */}
       {pendingRequest && (
@@ -303,11 +372,47 @@ export const MemberProfileEditor: React.FC<MemberProfileEditorProps> = ({ member
           </button>
         </div>
 
+        {/* Member Profile Key Details Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-4 text-xs">
+          <div className="p-3 bg-slate-950/70 rounded-xl border border-slate-800">
+            <span className="text-[11px] text-slate-400 block mb-0.5">পিতার নাম (Father's Name)</span>
+            <p className="font-semibold text-white">{member.fatherName || 'তথ্য হালনাগাদ করা হয়নি'}</p>
+          </div>
+          <div className="p-3 bg-slate-950/70 rounded-xl border border-slate-800">
+            <span className="text-[11px] text-slate-400 block mb-0.5">মাতার নাম (Mother's Name)</span>
+            <p className="font-semibold text-white">{member.motherName || 'তথ্য হালনাগাদ করা হয়নি'}</p>
+          </div>
+          <div className="p-3 bg-slate-950/70 rounded-xl border border-slate-800">
+            <span className="text-[11px] text-slate-400 block mb-0.5">জাতীয় পরিচয়পত্র (NID)</span>
+            <p className="font-semibold text-white font-mono">{member.nid || 'তথ্য হালনাগাদ করা হয়নি'}</p>
+          </div>
+          <div className="p-3 bg-slate-950/70 rounded-xl border border-slate-800">
+            <span className="text-[11px] text-slate-400 block mb-0.5">পেশা ও পদবী</span>
+            <p className="font-semibold text-emerald-400">{member.profession || 'মোটরযান চালক'}</p>
+          </div>
+          <div className="p-3 bg-slate-950/70 rounded-xl border border-slate-800">
+            <span className="text-[11px] text-slate-400 block mb-0.5">বর্তমান ঠিকানা</span>
+            <p className="font-semibold text-slate-200 truncate">{member.currentAddress || 'তথ্য দেওয়া হয়নি'}</p>
+          </div>
+          <div className="p-3 bg-slate-950/70 rounded-xl border border-slate-800">
+            <span className="text-[11px] text-slate-400 block mb-0.5">স্থায়ী ঠিকানা</span>
+            <p className="font-semibold text-slate-200 truncate">{member.permanentAddress || 'তথ্য দেওয়া হয়নি'}</p>
+          </div>
+        </div>
+
         {/* Informative Notice */}
         <div className="mt-4 p-3 bg-slate-950/80 rounded-xl border border-slate-800/80 flex items-start gap-2.5 text-xs text-slate-400">
           <Info className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
           <p>
-            <strong className="text-slate-200">নিরাপত্তা ও যাচাইকরণ নীতি:</strong> সদস্য আইডি ও জাতীয় পরিচয়পত্রের অপব্যবহার রোধে আপনার নাম, ছবি, নমিনির নাম বা অন্যান্য তথ্যের পরিবর্তন সরাসরি ডাটাবেসে আপডেট হয় না। আপনার দাখিলকৃত আবেদন অ্যাডমিন বোর্ড যাচাই ও অনুমোদন করার সাথে সাথে ডাটাবেসে কার্যকর হবে।
+            {member.membershipTier === 'FREE' ? (
+              <>
+                <strong className="text-slate-200">ফ্রি সাধারণ সদস্য নির্দেশিকা:</strong> আপনি এখানে পিতা, মাতা, জাতীয় পরিচয়পত্র (NID), বর্তমান ও স্থায়ী ঠিকানা সরাসরি হালনাগাদ করতে পারবেন। এরপর আজীবন কল্যাণ সেবা পেতে মনিনি (নমিনী) তথ্য পূরণ করে প্রিমিয়াম মেম্বারশিপে আপগ্রেড করুন।
+              </>
+            ) : (
+              <>
+                <strong className="text-slate-200">নিরাপত্তা ও যাচাইকরণ নীতি:</strong> সদস্য আইডি ও জাতীয় পরিচয়পত্রের অপব্যবহার রোধে আপনার নাম, ছবি বা নমিনির পরিবর্তনের আবেদন অ্যাডমিন বোর্ড যাচাই করে ডাটাবেসে কার্যকর করে।
+              </>
+            )}
           </p>
         </div>
       </div>
@@ -410,6 +515,60 @@ export const MemberProfileEditor: React.FC<MemberProfileEditorProps> = ({ member
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-white focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">পিতার নাম (Father's Name) *</label>
+                <input
+                  type="text"
+                  placeholder="যেমন: মোঃ লিয়াকত আলী"
+                  value={fatherName}
+                  onChange={(e) => setFatherName(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-white focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">মাতার নাম (Mother's Name) *</label>
+                <input
+                  type="text"
+                  placeholder="যেমন: মোসাঃ তাহমিনা বেগম"
+                  value={motherName}
+                  onChange={(e) => setMotherName(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-white focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">জাতীয় পরিচয়পত্র নম্বর (NID Number) *</label>
+                <input
+                  type="text"
+                  placeholder="১০ বা ১৭ সংখ্যার জাতীয় পরিচয়পত্র"
+                  value={nid}
+                  onChange={(e) => setNid(e.target.value.replace(/[^0-9]/g, ''))}
+                  className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-white font-mono focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">জন্ম তারিখ (Date of Birth)</label>
+                <input
+                  type="date"
+                  value={dob}
+                  onChange={(e) => setDob(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-white font-mono focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">পেশা / পদবী (Profession)</label>
+                <input
+                  type="text"
+                  placeholder="যেমন: প্রাইভেট কার চালক / রাইডার"
+                  value={profession}
+                  onChange={(e) => setProfession(e.target.value)}
                   className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-white focus:border-emerald-500"
                 />
               </div>

@@ -28,7 +28,9 @@ import {
   Cloud,
   HardDrive,
   Award,
-  UserCog
+  UserCog,
+  Crown,
+  Sparkles
 } from 'lucide-react';
 import { MembershipApplication, MedicalClaim, AccidentClaim, PaymentRecord } from '../../types/dwf';
 import { AdminCommitteeManager } from './AdminCommitteeManager';
@@ -57,7 +59,9 @@ export const AdminPanel: React.FC = () => {
     storedFiles,
     setShowDocumentVaultModal,
     setActiveView,
-    profileUpdateRequests
+    profileUpdateRequests,
+    allowFreeSubscriptionUpgrade,
+    setAllowFreeSubscriptionUpgrade
   } = useDwf();
 
   const [activeTab, setActiveTab] = useState<
@@ -264,6 +268,59 @@ export const AdminPanel: React.FC = () => {
                   <p className="text-[11px] text-slate-500 mt-2">বিতরণকৃত: ৳ {metrics.totalMedicalAssistance.toLocaleString('en-IN')}</p>
                 </div>
 
+              </div>
+
+              {/* Membership Tier & Upgrade Policy Control Card (Admin Toggle for Free Upgrade Option) */}
+              <div className="bg-slate-950 p-5 sm:p-6 rounded-2xl border-2 border-emerald-500/40 shadow-xl space-y-3">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                  <div className="flex items-start gap-3.5">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500/30 to-amber-700/20 border border-amber-500/50 flex items-center justify-center text-amber-400 shrink-0 shadow-md">
+                      <Crown className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="text-base font-bold text-white">প্রিমিয়াম আপগ্রেড সাবস্ক্রিপশন পলিসি (Free Option Control)</h3>
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
+                          allowFreeSubscriptionUpgrade 
+                            ? 'bg-emerald-950 text-emerald-300 border border-emerald-600' 
+                            : 'bg-rose-950 text-rose-300 border border-rose-600'
+                        }`}>
+                          <span className={`w-2 h-2 rounded-full ${allowFreeSubscriptionUpgrade ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'}`}></span>
+                          {allowFreeSubscriptionUpgrade ? 'ফ্রি অপশন চালু (Free Option Active)' : 'ফ্রি অপশন বন্ধ (Paid Only)'}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
+                        {allowFreeSubscriptionUpgrade 
+                          ? '✅ বর্তমানে সদস্যরা প্রিমিয়াম আপগ্রেডের সময় "ফ্রি সাবস্ক্রিপশন (স্পেশাল অফার ৳০ ফি)" নির্বাচন করে মনিনি ফরম পূরণ সাপেক্ষে সরাসরি প্রিমিয়ামে আপগ্রেড হতে পারছেন।' 
+                          : '⛔ বর্তমানে ফ্রি অপশন বন্ধ রাখা হয়েছে। সদস্যরা শুধুমাত্র বিকাশ/নগদে নির্ধারিত ফি (৳৩০০) পরিশোধ করে ট্রানজেকশন আইডি দিয়ে প্রিমিয়াম আপগ্রেড করতে পারবেন।'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 self-end md:self-auto shrink-0">
+                    <button
+                      onClick={() => setAllowFreeSubscriptionUpgrade(!allowFreeSubscriptionUpgrade)}
+                      className={`px-4 py-2.5 rounded-xl font-bold text-xs transition cursor-pointer flex items-center gap-2 shadow-lg active:scale-95 ${
+                        allowFreeSubscriptionUpgrade
+                          ? 'bg-rose-700 hover:bg-rose-600 text-white shadow-rose-950/60'
+                          : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-950/60'
+                      }`}
+                      title={allowFreeSubscriptionUpgrade ? 'ফ্রি সাবস্ক্রিপশন অপশন বন্ধ করুন' : 'ফ্রি সাবস্ক্রিপশন অপশন চালু করুন'}
+                    >
+                      {allowFreeSubscriptionUpgrade ? (
+                        <>
+                          <XCircle className="w-4 h-4 shrink-0" />
+                          <span>ফ্রি অপশন বন্ধ করুন (Disable Free Option)</span>
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="w-4 h-4 shrink-0" />
+                          <span>ফ্রি অপশন চালু করুন (Enable Free Option)</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {/* Dynamic Content Quick Access */}
@@ -539,16 +596,26 @@ export const AdminPanel: React.FC = () => {
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
                   <h2 className="text-xl font-bold text-white">নিবন্ধিত ড্রাইভার সদস্য রেজিস্টার</h2>
-                  <p className="text-xs text-slate-400">সদস্য ডাটাবেস, ডিজিটাল আইডি ও স্বাস্থ্য কার্ড সক্রিয়করণ</p>
+                  <p className="text-xs text-slate-400">
+                    সদস্য ডাটাবেস (ফ্রি ও প্রিমিয়াম) • সাবস্ক্রিপশন নীতি: {allowFreeSubscriptionUpgrade ? 'ফ্রি আপগ্রেড চালু ✅' : 'ফি বাধ্যতামূলক ⛔'}
+                  </p>
                 </div>
-                <div className="w-full sm:w-64">
-                  <input
-                    type="text"
-                    placeholder="নাম, আইডি বা লাইসেন্স খুঁজুন..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500"
-                  />
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <button
+                    onClick={() => setAllowFreeSubscriptionUpgrade(!allowFreeSubscriptionUpgrade)}
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-900 border border-slate-700 text-amber-300 hover:bg-slate-850 cursor-pointer shrink-0"
+                  >
+                    {allowFreeSubscriptionUpgrade ? 'ফ্রি অপশন বন্ধ করুন' : 'ফ্রি অপশন চালু করুন'}
+                  </button>
+                  <div className="w-full sm:w-64">
+                    <input
+                      type="text"
+                      placeholder="নাম, আইডি বা লাইসেন্স খুঁজুন..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -577,7 +644,19 @@ export const AdminPanel: React.FC = () => {
                           <td className="p-3 flex items-center gap-2.5">
                             <img src={m.photoUrl} alt={m.name} className="w-8 h-8 rounded-full object-cover border border-emerald-500" />
                             <div>
-                              <p className="font-bold text-white">{m.nameBn}</p>
+                              <div className="flex items-center gap-1.5">
+                                <p className="font-bold text-white">{m.nameBn}</p>
+                                {m.membershipTier === 'FREE' ? (
+                                  <span className="bg-slate-800 text-slate-300 text-[9px] px-1.5 py-0.2 rounded font-bold border border-slate-700">
+                                    ফ্রি
+                                  </span>
+                                ) : (
+                                  <span className="bg-amber-500/20 text-amber-300 text-[9px] px-1.5 py-0.2 rounded font-bold border border-amber-500/40 flex items-center gap-0.5">
+                                    <Crown className="w-2.5 h-2.5 fill-amber-400" />
+                                    <span>প্রিমিয়াম</span>
+                                  </span>
+                                )}
+                              </div>
                               <p className="text-[10px] text-slate-400">{m.profession}</p>
                             </div>
                           </td>

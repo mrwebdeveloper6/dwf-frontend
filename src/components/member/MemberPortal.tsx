@@ -33,12 +33,16 @@ import {
   Sparkles,
   ExternalLink,
   TrendingUp,
-  X
+  X,
+  Crown,
+  Lock,
+  Unlock
 } from 'lucide-react';
 import { PaymentMethod, PaymentType, Nominee } from '../../types/dwf';
 import { WelfareImpactChart } from './WelfareImpactChart';
 import { exportElementToPdf } from '../../lib/pdfExport';
 import { MemberProfileEditor } from './MemberProfileEditor';
+import { PremiumUpgradeModal } from './PremiumUpgradeModal';
 
 export const MemberPortal: React.FC = () => {
   const { 
@@ -56,6 +60,7 @@ export const MemberPortal: React.FC = () => {
     smsRecords,
     storedFiles,
     setShowDocumentVaultModal,
+    setShowPremiumUpgradeModal,
     setActiveView 
   } = useDwf();
 
@@ -66,6 +71,8 @@ export const MemberPortal: React.FC = () => {
   const [mobileTabMenuOpen, setMobileTabMenuOpen] = useState(false);
 
   const member = currentMemberData;
+  const isPremium = member?.membershipTier === 'PREMIUM';
+  const lockedTabs = ['impact', 'id-card', 'health-card', 'payments', 'medical', 'accident'];
 
   // Payments State
   const [payAmount, setPayAmount] = useState<number>(300);
@@ -261,19 +268,96 @@ export const MemberPortal: React.FC = () => {
   };
 
   const tabsList = [
-    { id: 'dashboard', label: 'ড্যাশবোর্ড', labelEn: 'Dashboard', icon: LayoutDashboard },
-    { id: 'impact', label: 'কল্যাণ প্রভাব চার্ট', labelEn: 'Welfare Impact', icon: TrendingUp },
-    { id: 'id-card', label: 'ডিজিটাল আইডি কার্ড', labelEn: 'Digital ID Card', icon: CreditCard },
-    { id: 'health-card', label: 'স্বাস্থ্য কার্ড', labelEn: 'Health Card', icon: HeartPulse },
-    { id: 'payments', label: 'চাঁদা ও তহবিল খতিয়ান', labelEn: 'Payments & Ledger', icon: Wallet },
-    { id: 'medical', label: 'চিকিৎসা দাবি', labelEn: 'Medical Claims', icon: Receipt },
-    { id: 'accident', label: 'দুর্ঘটনা সহায়তা', labelEn: 'Accident Aid', icon: ShieldAlert },
-    { id: 'documents', label: 'নথিপত্র ভল্ট', labelEn: 'Document Vault', icon: FolderArchive },
-    { id: 'nominees', label: 'নমিনি তথ্য', labelEn: 'Nominees', icon: Users },
-    { id: 'profile', label: 'আমার প্রোফাইল', labelEn: 'Profile', icon: User }
+    { id: 'dashboard', label: 'ড্যাশবোর্ড', labelEn: 'Dashboard', icon: LayoutDashboard, isLocked: false },
+    { id: 'impact', label: 'কল্যাণ প্রভাব চার্ট', labelEn: 'Welfare Impact', icon: TrendingUp, isLocked: !isPremium },
+    { id: 'id-card', label: 'ডিজিটাল আইডি কার্ড', labelEn: 'Digital ID Card', icon: CreditCard, isLocked: !isPremium },
+    { id: 'health-card', label: 'স্বাস্থ্য কার্ড', labelEn: 'Health Card', icon: HeartPulse, isLocked: !isPremium },
+    { id: 'payments', label: 'চাঁদা ও তহবিল খতিয়ান', labelEn: 'Payments & Ledger', icon: Wallet, isLocked: !isPremium },
+    { id: 'medical', label: 'চিকিৎসা দাবি', labelEn: 'Medical Claims', icon: Receipt, isLocked: !isPremium },
+    { id: 'accident', label: 'দুর্ঘটনা সহায়তা', labelEn: 'Accident Aid', icon: ShieldAlert, isLocked: !isPremium },
+    { id: 'documents', label: 'নথিপত্র ভল্ট', labelEn: 'Document Vault', icon: FolderArchive, isLocked: false },
+    { id: 'nominees', label: 'নমিনি তথ্য', labelEn: 'Nominees', icon: Users, isLocked: false },
+    { id: 'profile', label: 'আমার প্রোফাইল', labelEn: 'Profile', icon: User, isLocked: false }
   ];
 
   const currentTabObj = tabsList.find(t => t.id === activeTab) || tabsList[0];
+
+  const renderLockedFeatureGate = (tabId: string) => {
+    const curTab = tabsList.find(t => t.id === tabId);
+    return (
+      <div className="bg-slate-900 border-2 border-amber-500/50 rounded-3xl p-6 sm:p-10 shadow-2xl text-center max-w-3xl mx-auto my-6 animate-in zoom-in-95">
+        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-amber-500 to-amber-700 rounded-3xl mx-auto flex items-center justify-center text-white shadow-xl shadow-amber-600/30 mb-5">
+          <Lock className="w-8 h-8 sm:w-10 sm:h-10" />
+        </div>
+
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-full text-xs font-bold uppercase tracking-wider mb-3">
+          <Crown className="w-3.5 h-3.5 fill-amber-400" />
+          <span>{language === 'bn' ? 'শুধুমাত্র প্রিমিয়াম সদস্যদের জন্য সংরক্ষিত' : 'Reserved for Premium Members'}</span>
+        </div>
+
+        <h3 className="text-xl sm:text-2xl font-black text-white mb-2">
+          {curTab ? (language === 'bn' ? curTab.label : curTab.labelEn) : 'এই সেবাটি লক করা রয়েছে'}
+        </h3>
+
+        <p className="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto leading-relaxed mb-6">
+          {language === 'bn' 
+            ? 'আপনি বর্তমানে ফ্রি সাধারণ সদস্য (Free Member) হিসেবে নিবন্ধিত আছেন। এই সেবাটি ব্যবহার করতে এবং আজীবন বিনামূল্যে চিকিৎসা পলিসি ও সকল অনুদান সুবিধা পেতে মনিনি (নমিনী) ফরম পূরণ করে প্রিমিয়াম আজীবন সদস্যত্ব সক্রিয় করুন।' 
+            : 'You are currently registered as a Free Member. Please complete your Monini (nominee) form and subscription to unlock lifetime access to all 6 premium services.'}
+        </p>
+
+        {/* 6 Core Unlocked Services Highlights */}
+        <div className="bg-slate-950/80 rounded-2xl p-4 sm:p-5 border border-slate-800 text-left mb-6 max-w-xl mx-auto">
+          <p className="text-xs font-bold text-amber-300 mb-3 flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-amber-400" />
+            <span>{language === 'bn' ? 'প্রিমিয়াম সদস্য হলে যে ৬টি সেবা সম্পূর্ণ উন্মুক্ত হবে:' : '6 Services Unlocked upon Premium Upgrade:'}</span>
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-slate-300">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>১. কল্যাণ প্রভাব চার্ট ও সিমুলেটর</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" />
+              <span>২. ডিজিটাল স্মার্ট আইডি কার্ড</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-red-400 shrink-0" />
+              <span>৩. আজীবন ফ্রি চিকিৎসা ও স্বাস্থ্য কার্ড</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
+              <span>৪. চাঁদা ও তহবিল খতিয়ান ও রসিদ</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-purple-400 shrink-0" />
+              <span>৫. ৫০,০০০৳ পর্যন্ত চিকিৎসা দাবি</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-orange-400 shrink-0" />
+              <span>৬. ১,০০,০০০৳ পর্যন্ত দুর্ঘটনা সহায়তা</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <button
+            onClick={() => setShowPremiumUpgradeModal(true)}
+            className="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs sm:text-sm rounded-xl shadow-lg shadow-amber-500/25 transition cursor-pointer flex items-center justify-center gap-2 active:scale-95"
+          >
+            <Crown className="w-4 h-4 fill-slate-950" />
+            <span>{language === 'bn' ? 'প্রিমিয়াম সদস্যত্বে আপগ্রেড করুন (মনিনি পূরণ)' : 'Upgrade to Premium (Monini Form)'}</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('profile')}
+            className="w-full sm:w-auto px-5 py-3.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl border border-slate-700 transition cursor-pointer"
+          >
+            {language === 'bn' ? 'প্রোফাইল পূরণ করুন (পিতা, মাতা, এনআইডি)' : 'Fill Profile (Father, Mother, NID)'}
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 pb-16 selection:bg-emerald-900 selection:text-emerald-100 font-sans">
@@ -293,15 +377,40 @@ export const MemberPortal: React.FC = () => {
               <DwfLogo size="sm" variant="light" className="hidden sm:flex" />
             </div>
             <div className="border-l border-slate-800 pl-2.5 sm:pl-3 min-w-0">
-              <span className="text-[11px] sm:text-xs font-bold text-emerald-400 uppercase tracking-wider block truncate">
-                {language === 'bn' ? 'সদস্য পোর্টাল' : 'Member Portal'}
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] sm:text-xs font-bold text-emerald-400 uppercase tracking-wider block truncate">
+                  {language === 'bn' ? 'সদস্য পোর্টাল' : 'Member Portal'}
+                </span>
+                {isPremium ? (
+                  <span className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                    <Crown className="w-2.5 h-2.5 fill-amber-400" />
+                    <span>প্রিমিয়াম</span>
+                  </span>
+                ) : (
+                  <span className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                    <span>ফ্রি মেম্বার</span>
+                  </span>
+                )}
+              </div>
               <p className="text-[10px] sm:text-[11px] text-slate-400 truncate">{member.branchName}</p>
             </div>
           </div>
 
           {/* Member Profile Avatar, ID & Quick Actions */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            
+            {/* Upgrade CTA button if Free Member */}
+            {!isPremium && (
+              <button
+                onClick={() => setShowPremiumUpgradeModal(true)}
+                className="px-2.5 py-1.5 sm:px-3 sm:py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs rounded-xl shadow-md flex items-center gap-1.5 transition active:scale-95 cursor-pointer shrink-0 animate-pulse"
+                title="প্রিমিয়াম সদস্যত্বে আপগ্রেড করুন"
+              >
+                <Crown className="w-3.5 h-3.5 fill-slate-950 shrink-0" />
+                <span className="hidden xs:inline">{language === 'bn' ? 'প্রিমিয়াম আপগ্রেড' : 'Upgrade'}</span>
+              </button>
+            )}
+
             <div 
               onClick={() => setActiveTab('profile')}
               className="flex items-center gap-2 sm:gap-2.5 px-2 py-1 sm:px-3 sm:py-1.5 rounded-xl hover:bg-slate-800/60 cursor-pointer transition border border-transparent hover:border-slate-700/60"
@@ -380,14 +489,22 @@ export const MemberPortal: React.FC = () => {
                       setActiveTab(tab.id as any);
                       setMobileTabMenuOpen(false);
                     }}
-                    className={`w-full flex items-center gap-3 p-2.5 rounded-xl text-xs font-semibold transition text-left cursor-pointer ${
+                    className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs font-semibold transition text-left cursor-pointer ${
                       isActive
                         ? 'bg-emerald-600 text-white font-bold shadow-xs'
                         : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
                     }`}
                   >
-                    <tab.icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-emerald-400'}`} />
-                    <span>{tab.label}</span>
+                    <div className="flex items-center gap-3">
+                      <tab.icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-emerald-400'}`} />
+                      <span>{tab.label}</span>
+                    </div>
+                    {tab.isLocked && (
+                      <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[9px] font-bold flex items-center gap-1 border border-amber-500/30">
+                        <Lock className="w-2.5 h-2.5" />
+                        <span>লক</span>
+                      </span>
+                    )}
                   </button>
                 );
               })}
@@ -411,10 +528,23 @@ export const MemberPortal: React.FC = () => {
               >
                 <tab.icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-emerald-400'}`} />
                 <span>{tab.label}</span>
+                {tab.isLocked && (
+                  <span className="ml-1 px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 text-[9px] font-bold flex items-center gap-0.5 border border-amber-500/30">
+                    <Lock className="w-2.5 h-2.5" />
+                    <span>লক</span>
+                  </span>
+                )}
               </button>
             );
           })}
         </div>
+
+        {/* ============================================================ */}
+        {/* LOCKED FEATURE GATE FOR FREE USERS (6 PROTECTED SERVICES) */}
+        {/* ============================================================ */}
+        {!isPremium && lockedTabs.includes(activeTab) && (
+          renderLockedFeatureGate(activeTab)
+        )}
 
         {/* ============================================================ */}
         {/* TAB 1: DASHBOARD OVERVIEW */}
@@ -454,160 +584,387 @@ export const MemberPortal: React.FC = () => {
 
                 {/* Quick Shortcuts */}
                 <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-                  <button
-                    onClick={() => setActiveTab('id-card')}
-                    className="flex-1 sm:flex-none px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 shadow-md shadow-emerald-950/50"
-                  >
-                    <CreditCard className="w-4 h-4" />
-                    <span>আইডি কার্ড</span>
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('payments')}
-                    className="flex-1 sm:flex-none px-4 py-2.5 bg-slate-850 hover:bg-slate-800 text-emerald-300 text-xs font-bold rounded-xl transition border border-emerald-700/60 cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
-                  >
-                    <Wallet className="w-4 h-4" />
-                    <span>চাঁদা জমা দিন</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Core Member Metrics Grid - Responsive 1 -> 2 -> 4 columns */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-              
-              {/* Card 1: Membership Status */}
-              <div className="bg-slate-900/90 p-5 rounded-2xl border border-slate-800 shadow-md flex flex-col justify-between hover:border-emerald-500/30 transition">
-                <span className="text-xs text-slate-400 font-medium">সদস্যপদ স্থিতি ও স্বাস্থ্য কার্ড</span>
-                <div className="flex items-center justify-between mt-3">
-                  <span className="text-base sm:text-lg font-bold text-emerald-400 flex items-center gap-1.5">
-                    <CheckCircle2 className="w-5 h-5 shrink-0" />
-                    <span>সক্রিয় (Active)</span>
-                  </span>
-                  <span className="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-800/80 font-mono px-2 py-0.5 rounded font-bold">
-                    {member.bloodGroup}
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-400 mt-2">মেয়াদ: <span className="text-slate-200 font-mono">{member.healthCardExpiry}</span></p>
-              </div>
-
-              {/* Card 2: Total Deposit */}
-              <div className="bg-slate-900/90 p-5 rounded-2xl border border-slate-800 shadow-md flex flex-col justify-between hover:border-emerald-500/30 transition">
-                <span className="text-xs text-slate-400 font-medium">মোট জমাকৃত কল্যাণ তহবিল</span>
-                <div className="mt-2">
-                  <p className="text-2xl sm:text-3xl font-black text-white font-mono tracking-tight">
-                    ৳ {member.totalDeposit.toLocaleString('en-IN')}
-                  </p>
-                </div>
-                <p className="text-[11px] text-emerald-400 font-medium mt-2">মাসিক চাঁদা: ৳ {member.monthlyContribution}/মাস</p>
-              </div>
-
-              {/* Card 3: Due Amount */}
-              <div className="bg-slate-900/90 p-5 rounded-2xl border border-slate-800 shadow-md flex flex-col justify-between hover:border-emerald-500/30 transition">
-                <span className="text-xs text-slate-400 font-medium">বকেয়া চাঁদা স্থিতি</span>
-                <div className="mt-2">
-                  <p className={`text-2xl sm:text-3xl font-black font-mono tracking-tight ${member.outstandingDue > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
-                    ৳ {member.outstandingDue}
-                  </p>
-                </div>
-                <p className="text-[11px] text-slate-400 mt-2">
-                  {member.outstandingDue > 0 ? 'চলতি মাসের চাঁদা অপরিশোধিত' : 'সকল বকেয়া পরিশোধিত (আপ-টু-ডেট)'}
-                </p>
-              </div>
-
-              {/* Card 4: Medical Allowance Limit */}
-              <div className="bg-slate-900/90 p-5 rounded-2xl border border-slate-800 shadow-md flex flex-col justify-between hover:border-emerald-500/30 transition">
-                <span className="text-xs text-slate-400 font-medium">বার্ষিক চিকিৎসা অনুদান সীমা</span>
-                <div className="mt-2">
-                  <p className="text-2xl sm:text-3xl font-black text-rose-400 font-mono tracking-tight">
-                    ৳ {member.medicalAllowanceLimit.toLocaleString('en-IN')}
-                  </p>
-                </div>
-                <p className="text-[11px] text-slate-400 mt-2">ডিজিটাল স্বাস্থ্য কার্ডের আওতাধীন</p>
-              </div>
-
-            </div>
-
-            {/* Quick Split: Recent Payments & Claims History */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-              
-              {/* Recent Payment Receipts */}
-              <div className="bg-slate-900/90 rounded-2xl border border-slate-800 p-5 sm:p-6 shadow-md space-y-4">
-                <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                    <Receipt className="w-4 h-4 text-emerald-400" />
-                    <span>সর্বশেষ চাঁদা জমার রসিদ</span>
-                  </h3>
-                  <button
-                    onClick={() => setActiveTab('payments')}
-                    className="text-xs text-emerald-400 hover:text-emerald-300 font-semibold hover:underline cursor-pointer"
-                  >
-                    সকল রসিদ
-                  </button>
-                </div>
-
-                <div className="space-y-2.5">
-                  {myPayments.length > 0 ? (
-                    myPayments.slice(0, 3).map((p) => (
-                      <div key={p.id} className="bg-slate-950/70 p-3 rounded-xl border border-slate-800/80 flex justify-between items-center text-xs">
-                        <div className="min-w-0 pr-2">
-                          <p className="font-bold text-slate-200 truncate">{p.remarks || p.paymentType}</p>
-                          <p className="text-[11px] text-slate-400 font-mono mt-0.5 truncate">{p.receiptNo} • {p.date}</p>
-                        </div>
-                        <div className="text-right shrink-0">
-                          <span className="font-black font-mono text-emerald-400 text-sm">৳ {p.amount}</span>
-                          <p className="text-[10px] text-slate-400 font-semibold uppercase">{p.paymentMethod}</p>
-                        </div>
-                      </div>
-                    ))
+                  {isPremium ? (
+                    <>
+                      <button
+                        onClick={() => setActiveTab('id-card')}
+                        className="flex-1 sm:flex-none px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 shadow-md shadow-emerald-950/50"
+                      >
+                        <CreditCard className="w-4 h-4" />
+                        <span>আইডি কার্ড</span>
+                      </button>
+                      <button
+                        onClick={() => setActiveTab('payments')}
+                        className="flex-1 sm:flex-none px-4 py-2.5 bg-slate-850 hover:bg-slate-800 text-emerald-300 text-xs font-bold rounded-xl transition border border-emerald-700/60 cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
+                      >
+                        <Wallet className="w-4 h-4" />
+                        <span>চাঁদা জমা দিন</span>
+                      </button>
+                    </>
                   ) : (
-                    <p className="text-xs text-slate-500 text-center py-4">কোনো পূর্ববর্তী পেমেন্ট পাওয়া যায়নি</p>
+                    <>
+                      <button
+                        onClick={() => setShowPremiumUpgradeModal(true)}
+                        className="flex-1 sm:flex-none px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 text-xs font-black rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 shadow-lg shadow-amber-500/25 active:scale-95"
+                      >
+                        <Crown className="w-4 h-4 fill-slate-950" />
+                        <span>প্রিমিয়াম আপগ্রেড</span>
+                      </button>
+                      <button
+                        onClick={() => setActiveTab('profile')}
+                        className="flex-1 sm:flex-none px-4 py-2.5 bg-slate-850 hover:bg-slate-800 text-emerald-300 text-xs font-bold rounded-xl transition border border-emerald-700/60 cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
+                      >
+                        <User className="w-4 h-4" />
+                        <span>প্রোফাইল পূরণ</span>
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
+            </div>
 
-              {/* Claims Status Box */}
-              <div className="bg-slate-900/90 rounded-2xl border border-slate-800 p-5 sm:p-6 shadow-md space-y-4">
-                <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                    <HeartPulse className="w-4 h-4 text-rose-400" />
-                    <span>চিকিৎসা ও দুর্ঘটনা দাবি অগ্রগতি</span>
-                  </h3>
-                  <button
-                    onClick={() => setActiveTab('medical')}
-                    className="text-xs text-emerald-400 hover:text-emerald-300 font-semibold hover:underline cursor-pointer"
-                  >
-                    নতুন দাবি
-                  </button>
-                </div>
-
-                <div className="space-y-2.5">
-                  {myMedicalClaims.length > 0 ? (
-                    myMedicalClaims.slice(0, 3).map((c) => (
-                      <div key={c.id} className="bg-slate-950/70 p-3 rounded-xl border border-slate-800/80 flex justify-between items-center text-xs">
-                        <div className="min-w-0 pr-2">
-                          <p className="font-bold text-slate-200 truncate">{c.diseaseReason}</p>
-                          <p className="text-[11px] text-slate-400 truncate">{c.hospital} ({c.admissionDate})</p>
-                        </div>
-                        <div className="text-right shrink-0">
-                          <span className="inline-block bg-emerald-950 border border-emerald-700/80 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                            {c.status}
+            {/* ============================================================ */}
+            {/* 1. FREE MEMBERS DASHBOARD: ONLY PROFILE SETUP & PREMIUM UPGRADE */}
+            {/* ============================================================ */}
+            {!isPremium && (
+              <div className="space-y-6">
+                
+                {/* Free Member Onboarding Banner Card */}
+                <div className="bg-gradient-to-r from-amber-950/80 via-slate-900 to-amber-950/80 border-2 border-amber-500/50 rounded-3xl p-5 sm:p-7 shadow-xl space-y-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="flex items-start gap-3">
+                      <div className="p-3 bg-amber-500/20 rounded-2xl border border-amber-500/40 text-amber-400 shrink-0">
+                        <Crown className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-base sm:text-lg font-bold text-white">সদস্যপদ স্থিতি: ফ্রি মেম্বার (Free Member)</h3>
+                          <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                            একাউন্ট সক্রিয়
                           </span>
-                          <p className="text-[11px] font-bold text-slate-300 mt-0.5 font-mono">
-                            দাবি: ৳ {c.claimAmount}
-                          </p>
+                        </div>
+                        <p className="text-xs text-slate-300 mt-1">
+                          আপনার একাউন্টে শুধুমাত্র প্রোফাইল সেটাপ এবং প্রিমিয়াম প্যাকেজ আপডেট করার অপশন উন্মুক্ত আছে।
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => setShowPremiumUpgradeModal(true)}
+                      className="w-full sm:w-auto px-5 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs rounded-xl shadow-lg transition cursor-pointer flex items-center justify-center gap-2 active:scale-95 shrink-0"
+                    >
+                      <Crown className="w-4 h-4 fill-slate-950" />
+                      <span>প্রিমিয়াম প্যাকেজ আপডেট (মনিনি পূরণ)</span>
+                    </button>
+                  </div>
+
+                  {/* 3 Step Onboarding Flow */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                    <div className="p-3 bg-slate-950/60 rounded-xl border border-emerald-500/40 flex items-center gap-3">
+                      <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center shrink-0 text-xs">
+                        ১
+                      </div>
+                      <div>
+                        <p className="font-bold text-white text-xs">ফ্রি একাউন্ট রেজিস্ট্রেশন</p>
+                        <span className="text-[10px] text-emerald-400 font-semibold">সম্পন্ন হয়েছে ✅</span>
+                      </div>
+                    </div>
+
+                    <div 
+                      onClick={() => setActiveTab('profile')}
+                      className="p-3 bg-slate-950/60 hover:bg-slate-950 rounded-xl border border-slate-800 hover:border-slate-700 flex items-center justify-between cursor-pointer transition"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-7 h-7 rounded-lg bg-blue-500/20 text-blue-400 font-bold flex items-center justify-center shrink-0 text-xs">
+                          ২
+                        </div>
+                        <div>
+                          <p className="font-bold text-white text-xs">পিতা, মাতা, এনআইডি পূরণ</p>
+                          <span className="text-[10px] text-blue-400 font-semibold">প্রোফাইল সেটাপ করুন 📝</span>
                         </div>
                       </div>
-                    ))
-                  ) : (
-                    <p className="text-xs text-slate-500 py-4 text-center">কোনো সক্রিয় চিকিৎসা বা দুর্ঘটনা দাবি নেই।</p>
-                  )}
+                      <ArrowRight className="w-4 h-4 text-slate-400" />
+                    </div>
+
+                    <div 
+                      onClick={() => setShowPremiumUpgradeModal(true)}
+                      className="p-3 bg-slate-950/60 hover:bg-slate-950 rounded-xl border border-amber-500/40 hover:border-amber-400 flex items-center justify-between cursor-pointer transition"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center shrink-0 text-xs">
+                          ৩
+                        </div>
+                        <div>
+                          <p className="font-bold text-white text-xs">মনিনি ও সাবস্ক্রিপশন পূরণ</p>
+                          <span className="text-[10px] text-amber-400 font-semibold">প্যাকেজ আপডেট করুন 👑</span>
+                        </div>
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-amber-400" />
+                    </div>
+                  </div>
                 </div>
+
+                {/* 2 Dedicated Action Options For Free Member */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                  
+                  {/* OPTION 1: Profile Setup (প্রোফাইল সেটাপ) */}
+                  <div className="bg-slate-900/90 rounded-3xl p-6 sm:p-7 border-2 border-slate-800 hover:border-emerald-500/60 transition shadow-xl flex flex-col justify-between space-y-5">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
+                          <User className="w-6 h-6" />
+                        </div>
+                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                          অপশন ১ • প্রোফাইল সেটাপ
+                        </span>
+                      </div>
+
+                      <div>
+                        <h3 className="text-lg font-bold text-white">প্রোফাইল সেটাপ ও তথ্য পূরণ</h3>
+                        <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                          পিতার নাম, মাতার নাম, জাতীয় পরিচয়পত্র (NID) নম্বর, বর্তমান ঠিকানা এবং স্থায়ী ঠিকানা হালনাগাদ করুন।
+                        </p>
+                      </div>
+
+                      {/* Fields Completion Status Indicator */}
+                      <div className="p-3.5 bg-slate-950/70 rounded-2xl border border-slate-800/80 space-y-2 text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-400">পিতার নাম (Father's Name):</span>
+                          <span className={member.fatherName ? "text-emerald-400 font-bold" : "text-amber-400 font-semibold"}>
+                            {member.fatherName ? `${member.fatherName} ✅` : "পূরণ বাকি ⚠️"}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-400">মাতার নাম (Mother's Name):</span>
+                          <span className={member.motherName ? "text-emerald-400 font-bold" : "text-amber-400 font-semibold"}>
+                            {member.motherName ? `${member.motherName} ✅` : "পূরণ বাকি ⚠️"}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-400">জাতীয় পরিচয়পত্র (NID):</span>
+                          <span className={member.nid ? "text-emerald-400 font-mono font-bold" : "text-amber-400 font-semibold"}>
+                            {member.nid ? `${member.nid} ✅` : "পূরণ বাকি ⚠️"}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-400">বর্তমান ও স্থায়ী ঠিকানা:</span>
+                          <span className={member.currentAddress ? "text-emerald-400 font-bold" : "text-amber-400 font-semibold"}>
+                            {member.currentAddress ? "পূরণকৃত ✅" : "পূরণ বাকি ⚠️"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => setActiveTab('profile')}
+                      className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm rounded-xl transition cursor-pointer shadow-lg shadow-emerald-950/50 flex items-center justify-center gap-2 active:scale-95"
+                    >
+                      <User className="w-4 h-4" />
+                      <span>প্রোফাইল সেটাপ শুরু / হালনাগাদ করুন</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  {/* OPTION 2: Premium Package Update (প্রিমিয়াম প্যাকেজ আপডেট) */}
+                  <div className="bg-gradient-to-br from-amber-950/40 via-slate-900 to-amber-950/30 rounded-3xl p-6 sm:p-7 border-2 border-amber-500/50 hover:border-amber-400 transition shadow-xl flex flex-col justify-between space-y-5">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 text-slate-950 flex items-center justify-center shadow-lg shadow-amber-600/30">
+                          <Crown className="w-6 h-6 fill-slate-950" />
+                        </div>
+                        <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase">
+                          অপশন ২ • প্যাকেজ আপডেট
+                        </span>
+                      </div>
+
+                      <div>
+                        <h3 className="text-lg font-bold text-white">প্রিমিয়াম প্যাকেজ আপডেট ও আনলক</h3>
+                        <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                          মনিনি (নমিনী) ফরম পূরণ করে ৬টি আজীবন কল্যাণ সেবা (স্বাস্থ্য কার্ড, চিকিৎসা ও দুর্ঘটনা দাবি ইত্যাদি) সক্রিয় করুন।
+                        </p>
+                      </div>
+
+                      {/* Benefits Highlights List */}
+                      <div className="p-3.5 bg-slate-950/80 rounded-2xl border border-amber-500/30 space-y-2 text-xs text-slate-200">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                          <span>আজীবন বিনামূল্যে চিকিৎসা পলিসি ও ডিজিটাল স্বাস্থ্য কার্ড</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" />
+                          <span>ডিজিটাল স্মার্ট আইডি কার্ড ও পিভিডি ভেরিফিকেশন</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-rose-400 shrink-0" />
+                          <span>৫০,০০০ টাকা পর্যন্ত হাসপাতাল চিকিৎসা অনুদান দাবি</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
+                          <span>১,০০,০০০ টাকা পর্যন্ত সড়ক দুর্ঘটনা সহায়তা সেল</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => setShowPremiumUpgradeModal(true)}
+                      className="w-full py-3 px-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs sm:text-sm rounded-xl transition cursor-pointer shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2 active:scale-95"
+                    >
+                      <Crown className="w-4 h-4 fill-slate-950" />
+                      <span>প্রিমিয়াম প্যাকেজ আপডেট (মনিনি পূরণ)</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                </div>
+
               </div>
+            )}
 
-            </div>
+            {/* ============================================================ */}
+            {/* 2. PREMIUM MEMBERS DASHBOARD: FINANCIAL METRICS, DUES & CLAIMS */}
+            {/* ============================================================ */}
+            {isPremium && (
+              <div className="space-y-6">
+                
+                {/* Core Member Metrics Grid - Responsive 1 -> 2 -> 4 columns */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                  
+                  {/* Card 1: Membership Status */}
+                  <div className="bg-slate-900/90 p-5 rounded-2xl border border-slate-800 shadow-md flex flex-col justify-between hover:border-emerald-500/30 transition">
+                    <span className="text-xs text-slate-400 font-medium">সদস্যপদ স্থিতি ও স্বাস্থ্য কার্ড</span>
+                    <div className="flex items-center justify-between mt-3">
+                      <span className="text-base sm:text-lg font-bold text-emerald-400 flex items-center gap-1.5">
+                        <CheckCircle2 className="w-5 h-5 shrink-0" />
+                        <span>সক্রিয় (Active)</span>
+                      </span>
+                      <span className="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-800/80 font-mono px-2 py-0.5 rounded font-bold">
+                        {member.bloodGroup}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-400 mt-2">মেয়াদ: <span className="text-slate-200 font-mono">{member.healthCardExpiry}</span></p>
+                  </div>
 
-            {/* Recharts Welfare Impact Chart Section */}
-            <WelfareImpactChart language={language} />
+                  {/* Card 2: Total Deposit */}
+                  <div className="bg-slate-900/90 p-5 rounded-2xl border border-slate-800 shadow-md flex flex-col justify-between hover:border-emerald-500/30 transition">
+                    <span className="text-xs text-slate-400 font-medium">মোট জমাকৃত কল্যাণ তহবিল</span>
+                    <div className="mt-2">
+                      <p className="text-2xl sm:text-3xl font-black text-white font-mono tracking-tight">
+                        ৳ {member.totalDeposit.toLocaleString('en-IN')}
+                      </p>
+                    </div>
+                    <p className="text-[11px] text-emerald-400 font-medium mt-2">মাসিক চাঁদা: ৳ {member.monthlyContribution}/মাস</p>
+                  </div>
+
+                  {/* Card 3: Due Amount */}
+                  <div className="bg-slate-900/90 p-5 rounded-2xl border border-slate-800 shadow-md flex flex-col justify-between hover:border-emerald-500/30 transition">
+                    <span className="text-xs text-slate-400 font-medium">বকেয়া চাঁদা স্থিতি</span>
+                    <div className="mt-2">
+                      <p className={`text-2xl sm:text-3xl font-black font-mono tracking-tight ${member.outstandingDue > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
+                        ৳ {member.outstandingDue}
+                      </p>
+                    </div>
+                    <p className="text-[11px] text-slate-400 mt-2">
+                      {member.outstandingDue > 0 ? 'চলতি মাসের চাঁদা অপরিশোধিত' : 'সকল বকেয়া পরিশোধিত (আপ-টু-ডেট)'}
+                    </p>
+                  </div>
+
+                  {/* Card 4: Medical Allowance Limit */}
+                  <div className="bg-slate-900/90 p-5 rounded-2xl border border-slate-800 shadow-md flex flex-col justify-between hover:border-emerald-500/30 transition">
+                    <span className="text-xs text-slate-400 font-medium">বার্ষিক চিকিৎসা অনুদান সীমা</span>
+                    <div className="mt-2">
+                      <p className="text-2xl sm:text-3xl font-black text-rose-400 font-mono tracking-tight">
+                        ৳ {member.medicalAllowanceLimit.toLocaleString('en-IN')}
+                      </p>
+                    </div>
+                    <p className="text-[11px] text-slate-400 mt-2">ডিজিটাল স্বাস্থ্য কার্ডের আওতাধীন</p>
+                  </div>
+
+                </div>
+
+                {/* Quick Split: Recent Payments & Claims History */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                  
+                  {/* Recent Payment Receipts */}
+                  <div className="bg-slate-900/90 rounded-2xl border border-slate-800 p-5 sm:p-6 shadow-md space-y-4">
+                    <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+                      <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                        <Receipt className="w-4 h-4 text-emerald-400" />
+                        <span>সর্বশেষ চাঁদা জমার রসিদ</span>
+                      </h3>
+                      <button
+                        onClick={() => setActiveTab('payments')}
+                        className="text-xs text-emerald-400 hover:text-emerald-300 font-semibold hover:underline cursor-pointer"
+                      >
+                        সকল রসিদ
+                      </button>
+                    </div>
+
+                    <div className="space-y-2.5">
+                      {myPayments.length > 0 ? (
+                        myPayments.slice(0, 3).map((p) => (
+                          <div key={p.id} className="bg-slate-950/70 p-3 rounded-xl border border-slate-800/80 flex justify-between items-center text-xs">
+                            <div className="min-w-0 pr-2">
+                              <p className="font-bold text-slate-200 truncate">{p.remarks || p.paymentType}</p>
+                              <p className="text-[11px] text-slate-400 font-mono mt-0.5 truncate">{p.receiptNo} • {p.date}</p>
+                            </div>
+                            <div className="text-right shrink-0">
+                              <span className="font-black font-mono text-emerald-400 text-sm">৳ {p.amount}</span>
+                              <p className="text-[10px] text-slate-400 font-semibold uppercase">{p.paymentMethod}</p>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-xs text-slate-500 text-center py-4">কোনো পূর্ববর্তী পেমেন্ট পাওয়া যায়নি</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Claims Status Box */}
+                  <div className="bg-slate-900/90 rounded-2xl border border-slate-800 p-5 sm:p-6 shadow-md space-y-4">
+                    <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+                      <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                        <HeartPulse className="w-4 h-4 text-rose-400" />
+                        <span>চিকিৎসা ও দুর্ঘটনা দাবি অগ্রগতি</span>
+                      </h3>
+                      <button
+                        onClick={() => setActiveTab('medical')}
+                        className="text-xs text-emerald-400 hover:text-emerald-300 font-semibold hover:underline cursor-pointer"
+                      >
+                        নতুন দাবি
+                      </button>
+                    </div>
+
+                    <div className="space-y-2.5">
+                      {myMedicalClaims.length > 0 ? (
+                        myMedicalClaims.slice(0, 3).map((c) => (
+                          <div key={c.id} className="bg-slate-950/70 p-3 rounded-xl border border-slate-800/80 flex justify-between items-center text-xs">
+                            <div className="min-w-0 pr-2">
+                              <p className="font-bold text-slate-200 truncate">{c.diseaseReason}</p>
+                              <p className="text-[11px] text-slate-400 truncate">{c.hospital} ({c.admissionDate})</p>
+                            </div>
+                            <div className="text-right shrink-0">
+                              <span className="inline-block bg-emerald-950 border border-emerald-700/80 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                {c.status}
+                              </span>
+                              <p className="text-[11px] font-bold text-slate-300 mt-0.5 font-mono">
+                                দাবি: ৳ {c.claimAmount}
+                              </p>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-xs text-slate-500 py-4 text-center">কোনো সক্রিয় চিকিৎসা বা দুর্ঘটনা দাবি নেই।</p>
+                      )}
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Recharts Welfare Impact Chart Section (Premium Members) */}
+                <WelfareImpactChart language={language} />
+
+              </div>
+            )}
 
           </div>
         )}
@@ -615,7 +972,7 @@ export const MemberPortal: React.FC = () => {
         {/* ============================================================ */}
         {/* TAB: WELFARE IMPACT REPORT */}
         {/* ============================================================ */}
-        {activeTab === 'impact' && (
+        {isPremium && activeTab === 'impact' && (
           <div className="space-y-6 animate-in fade-in duration-200">
             <WelfareImpactChart language={language} />
           </div>
@@ -624,7 +981,7 @@ export const MemberPortal: React.FC = () => {
         {/* ============================================================ */}
         {/* TAB 2: DIGITAL ID CARD (Responsive Holographic Dark Card) */}
         {/* ============================================================ */}
-        {activeTab === 'id-card' && (
+        {isPremium && activeTab === 'id-card' && (
           <div className="space-y-6 max-w-4xl mx-auto animate-in fade-in duration-200">
             {/* Notification */}
             {pdfNotification && (
@@ -777,7 +1134,7 @@ export const MemberPortal: React.FC = () => {
         {/* ============================================================ */}
         {/* TAB 3: HEALTH PROTECTION CARD */}
         {/* ============================================================ */}
-        {activeTab === 'health-card' && (
+        {isPremium && activeTab === 'health-card' && (
           <div className="space-y-6 max-w-2xl mx-auto animate-in fade-in duration-200">
             {/* Notification */}
             {pdfNotification && (
@@ -877,7 +1234,7 @@ export const MemberPortal: React.FC = () => {
         {/* ============================================================ */}
         {/* TAB 4: PAYMENTS & FINANCIAL STATEMENT */}
         {/* ============================================================ */}
-        {activeTab === 'payments' && (
+        {isPremium && activeTab === 'payments' && (
           <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-200">
             {/* Pay Monthly Fee Card */}
             <div className="bg-slate-900/90 rounded-3xl p-5 sm:p-8 border border-slate-800 shadow-xl">
@@ -1013,7 +1370,7 @@ export const MemberPortal: React.FC = () => {
         {/* ============================================================ */}
         {/* TAB 5: MEDICAL ASSISTANCE CLAIMS */}
         {/* ============================================================ */}
-        {activeTab === 'medical' && (
+        {isPremium && activeTab === 'medical' && (
           <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-200">
             {/* New Medical Claim Form */}
             <div className="bg-slate-900/90 rounded-3xl p-5 sm:p-8 border border-slate-800 shadow-xl">
@@ -1155,7 +1512,7 @@ export const MemberPortal: React.FC = () => {
         {/* ============================================================ */}
         {/* TAB 6: ACCIDENT ASSISTANCE */}
         {/* ============================================================ */}
-        {activeTab === 'accident' && (
+        {isPremium && activeTab === 'accident' && (
           <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-200">
             <div className="bg-slate-900/90 rounded-3xl p-5 sm:p-8 border border-slate-800 shadow-xl">
               <div className="flex items-center gap-3 mb-6 border-b border-slate-800 pb-4">
@@ -1507,6 +1864,9 @@ export const MemberPortal: React.FC = () => {
         )}
 
       </main>
+
+      {/* Premium Upgrade Modal with Monini/Nominee Form & Subscription confirmation */}
+      <PremiumUpgradeModal />
     </div>
   );
 };

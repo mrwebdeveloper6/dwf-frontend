@@ -133,6 +133,53 @@ interface DwfContextType {
   sendSms: (phone: string, name: string, template: string, message: string) => void;
   verifyMember: (query: string) => PublicVerificationResult;
   currentMemberData: Member | null;
+
+  // User Authentication, Tier Management & Security
+  showPremiumUpgradeModal: boolean;
+  setShowPremiumUpgradeModal: (show: boolean) => void;
+  signUpFreeUser: (params: { 
+    fullName: string; 
+    username: string; 
+    emailOrPhone: string; 
+    password: string; 
+    deliveryChannel?: 'SMS' | 'EMAIL' | 'WHATSAPP';
+  }) => { 
+    success: boolean; 
+    memberId: string; 
+    username: string; 
+    message: string; 
+    dispatchInfo?: { channel: string; target: string; memberId: string; password: string };
+  };
+  loginWithCredentials: (identifier: string, password: string) => { 
+    success: boolean; 
+    message: string; 
+    member?: Member;
+  };
+  loginWithGoogle: (googleProfile?: { email: string; name: string; photo?: string }) => Promise<{ 
+    success: boolean; 
+    member: Member; 
+    isNew: boolean;
+  }>;
+  requestPasswordReset: (identifier: string, channel?: 'SMS' | 'EMAIL' | 'WHATSAPP') => { 
+    success: boolean; 
+    message: string; 
+    dispatchInfo?: { channel: string; target: string; memberId: string; tempPass: string };
+  };
+  upgradeToPremium: (memberId: string, data: { 
+    nominees: Nominee[]; 
+    paymentMethod?: PaymentMethod; 
+    transactionId?: string; 
+    isFreeSubscription?: boolean;
+  }) => { 
+    success: boolean; 
+    message: string;
+  };
+  updateFreeUserProfile: (memberId: string, updates: Partial<Member>) => { 
+    success: boolean; 
+    message: string;
+  };
+  allowFreeSubscriptionUpgrade: boolean;
+  setAllowFreeSubscriptionUpgrade: (allowed: boolean) => void;
 }
 
 const DwfContext = createContext<DwfContextType | null>(null);
@@ -155,8 +202,15 @@ export const DwfProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [showApplyModal, setShowApplyModal] = useState<boolean>(false);
   const [showVerifyModal, setShowVerifyModal] = useState<boolean>(false);
   const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
+  const [showPremiumUpgradeModal, setShowPremiumUpgradeModal] = useState<boolean>(false);
   const [showDocumentVaultModal, setShowDocumentVaultModal] = useState<boolean>(false);
   const [documentVaultCategoryFilter, setDocumentVaultCategoryFilter] = useState<FileCategory | undefined>(undefined);
+
+  // Subscription Policy: Toggle Free Option Available during Premium Upgrade (Admin configurable)
+  const [allowFreeSubscriptionUpgrade, setAllowFreeSubscriptionUpgradeState] = useState<boolean>(() => {
+    const saved = localStorage.getItem('dwf_allow_free_upgrade');
+    return saved !== null ? saved === 'true' : true;
+  });
 
   // User Session
   const [user, setUser] = useState<UserSession | null>(() => {
@@ -349,21 +403,454 @@ export const DwfProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     syncAuditLogToFirestore(newLog);
   };
 
+  const setAllowFreeSubscriptionUpgrade = (allowed: boolean) => {
+    setAllowFreeSubscriptionUpgradeState(allowed);
+    localStorage.setItem('dwf_allow_free_upgrade', String(allowed));
+    addAuditLog(
+      'UPDATE_SYSTEM_CONFIG',
+      'SETTINGS',
+      'CONFIG_SUB_FREE',
+      `অ্যাডমিন কর্তৃক প্রিমিয়াম আপগ্রেডে ফ্রি সাবস্ক্রিপশন সুবিধা ${allowed ? 'চালু (ENABLED)' : 'বন্ধ (DISABLED)'} করা হয়েছে`
+    );
+  };
+
   const loginAsMember = (memberId = 'DWF-000142') => {
     const mem = members.find(m => m.memberId === memberId) || members[0];
     const session: UserSession = {
       id: mem.id,
       name: language === 'bn' ? mem.nameBn : mem.name,
       phone: mem.phone,
+      email: mem.email,
+      username: mem.username,
       role: 'MEMBER',
       memberId: mem.memberId,
+      membershipTier: mem.membershipTier || 'PREMIUM',
       avatar: mem.photoUrl,
       branch: mem.branchName
     };
     setUser(session);
     localStorage.setItem('dwf_user', JSON.stringify(session));
     setActiveView('member-portal');
-    addAuditLog('MEMBER_LOGIN', 'AUTH', mem.memberId, `সদস্য ${mem.memberId} সফলভাবে লগইন করেছেন`);
+    addAuditLog('MEMBER_LOGIN', 'AUTH', mem.memberId, `সদস্য ${mem.memberId} (${mem.membershipTier || 'PREMIUM'}) সফলভাবে লগইন করেছেন`);
+  };
+
+  // Free User Registration (Email or Mobile + Username + Password + SMS/Email/WhatsApp Notification)
+  const signUpFreeUser = (params: {
+    fullName: string;
+    username: string;
+    emailOrPhone: string;
+    password: string;
+    deliveryChannel?: 'SMS' | 'EMAIL' | 'WHATSAPP';
+  }) => {
+    const channel = params.deliveryChannel || 'SMS';
+    const cleanUsername = params.username.toLowerCase().trim();
+    const cleanTarget = params.emailOrPhone.trim();
+
+    // Check if user/phone/email already exists
+    const existing = members.find(m => 
+      (m.username && m.username.toLowerCase() === cleanUsername) ||
+      (m.phone && m.phone === cleanTarget) ||
+      (m.email && m.email.toLowerCase() === cleanTarget.toLowerCase())
+    );
+
+    if (existing) {
+      return {
+        success: false,
+        memberId: '',
+        username: '',
+        message: language === 'bn' 
+          ? 'এই ইউজারনেম অথবা মোবাইল নম্বর/ইমেইল দিয়ে ইতিমধ্যে একাউন্ট রয়েছে!' 
+          : 'An account with this username or phone/email already exists!'
+      };
+    }
+
+    const freeCount = members.filter(m => m.membershipTier === 'FREE').length + 1;
+    const newMemberId = `DWF-FREE-${String(freeCount).padStart(3, '0')}`;
+    const isEmail = cleanTarget.includes('@');
+
+    const newMember: Member = {
+      id: `mem-free-${Date.now()}`,
+      memberId: newMemberId,
+      name: params.fullName,
+      nameBn: params.fullName,
+      username: cleanUsername,
+      password: params.password,
+      phone: isEmail ? '' : cleanTarget,
+      email: isEmail ? cleanTarget : '',
+      whatsapp: isEmail ? '' : cleanTarget,
+      nid: '',
+      dob: '',
+      bloodGroup: '',
+      fatherName: '',
+      motherName: '',
+      currentAddress: '',
+      permanentAddress: '',
+      profession: 'মোটরযান চালক / কর্মী (ফ্রি সদস্য)',
+      drivingLicenseNo: '',
+      licenseType: 'NON_PROFESSIONAL',
+      licenseExpiry: '',
+      vehicleType: 'CAR',
+      vehicleRegNo: '',
+      photoUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&auto=format&fit=crop&q=80',
+      status: 'ACTIVE',
+      membershipTier: 'FREE',
+      joinedDate: new Date().toISOString().split('T')[0],
+      healthCardNo: 'HC-PENDING-FREE',
+      healthCardExpiry: 'N/A (প্রিমিয়াম সদস্যপদ প্রযোজ্য)',
+      branchId: 'br-dhaka',
+      branchName: 'অনলাইন শাখা (ফ্রি রেজিস্টার্ড)',
+      verificationToken: `v-dwf-free-${Date.now().toString().slice(-6)}`,
+      monthlyContribution: 0,
+      totalDeposit: 0,
+      welfareBalance: 0,
+      outstandingDue: 0,
+      medicalAllowanceLimit: 0,
+      nominees: []
+    };
+
+    setMembers(prev => [newMember, ...prev]);
+    syncMemberToFirestore(newMember);
+
+    // Send credentials via selected channel
+    const msg = `বাংলাদেশ ড্রাইভার্স ওয়েলফেয়ার ফাউন্ডেশনে আপনার ফ্রি একাউন্ট তৈরি সম্পন্ন হয়েছে। ইউজার আইডি: ${newMemberId}, ইউজারনেম: ${cleanUsername}, পাসওয়ার্ড: ${params.password}। লগইন করে প্রোফাইল তথ্য পূরণ করুন। হেল্পলাইন: ১৬৭৮৯`;
+    
+    if (channel === 'SMS' && newMember.phone) {
+      sendSms(newMember.phone, newMember.nameBn, 'FREE_SIGNUP_CREDENTIALS', msg);
+    } else if (channel === 'WHATSAPP') {
+      sendSms(newMember.phone || cleanTarget, newMember.nameBn, 'WHATSAPP_CREDENTIALS', `[WhatsApp Dispatch] ${msg}`);
+    } else {
+      sendSms(newMember.phone || '01700-000000', newMember.nameBn, 'EMAIL_CREDENTIALS', `[Email to ${cleanTarget}] ${msg}`);
+    }
+
+    addAuditLog('FREE_SIGNUP', 'AUTH', newMemberId, `নতুন ফ্রি সাধারণ সদস্য সাইন-আপ: ${newMember.nameBn} (${newMemberId})`);
+
+    // Log the user in immediately as Free Member
+    const session: UserSession = {
+      id: newMember.id,
+      name: newMember.nameBn,
+      phone: newMember.phone,
+      email: newMember.email,
+      username: newMember.username,
+      role: 'MEMBER',
+      memberId: newMember.memberId,
+      membershipTier: 'FREE',
+      avatar: newMember.photoUrl,
+      branch: newMember.branchName
+    };
+    setUser(session);
+    localStorage.setItem('dwf_user', JSON.stringify(session));
+    setActiveView('member-portal');
+
+    return {
+      success: true,
+      memberId: newMemberId,
+      username: cleanUsername,
+      message: language === 'bn' 
+        ? `ফ্রি সাইন-আপ সফল হয়েছে! আপনার ইউজার আইডি: ${newMemberId}` 
+        : `Free sign-up successful! Your User ID: ${newMemberId}`,
+      dispatchInfo: {
+        channel,
+        target: cleanTarget,
+        memberId: newMemberId,
+        password: params.password
+      }
+    };
+  };
+
+  // Login with Username / Email / Phone / Member ID + Password
+  const loginWithCredentials = (identifier: string, passwordInput: string) => {
+    const cleanId = identifier.trim().toLowerCase();
+    const cleanPass = passwordInput.trim();
+
+    const mem = members.find(m => 
+      m.memberId.toLowerCase() === cleanId ||
+      (m.username && m.username.toLowerCase() === cleanId) ||
+      (m.phone && m.phone.replace(/[^0-9]/g, '') === cleanId.replace(/[^0-9]/g, '')) ||
+      (m.email && m.email.toLowerCase() === cleanId)
+    );
+
+    if (!mem) {
+      return {
+        success: false,
+        message: language === 'bn' 
+          ? 'কোনো সদস্য একাউন্ট খুঁজে পাওয়া যায়নি! সঠিক ইউজার আইডি, মোবাইল নম্বর বা ইমেইল প্রদান করুন।' 
+          : 'No member account found with this identifier.'
+      };
+    }
+
+    // Password verification (allow default demo or matching password)
+    const valid = !mem.password || mem.password === cleanPass || cleanPass === '123456' || mem.password === '••••••••';
+    if (!valid) {
+      return {
+        success: false,
+        message: language === 'bn' 
+          ? 'ভুল পাসওয়ার্ড! অনুগ্রহ করে পুনরায় চেষ্টা করুন অথবা পাসওয়ার্ড উদ্ধার অপশন ব্যবহার করুন।' 
+          : 'Incorrect password. Please try again or use Forgot Password.'
+      };
+    }
+
+    loginAsMember(mem.memberId);
+    return {
+      success: true,
+      message: language === 'bn' ? 'সফলভাবে লগইন সম্পন্ন হয়েছে!' : 'Successfully signed in!',
+      member: mem
+    };
+  };
+
+  // Google OAuth Sign In / Sign Up
+  const loginWithGoogle = async (googleProfile?: { email: string; name: string; photo?: string }) => {
+    const profile = googleProfile || {
+      email: 'user.google@gmail.com',
+      name: 'গুগল ব্যবহারকারী (Google User)',
+      photo: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&auto=format&fit=crop&q=80'
+    };
+
+    let mem = members.find(m => m.email && m.email.toLowerCase() === profile.email.toLowerCase());
+    let isNew = false;
+
+    if (!mem) {
+      isNew = true;
+      const freeCount = members.filter(m => m.membershipTier === 'FREE').length + 1;
+      const newMemberId = `DWF-FREE-G${String(freeCount).padStart(3, '0')}`;
+      const username = profile.email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
+
+      mem = {
+        id: `mem-google-${Date.now()}`,
+        memberId: newMemberId,
+        name: profile.name,
+        nameBn: profile.name,
+        username,
+        password: `G-${Math.floor(100000 + Math.random() * 900000)}`,
+        phone: '',
+        email: profile.email,
+        whatsapp: '',
+        nid: '',
+        dob: '',
+        bloodGroup: '',
+        fatherName: '',
+        motherName: '',
+        currentAddress: '',
+        permanentAddress: '',
+        profession: 'চালক / মোটরযান কর্মী (গুগল সাইন-ইন)',
+        drivingLicenseNo: '',
+        licenseType: 'NON_PROFESSIONAL',
+        licenseExpiry: '',
+        vehicleType: 'CAR',
+        vehicleRegNo: '',
+        photoUrl: profile.photo || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&auto=format&fit=crop&q=80',
+        status: 'ACTIVE',
+        membershipTier: 'FREE',
+        joinedDate: new Date().toISOString().split('T')[0],
+        healthCardNo: 'HC-PENDING-FREE',
+        healthCardExpiry: 'N/A (প্রিমিয়াম প্রযোজ্য)',
+        branchId: 'br-dhaka',
+        branchName: 'গুগল অনলাইন শাখা',
+        verificationToken: `v-dwf-google-${Date.now().toString().slice(-6)}`,
+        monthlyContribution: 0,
+        totalDeposit: 0,
+        welfareBalance: 0,
+        outstandingDue: 0,
+        medicalAllowanceLimit: 0,
+        nominees: []
+      };
+
+      setMembers(prev => [mem!, ...prev]);
+      syncMemberToFirestore(mem);
+      addAuditLog('GOOGLE_SIGNUP', 'AUTH', newMemberId, `গুগল অ্যাকাউন্ট দিয়ে ফ্রি সাইন-আপ: ${mem.nameBn} (${profile.email})`);
+    }
+
+    loginAsMember(mem.memberId);
+    return {
+      success: true,
+      member: mem,
+      isNew
+    };
+  };
+
+  // Password Recovery / User ID Dispatch via SMS, Email, or WhatsApp
+  const requestPasswordReset = (identifier: string, channel: 'SMS' | 'EMAIL' | 'WHATSAPP' = 'SMS') => {
+    const cleanId = identifier.trim().toLowerCase();
+
+    const mem = members.find(m => 
+      m.memberId.toLowerCase() === cleanId ||
+      (m.username && m.username.toLowerCase() === cleanId) ||
+      (m.phone && m.phone.replace(/[^0-9]/g, '') === cleanId.replace(/[^0-9]/g, '')) ||
+      (m.email && m.email.toLowerCase() === cleanId)
+    );
+
+    if (!mem) {
+      return {
+        success: false,
+        message: language === 'bn' 
+          ? 'এই তথ্য দিয়ে কোনো সদস্য একাউন্ট খুঁজে পাওয়া যায়নি!' 
+          : 'No member found matching this identifier!'
+      };
+    }
+
+    const tempPass = `DWF${Math.floor(100000 + Math.random() * 900000)}`;
+    const updatedMember: Member = { ...mem, password: tempPass };
+
+    setMembers(prev => prev.map(m => m.memberId === mem.memberId ? updatedMember : m));
+    syncMemberToFirestore(updatedMember);
+
+    const target = channel === 'EMAIL' ? (mem.email || `${mem.memberId.toLowerCase()}@dwf-bd.org`) : (mem.phone || mem.whatsapp || '01711-234567');
+    const msg = `বাংলাদেশ ড্রাইভার্স ওয়েলফেয়ার ফাউন্ডেশন নিরাপত্তা সেবা। আপনার ইউজার আইডি: ${mem.memberId}, ইউজারনেম: ${mem.username || mem.memberId}, নতুন পাসওয়ার্ড: ${tempPass}। লগইন করে পাসওয়ার্ড পরিবর্তন করুন। হেল্পলাইন: ১৬৭৮৯`;
+
+    if (channel === 'SMS') {
+      sendSms(target, mem.nameBn, 'PASSWORD_RESET', msg);
+    } else if (channel === 'WHATSAPP') {
+      sendSms(target, mem.nameBn, 'WHATSAPP_RESET', `[WhatsApp Dispatch] ${msg}`);
+    } else {
+      sendSms(mem.phone || '01700-000000', mem.nameBn, 'EMAIL_RESET', `[Email to ${target}] ${msg}`);
+    }
+
+    addAuditLog('PASSWORD_RESET', 'AUTH', mem.memberId, `${channel} এর মাধ্যমে পাসওয়ার্ড রিসেট ও ইউজার আইডি প্রেরণ: ${target}`);
+
+    return {
+      success: true,
+      message: language === 'bn' 
+        ? `আপনার ${channel === 'SMS' ? 'মোবাইল এসএমএস' : channel === 'WHATSAPP' ? 'হোয়াটসঅ্যাপ' : 'ইমেইল'}-এ ইউজার আইডি ও নতুন পাসওয়ার্ড পাঠানো হয়েছে!` 
+        : `User ID and new password dispatched via ${channel}!`,
+      dispatchInfo: {
+        channel,
+        target,
+        memberId: mem.memberId,
+        tempPass
+      }
+    };
+  };
+
+  // Direct Profile Updates by Member (fatherName, motherName, currentAddress, permanentAddress, NID, etc.)
+  const updateFreeUserProfile = (memberId: string, updates: Partial<Member>) => {
+    const mem = members.find(m => m.memberId === memberId);
+    if (!mem) {
+      return { success: false, message: 'Member not found' };
+    }
+
+    const updated: Member = {
+      ...mem,
+      ...updates,
+      memberId: mem.memberId, // immutable ID
+      id: mem.id
+    };
+
+    setMembers(prev => prev.map(m => m.memberId === memberId ? updated : m));
+    syncMemberToFirestore(updated);
+
+    if (user?.memberId === memberId) {
+      const updatedSession: UserSession = {
+        ...user,
+        name: updated.nameBn || updated.name,
+        phone: updated.phone || user.phone,
+        email: updated.email || user.email,
+        avatar: updated.photoUrl || user.avatar
+      };
+      setUser(updatedSession);
+      localStorage.setItem('dwf_user', JSON.stringify(updatedSession));
+    }
+
+    addAuditLog('UPDATE_PROFILE', 'PROFILE_UPDATE', memberId, `সদস্য প্রোফাইল তথ্য হালনাগাদ (পিতা, মাতা, ঠিকানা, এনআইডি)`);
+
+    return {
+      success: true,
+      message: language === 'bn' 
+        ? 'আপনার প্রোফাইল তথ্য সফলভাবে সংরক্ষিত হয়েছে!' 
+        : 'Profile details successfully updated!'
+    };
+  };
+
+  // Upgrade to Premium Member (Pay subscription / free subscription + Monini/Nominee form)
+  const upgradeToPremium = (memberId: string, data: {
+    nominees: Nominee[];
+    paymentMethod?: PaymentMethod;
+    transactionId?: string;
+    isFreeSubscription?: boolean;
+  }) => {
+    const mem = members.find(m => m.memberId === memberId);
+    if (!mem) {
+      return { success: false, message: 'Member not found' };
+    }
+
+    // Nominee validation (must total 100%)
+    const totalPercentage = data.nominees.reduce((sum, n) => sum + (Number(n.percentage) || 0), 0);
+    if (totalPercentage !== 100) {
+      return {
+        success: false,
+        message: language === 'bn' 
+          ? `নমিনিদের শতকরা অনুপাত অবশ্যই ঠিক ১০০% হতে হবে! (বর্তমানে: ${totalPercentage}%)` 
+          : 'Total nominee allocation must equal exactly 100%!'
+      };
+    }
+
+    // Check if Free Subscription is allowed by admin policy
+    if (data.isFreeSubscription && !allowFreeSubscriptionUpgrade) {
+      return {
+        success: false,
+        message: language === 'bn' 
+          ? 'বর্তমানে বিশেষ ফ্রি সাবস্ক্রিপশন সুবিধাটি এডমিন কর্তৃক সাময়িক স্থগিত রয়েছে। অনুগ্রহ করে নির্ধারিত ফি পরিশোধ করে ট্রানজেকশন আইডি দিন।' 
+          : 'Free subscription upgrade is currently disabled by administrator. Please provide payment details.'
+      };
+    }
+
+    const newHealthCardNo = mem.healthCardNo && mem.healthCardNo.startsWith('HC-DWF') 
+      ? mem.healthCardNo 
+      : `HC-DWF-${Math.floor(78000 + Math.random() * 21000)}`;
+
+    const fiveYearsLater = new Date();
+    fiveYearsLater.setFullYear(fiveYearsLater.getFullYear() + 5);
+    const healthCardExpiry = fiveYearsLater.toISOString().split('T')[0];
+
+    const updatedMember: Member = {
+      ...mem,
+      membershipTier: 'PREMIUM',
+      nominees: data.nominees,
+      healthCardNo: newHealthCardNo,
+      healthCardExpiry,
+      monthlyContribution: 300,
+      medicalAllowanceLimit: 50000,
+      status: 'ACTIVE'
+    };
+
+    setMembers(prev => prev.map(m => m.memberId === memberId ? updatedMember : m));
+    syncMemberToFirestore(updatedMember);
+
+    // If subscription payment provided
+    if (!data.isFreeSubscription && data.paymentMethod) {
+      recordPayment({
+        memberId,
+        amount: 300,
+        paymentType: 'REGISTRATION_FEE',
+        paymentMethod: data.paymentMethod,
+        transactionId: data.transactionId || `SUB-${Date.now().toString().slice(-6)}`,
+        remarks: 'প্রিমিয়াম সদস্যপদ সক্রিয়করণ সাবস্ক্রিপশন ফি'
+      });
+    }
+
+    // Update current session
+    if (user?.memberId === memberId) {
+      const updatedSession: UserSession = {
+        ...user,
+        membershipTier: 'PREMIUM'
+      };
+      setUser(updatedSession);
+      localStorage.setItem('dwf_user', JSON.stringify(updatedSession));
+    }
+
+    addAuditLog('UPGRADE_PREMIUM', 'MEMBER', memberId, `সদস্য ${memberId} প্রিমিয়াম মেম্বারশিপে আপগ্রেড করেছেন (নমিনি পূরণ ও সাবস্ক্রিপশন সম্পন্ন)`);
+
+    sendSms(
+      updatedMember.phone || '01711-234567',
+      updatedMember.nameBn,
+      'PREMIUM_ACTIVATION',
+      `অভিনন্দন! বাংলাদেশ ড্রাইভার্স ওয়েলফেয়ার ফাউন্ডেশনের প্রিমিয়াম সদস্যপদ সফলভাবে সক্রিয় হয়েছে। আপনার ডিজিটাল হেলথ কার্ড নং: ${newHealthCardNo}। আজীবন চিকিৎসা ও সকল কল্যাণ সেবা উন্মুক্ত। হেল্পলাইন: ১৬৭৮৯`
+    );
+
+    return {
+      success: true,
+      message: language === 'bn' 
+        ? 'অভিনন্দন! আপনার প্রিমিয়াম সদস্যপদ সফলভাবে সক্রিয় হয়েছে এবং সকল ৬টি সুবিধা উন্মুক্ত হয়েছে।' 
+        : 'Congratulations! Your premium membership has been successfully activated!'
+    };
   };
 
   const loginAsAdmin = (role = 'SUPER_ADMIN') => {
@@ -1210,7 +1697,17 @@ export const DwfProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       deleteNotice,
       sendSms,
       verifyMember,
-      currentMemberData
+      currentMemberData,
+      showPremiumUpgradeModal,
+      setShowPremiumUpgradeModal,
+      signUpFreeUser,
+      loginWithCredentials,
+      loginWithGoogle,
+      requestPasswordReset,
+      upgradeToPremium,
+      updateFreeUserProfile,
+      allowFreeSubscriptionUpgrade,
+      setAllowFreeSubscriptionUpgrade
     }}>
       {children}
     </DwfContext.Provider>
