@@ -1,19 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { useDwf } from '../../context/DwfContext';
 import { 
-  UserPlus, 
-  LogIn, 
-  Search, 
-  ShieldCheck, 
   HeartPulse, 
   Scale, 
   ChevronRight, 
   ChevronLeft,
   CheckCircle2,
   Sparkles,
-  PhoneCall,
   AlertTriangle,
-  GraduationCap
+  GraduationCap,
+  ShieldCheck
 } from 'lucide-react';
 
 interface HeroSlide {
@@ -38,10 +34,7 @@ interface HeroSlide {
 
 export const HeroSection: React.FC = () => {
   const { 
-    language, 
-    setShowApplyModal, 
-    setShowVerifyModal, 
-    setShowLoginModal 
+    language 
   } = useDwf();
 
   const slides: HeroSlide[] = [
@@ -52,7 +45,7 @@ export const HeroSection: React.FC = () => {
       tagEn: 'National Drivers Welfare & Social Security Platform',
       titleBn: 'সুরক্ষিত চালক – নিরাপদ সড়ক',
       titleEn: 'Protected Drivers – Safer Highways',
-      subBn: 'বাংলাদেশের সকল পেশাদার পরিবহন চালকদের সামাজিক নিরাপত্তা, ডিজিটাল স্বাস্থ্য সুরক্ষা কার্ড ও এককালীন জরুরি দুর্ঘটনা অনুদান নিশ্চিত করতে ডিডব্লিউএফ সর্বদা আপনার পাশে।',
+      subBn: 'বাংলাদেশের সকল পেশাদার পরিবহন চালকদের সামাজিক নিরাপত্তা, ডিজিটাল স্বাস্থ্য সুরক্ষা কার্ড ও এককালীন জরুরি দুর্ঘটনা অনুদান নিশ্চিত করতে ডি.ডব্লিউ.এফ সর্বদা আপনার পাশে।',
       subEn: 'Ensuring digital health coverage, roadside legal defense, and instant emergency accident relief for commercial drivers across Bangladesh.',
       badgeBn: '৫০% পর্যন্ত হাসপাতাল ছাড়',
       badgeEn: 'Up to 50% Hospital Discount',
@@ -124,8 +117,6 @@ export const HeroSection: React.FC = () => {
   ];
 
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % slides.length);
@@ -135,27 +126,12 @@ export const HeroSection: React.FC = () => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
-  // Auto-advance timer (moves automatically after 3 seconds)
-  useEffect(() => {
-    if (isPaused) return;
-
-    autoPlayRef.current = setInterval(() => {
-      nextSlide();
-    }, 3000);
-
-    return () => {
-      if (autoPlayRef.current) clearInterval(autoPlayRef.current);
-    };
-  }, [isPaused, currentSlide]);
-
   const activeSlide = slides[currentSlide];
   const BadgeIcon = activeSlide.badgeIcon;
 
   return (
     <section 
       className="relative overflow-hidden w-full lg:h-[calc(100vh-92px)] lg:min-h-[560px] lg:max-h-[760px] flex flex-col justify-between bg-slate-950 text-white select-none"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
     >
       {/* Background Images with Cross-Fade & Cinematic Overlays */}
       {slides.map((slide, index) => {
@@ -240,39 +216,8 @@ export const HeroSection: React.FC = () => {
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-2 sm:gap-3 pt-1 sm:pt-2">
-              {/* Primary: Membership Application */}
-              <button
-                onClick={() => setShowApplyModal(true)}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 sm:px-6 sm:py-3 text-xs sm:text-sm font-black text-white bg-red-600 hover:bg-red-700 rounded-xl transition shadow-xl shadow-red-950/60 cursor-pointer active:scale-98 border border-red-400/40"
-              >
-                <UserPlus className="w-4 h-4" />
-                <span>{language === 'bn' ? 'সদস্য হতে আবেদন করুন' : 'Apply for Membership'}</span>
-                <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
-              </button>
-
-              {/* Secondary: Member Login */}
-              <button
-                onClick={() => setShowLoginModal(true)}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:px-4.5 sm:py-2.5 text-xs sm:text-sm font-bold text-white hover:text-white bg-red-950/70 hover:bg-red-900/80 border border-red-500/60 rounded-xl transition cursor-pointer backdrop-blur-md"
-              >
-                <LogIn className="w-4 h-4 text-red-400" />
-                <span>{language === 'bn' ? 'সদস্য লগইন' : 'Member Login'}</span>
-              </button>
-
-              {/* Tertiary: Public Verification */}
-              <button
-                onClick={() => setShowVerifyModal(true)}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-semibold text-slate-200 hover:text-white bg-slate-950/70 hover:bg-slate-800/80 border border-red-500/40 hover:border-red-400 rounded-xl transition cursor-pointer backdrop-blur-md"
-              >
-                <Search className="w-3.5 h-3.5 text-red-400" />
-                <span>{language === 'bn' ? 'আইডি যাচাই' : 'Verify ID'}</span>
-              </button>
-            </div>
-
             {/* Direct Assurance Notice */}
-            <p className="text-[10px] sm:text-[11px] text-slate-400 pt-0.5">
+            <p className="text-[10px] sm:text-[11px] text-slate-400 pt-1">
               {language === 'bn' 
                 ? '✓ সরকারি নিয়মানুযায়ী নিবন্ধিত অলাভজনক চালক কল্যাণ সংস্থা • কোনো মধ্যস্বত্বভোগী ছাড়া সরাসরি সেবা।' 
                 : '✓ Registered non-profit driver welfare trust • Direct verification and instant member assistance.'}
@@ -290,7 +235,7 @@ export const HeroSection: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-[11px] font-bold text-white leading-tight">{language === 'bn' ? activeSlide.badgeBn : activeSlide.badgeEn}</p>
-                  <p className="text-[9px] text-emerald-300 font-medium">{language === 'bn' ? 'ডিডব্লিউএফ নিশ্চয়তা' : 'DWF Guarantee'}</p>
+                  <p className="text-[9px] text-emerald-300 font-medium">{language === 'bn' ? 'ডি.ডব্লিউ.এফ নিশ্চয়তা' : 'DWF Guarantee'}</p>
                 </div>
               </div>
 

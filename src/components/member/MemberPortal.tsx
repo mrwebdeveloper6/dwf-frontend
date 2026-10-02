@@ -276,7 +276,7 @@ export const MemberPortal: React.FC = () => {
     { id: 'medical', label: 'চিকিৎসা দাবি', labelEn: 'Medical Claims', icon: Receipt, isLocked: !isPremium },
     { id: 'accident', label: 'দুর্ঘটনা সহায়তা', labelEn: 'Accident Aid', icon: ShieldAlert, isLocked: !isPremium },
     { id: 'documents', label: 'নথিপত্র ভল্ট', labelEn: 'Document Vault', icon: FolderArchive, isLocked: false },
-    { id: 'nominees', label: 'নমিনি তথ্য', labelEn: 'Nominees', icon: Users, isLocked: false },
+    { id: 'nominees', label: 'নমিনি তথ্য', labelEn: 'Nominees', icon: Users, isLocked: !isPremium },
     { id: 'profile', label: 'আমার প্রোফাইল', labelEn: 'Profile', icon: User, isLocked: false }
   ];
 
@@ -1724,7 +1724,7 @@ export const MemberPortal: React.FC = () => {
         {/* ============================================================ */}
         {/* TAB 8: NOMINEE MANAGEMENT */}
         {/* ============================================================ */}
-        {activeTab === 'nominees' && (
+        {isPremium && activeTab === 'nominees' && (
           <div className="space-y-6 max-w-3xl mx-auto animate-in fade-in duration-200">
             <div className="bg-slate-900/90 rounded-3xl p-5 sm:p-8 border border-slate-800 shadow-xl space-y-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-800 pb-4">

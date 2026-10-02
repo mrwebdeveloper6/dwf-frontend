@@ -53,7 +53,7 @@ export const StoreSection: React.FC = () => {
               <span>{language === 'bn' ? 'ডিজিটাল পাবলিকেশন ও ফটো স্টোর' : 'Digital Publications & Photo Store'}</span>
             </div>
             <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 mt-3 tracking-tight">
-              {language === 'bn' ? 'ডিডব্লিউএফ ডিজিটাল স্টোর' : 'DWF Digital Media Store'}
+              {language === 'bn' ? 'ডি.ডব্লিউ.এফ ডিজিটাল স্টোর' : 'DWF Digital Media Store'}
             </h2>
             <p className="text-sm sm:text-base text-slate-600 mt-2 max-w-2xl">
               {language === 'bn'

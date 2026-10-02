@@ -16,7 +16,7 @@ export const EmergencyTopBar: React.FC = () => {
               DWF-SOS
             </span>
             <span className="text-[11px] sm:text-xs font-bold text-white">
-              {language === 'bn' ? 'জরুরি হেল্পলাইন: ১৬৭৮৯' : 'Emergency Helpline: 16789'}
+              {language === 'bn' ? 'জরুরি হেল্পলাইন: ১৬000' : 'Emergency Helpline: 16789'}
             </span>
           </div>
 

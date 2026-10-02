@@ -70,7 +70,7 @@ export const GalleryPage: React.FC = () => {
       category: 'Welfare',
       categoryBn: 'কল্যাণ অনুদান',
       image: 'https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?w=1200&auto=format&fit=crop&q=80',
-      locationBn: 'ডিডব্লিউএফ কেন্দ্রীয় কার্যালয়, ঢাকা',
+      locationBn: 'ডি.ডব্লিউ.এফ কেন্দ্রীয় কার্যালয়, ঢাকা',
       descriptionBn: 'নিহত সদস্যের মনোনীত স্ত্রীর হাতে ২ লক্ষ টাকার সঞ্চয়ী চেক এবং সন্তানদের পড়ালেখার সার্বিক দায়িত্ব গ্রহণ।'
     },
     {
@@ -149,7 +149,7 @@ export const GalleryPage: React.FC = () => {
               <span>{language === 'bn' ? 'হোমপেইজে ফিরে যান' : 'Back to Home'}</span>
             </button>
             <span className="text-emerald-500">/</span>
-            <span className="text-white font-semibold">{language === 'bn' ? 'ডিডব্লিউএফ ফটো গ্যালারি ও স্থিরচিত্র' : 'Visual Photo Archive'}</span>
+            <span className="text-white font-semibold">{language === 'bn' ? 'ডি.ডব্লিউ.এফ ফটো গ্যালারি ও স্থিরচিত্র' : 'Visual Photo Archive'}</span>
           </div>
 
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pt-2">
@@ -159,7 +159,7 @@ export const GalleryPage: React.FC = () => {
                 <span>{language === 'bn' ? 'মাঠপর্যায়ের কার্যক্রম ও মুহূর্ত' : 'Documented Field Archive'}</span>
               </span>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white mt-3 tracking-tight">
-                {language === 'bn' ? 'ডিডব্লিউএফ ফটো গ্যালারি ও আর্কাইভ' : 'Official Photo Archive & Moments'}
+                {language === 'bn' ? 'ডি.ডব্লিউ.এফ ফটো গ্যালারি ও আর্কাইভ' : 'Official Photo Archive & Moments'}
               </h1>
               <p className="text-xs sm:text-sm text-emerald-100/90 mt-2 max-w-2xl leading-relaxed">
                 {language === 'bn'

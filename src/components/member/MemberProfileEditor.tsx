@@ -366,7 +366,7 @@ export const MemberProfileEditor: React.FC<MemberProfileEditorProps> = ({ member
             ) : (
               <>
                 <FileEdit className="w-4 h-4" />
-                <span>প্রোফাইল ও নমিনি পরিবর্তন আবেদন</span>
+                <span>{member.membershipTier === 'FREE' ? 'প্রোফাইল তথ্য হালনাগাদ করুন' : 'প্রোফাইল ও নমিনি পরিবর্তন আবেদন'}</span>
               </>
             )}
           </button>
@@ -672,125 +672,127 @@ export const MemberProfileEditor: React.FC<MemberProfileEditorProps> = ({ member
             </div>
           </div>
 
-          {/* Section 3: Nominee Information */}
-          <div className="bg-slate-950/80 p-4 sm:p-5 rounded-2xl border border-slate-800 space-y-4 text-xs">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-              <div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-400">
-                  ৩. নমিনি তথ্য পরিবর্তন ও অংশ বণ্টন
-                </h4>
-                <p className="text-[11px] text-slate-400">নমিনির নাম ও শতকরা অনুপাত (মোট ঠিক ১০০% হতে হবে)</p>
+          {/* Section 3: Nominee Information (Only for Premium Members - Free Accounts do not have Nominee management) */}
+          {member.membershipTier !== 'FREE' && (
+            <div className="bg-slate-950/80 p-4 sm:p-5 rounded-2xl border border-slate-800 space-y-4 text-xs">
+              <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+                <div>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-400">
+                    ৩. নমিনি তথ্য পরিবর্তন ও অংশ বণ্টন
+                  </h4>
+                  <p className="text-[11px] text-slate-400">নমিনির নাম ও শতকরা অনুপাত (মোট ঠিক ১০০% হতে হবে)</p>
+                </div>
+
+                <span className={`text-xs font-mono font-bold px-3 py-1 rounded-lg border ${
+                  nominees.reduce((acc, n) => acc + (Number(n.percentage) || 0), 0) === 100
+                    ? 'bg-emerald-950 text-emerald-300 border-emerald-800'
+                    : 'bg-red-950 text-red-300 border-red-800'
+                }`}>
+                  মোট: {nominees.reduce((acc, n) => acc + (Number(n.percentage) || 0), 0)}% / 100%
+                </span>
               </div>
 
-              <span className={`text-xs font-mono font-bold px-3 py-1 rounded-lg border ${
-                nominees.reduce((acc, n) => acc + (Number(n.percentage) || 0), 0) === 100
-                  ? 'bg-emerald-950 text-emerald-300 border-emerald-800'
-                  : 'bg-red-950 text-red-300 border-red-800'
-              }`}>
-                মোট: {nominees.reduce((acc, n) => acc + (Number(n.percentage) || 0), 0)}% / 100%
-              </span>
-            </div>
-
-            <div className="space-y-3">
-              {nominees.map((nom, idx) => (
-                <div key={nom.id || idx} className="bg-slate-900 p-3.5 rounded-xl border border-slate-800 space-y-3">
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="font-bold text-white">নমিনি #{idx + 1}</span>
-                    {nominees.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeNominee(idx)}
-                        className="text-red-400 hover:text-red-300 flex items-center gap-1 cursor-pointer"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>মুছুন</span>
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                    <div className="sm:col-span-2">
-                      <label className="block text-slate-400 mb-1">নমিনির পুরো নাম *</label>
-                      <input
-                        type="text"
-                        required
-                        value={nom.name}
-                        onChange={(e) => handleNomineeChange(idx, 'name', e.target.value)}
-                        className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white focus:border-emerald-500"
-                      />
+              <div className="space-y-3">
+                {nominees.map((nom, idx) => (
+                  <div key={nom.id || idx} className="bg-slate-900 p-3.5 rounded-xl border border-slate-800 space-y-3">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="font-bold text-white">নমিনি #{idx + 1}</span>
+                      {nominees.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeNominee(idx)}
+                          className="text-red-400 hover:text-red-300 flex items-center gap-1 cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>মুছুন</span>
+                        </button>
+                      )}
                     </div>
 
-                    <div>
-                      <label className="block text-slate-400 mb-1">সম্পর্ক *</label>
-                      <input
-                        type="text"
-                        required
-                        value={nom.relationship}
-                        onChange={(e) => handleNomineeChange(idx, 'relationship', e.target.value)}
-                        placeholder="যেমন: স্ত্রী, পুত্র, মাতা"
-                        className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white focus:border-emerald-500"
-                      />
-                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                      <div className="sm:col-span-2">
+                        <label className="block text-slate-400 mb-1">নমিনির পুরো নাম *</label>
+                        <input
+                          type="text"
+                          required
+                          value={nom.name}
+                          onChange={(e) => handleNomineeChange(idx, 'name', e.target.value)}
+                          className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white focus:border-emerald-500"
+                        />
+                      </div>
 
-                    <div>
-                      <label className="block text-slate-400 mb-1">অংশ শতকরা (%) *</label>
-                      <input
-                        type="number"
-                        min="1"
-                        max="100"
-                        required
-                        value={nom.percentage}
-                        onChange={(e) => handleNomineeChange(idx, 'percentage', Number(e.target.value))}
-                        className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg font-mono font-bold text-emerald-400 focus:border-emerald-500"
-                      />
-                    </div>
+                      <div>
+                        <label className="block text-slate-400 mb-1">সম্পর্ক *</label>
+                        <input
+                          type="text"
+                          required
+                          value={nom.relationship}
+                          onChange={(e) => handleNomineeChange(idx, 'relationship', e.target.value)}
+                          placeholder="যেমন: স্ত্রী, পুত্র, মাতা"
+                          className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white focus:border-emerald-500"
+                        />
+                      </div>
 
-                    <div className="sm:col-span-2">
-                      <label className="block text-slate-400 mb-1">নমিনির মোবাইল নম্বর</label>
-                      <input
-                        type="text"
-                        value={nom.mobile || ''}
-                        onChange={(e) => handleNomineeChange(idx, 'mobile', e.target.value)}
-                        className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white font-mono focus:border-emerald-500"
-                      />
-                    </div>
+                      <div>
+                        <label className="block text-slate-400 mb-1">অংশ শতকরা (%) *</label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="100"
+                          required
+                          value={nom.percentage}
+                          onChange={(e) => handleNomineeChange(idx, 'percentage', Number(e.target.value))}
+                          className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg font-mono font-bold text-emerald-400 focus:border-emerald-500"
+                        />
+                      </div>
 
-                    <div className="sm:col-span-2">
-                      <label className="block text-slate-400 mb-1">নমিনির এনআইডি (NID)</label>
-                      <input
-                        type="text"
-                        value={nom.nid || ''}
-                        onChange={(e) => handleNomineeChange(idx, 'nid', e.target.value)}
-                        className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white font-mono focus:border-emerald-500"
-                      />
+                      <div className="sm:col-span-2">
+                        <label className="block text-slate-400 mb-1">নমিনির মোবাইল নম্বর</label>
+                        <input
+                          type="text"
+                          value={nom.mobile || ''}
+                          onChange={(e) => handleNomineeChange(idx, 'mobile', e.target.value)}
+                          className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white font-mono focus:border-emerald-500"
+                        />
+                      </div>
+
+                      <div className="sm:col-span-2">
+                        <label className="block text-slate-400 mb-1">নমিনির এনআইডি (NID)</label>
+                        <input
+                          type="text"
+                          value={nom.nid || ''}
+                          onChange={(e) => handleNomineeChange(idx, 'nid', e.target.value)}
+                          className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white font-mono focus:border-emerald-500"
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
 
-              {nominees.length < 3 && (
-                <button
-                  type="button"
-                  onClick={addNominee}
-                  className="px-3.5 py-2 border border-dashed border-slate-700 hover:border-emerald-500 rounded-xl text-xs font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>+ নতুন নমিনি যোগ করুন</span>
-                </button>
-              )}
+                {nominees.length < 3 && (
+                  <button
+                    type="button"
+                    onClick={addNominee}
+                    className="px-3.5 py-2 border border-dashed border-slate-700 hover:border-emerald-500 rounded-xl text-xs font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>+ নতুন নমিনি যোগ করুন</span>
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Section 4: Reason for Change */}
+          {/* Section 4: Reason for Change / Note */}
           <div className="bg-slate-950/80 p-4 sm:p-5 rounded-2xl border border-slate-800 space-y-2 text-xs">
             <label className="block text-slate-300 font-semibold">
-              পরিবর্তনের কারণ বা সংক্ষেপ নোট (অ্যাডমিন পর্যালোচনার জন্য)
+              {member.membershipTier === 'FREE' ? 'সংক্ষেপ নোট বা মন্তব্য (ঐচ্ছিক)' : 'পরিবর্তনের কারণ বা সংক্ষেপ নোট (অ্যাডমিন পর্যালোচনার জন্য)'}
             </label>
             <textarea
               rows={2}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="যেমন: বাসা পরিবর্তন হওয়ায় বর্তমান ঠিকানা ও নমিনির মোবাইল নম্বর পরিবর্তন প্রয়োজন..."
+              placeholder={member.membershipTier === 'FREE' ? 'যেমন: বর্তমান কর্মস্থল বা ঠিকানার তথ্য...' : 'যেমন: বাসা পরিবর্তন হওয়ায় বর্তমান ঠিকানা ও মোবাইল নম্বর পরিবর্তন প্রয়োজন...'}
               className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:border-emerald-500"
             />
           </div>
@@ -810,7 +812,7 @@ export const MemberProfileEditor: React.FC<MemberProfileEditorProps> = ({ member
               className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition cursor-pointer shadow-lg shadow-emerald-950/50 flex items-center justify-center gap-2"
             >
               <Save className="w-4 h-4" />
-              <span>পরিবর্তন আবেদন দাখিল করুন (Submit for Approval)</span>
+              <span>{member.membershipTier === 'FREE' ? 'প্রোফাইল তথ্য সংরক্ষণ করুন (Save Profile)' : 'পরিবর্তন আবেদন দাখিল করুন (Submit for Approval)'}</span>
             </button>
           </div>
         </form>

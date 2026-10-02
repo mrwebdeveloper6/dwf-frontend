@@ -160,6 +160,11 @@ interface DwfContextType {
     member: Member; 
     isNew: boolean;
   }>;
+  loginWithFacebook: (facebookProfile?: { email?: string; name?: string; photo?: string }) => Promise<{ 
+    success: boolean; 
+    member: Member; 
+    isNew: boolean;
+  }>;
   requestPasswordReset: (identifier: string, channel?: 'SMS' | 'EMAIL' | 'WHATSAPP') => { 
     success: boolean; 
     message: string; 
@@ -657,6 +662,76 @@ export const DwfProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setMembers(prev => [mem!, ...prev]);
       syncMemberToFirestore(mem);
       addAuditLog('GOOGLE_SIGNUP', 'AUTH', newMemberId, `গুগল অ্যাকাউন্ট দিয়ে ফ্রি সাইন-আপ: ${mem.nameBn} (${profile.email})`);
+    }
+
+    loginAsMember(mem.memberId);
+    return {
+      success: true,
+      member: mem,
+      isNew
+    };
+  };
+
+  // Facebook OAuth Sign In / Sign Up
+  const loginWithFacebook = async (facebookProfile?: { email?: string; name?: string; photo?: string }) => {
+    const profile = {
+      email: facebookProfile?.email || 'user.facebook@driverwelfare.org',
+      name: facebookProfile?.name || 'ফেসবুক ব্যবহারকারী (Facebook User)',
+      photo: facebookProfile?.photo || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80'
+    };
+
+    let mem = members.find(m => m.email && m.email.toLowerCase() === profile.email.toLowerCase());
+    let isNew = false;
+
+    if (!mem) {
+      isNew = true;
+      const freeCount = members.filter(m => m.membershipTier === 'FREE').length + 1;
+      const newMemberId = `DWF-FREE-FB${String(freeCount).padStart(3, '0')}`;
+      const username = profile.email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '') || `fb_user_${freeCount}`;
+
+      mem = {
+        id: `mem-fb-${Date.now()}`,
+        memberId: newMemberId,
+        name: profile.name,
+        nameBn: profile.name,
+        username,
+        password: `FB-${Math.floor(100000 + Math.random() * 900000)}`,
+        phone: '',
+        email: profile.email,
+        whatsapp: '',
+        nid: '',
+        dob: '',
+        bloodGroup: '',
+        fatherName: '',
+        motherName: '',
+        currentAddress: '',
+        permanentAddress: '',
+        profession: 'চালক / মোটরযান কর্মী (ফেসবুক সাইন-ইন)',
+        drivingLicenseNo: '',
+        licenseType: 'NON_PROFESSIONAL',
+        licenseExpiry: '',
+        vehicleType: 'CAR',
+        vehicleRegNo: '',
+        photoUrl: profile.photo,
+        status: 'ACTIVE',
+        membershipTier: 'FREE',
+        joinedDate: new Date().toISOString().split('T')[0],
+        healthCardNo: 'HC-PENDING-FREE',
+        healthCardExpiry: 'N/A (প্রিমিয়াম প্রযোজ্য)',
+        branchId: 'br-dhaka',
+        branchName: 'ফেসবুক অনলাইন শাখা',
+        verificationToken: `v-dwf-fb-${Date.now().toString().slice(-6)}`,
+        monthlyContribution: 0,
+        totalDeposit: 0,
+        welfareBalance: 0,
+        outstandingDue: 0,
+        medicalAllowanceLimit: 0,
+        nominees: []
+      };
+
+      setMembers(prev => [mem!, ...prev]);
+      syncMemberToFirestore(mem);
+      addAuditLog('FACEBOOK_SIGNUP', 'AUTH', newMemberId, `ফেসবুক অ্যাকাউন্ট দিয়ে ফ্রি সাইন-আপ: ${mem.nameBn} (${profile.email})`);
     }
 
     loginAsMember(mem.memberId);
@@ -1703,6 +1778,7 @@ export const DwfProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       signUpFreeUser,
       loginWithCredentials,
       loginWithGoogle,
+      loginWithFacebook,
       requestPasswordReset,
       upgradeToPremium,
       updateFreeUserProfile,

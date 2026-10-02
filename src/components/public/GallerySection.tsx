@@ -83,7 +83,7 @@ export const GallerySection: React.FC = () => {
             {language === 'bn' ? 'কার্যক্রম ও স্থিরচিত্র' : 'Field Activities & Moments'}
           </span>
           <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 mt-3 tracking-tight">
-            {language === 'bn' ? 'ডিডব্লিউএফ ফটো গ্যালারি' : 'DWF Visual Archive'}
+            {language === 'bn' ? 'ডি.ডব্লিউ.এফ ফটো গ্যালারি' : 'DWF Visual Archive'}
           </h2>
           <p className="text-sm sm:text-base text-slate-600 mt-2">
             {language === 'bn'

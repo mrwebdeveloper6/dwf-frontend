@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 export const PublicFooter: React.FC = () => {
-  const { language, t, setActiveView, setShowApplyModal, setShowVerifyModal } = useDwf();
+  const { language, t, setActiveView, setShowApplyModal, setShowVerifyModal, loginWithGoogle, user } = useDwf();
 
   const handleNav = (id: string) => {
     setActiveView(id);
@@ -114,9 +114,17 @@ export const PublicFooter: React.FC = () => {
             </h4>
             <ul className="space-y-2 text-xs text-emerald-100/80 pt-1">
               <li>
-                <button onClick={() => setShowApplyModal(true)} className="hover:text-white transition cursor-pointer flex items-center gap-1.5">
+                <button
+                  onClick={async () => {
+                    if (!user) {
+                      await loginWithGoogle();
+                    }
+                    setShowApplyModal(true);
+                  }}
+                  className="hover:text-white transition cursor-pointer flex items-center gap-1.5"
+                >
                   <ChevronRight className="w-3.5 h-3.5 text-red-400 shrink-0" />
-                  <span>{t.btnApply}</span>
+                  <span>{language === 'bn' ? 'Google দিয়ে সাইন-আপ ও আবেদন' : 'Sign Up with Google & Apply'}</span>
                 </button>
               </li>
               <li>

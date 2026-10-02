@@ -14,14 +14,14 @@ import {
 } from '../types/dwf';
 
 export const initialSystemMetrics: SystemMetrics = {
-  totalMembers: 14850,
-  activeMembers: 12420,
-  pendingApplications: 34,
-  totalWelfareFund: 48550000, // 4.85 Crore BDT
-  totalMedicalAssistance: 7840000, // 78.4 Lac BDT
-  totalAccidentAssistance: 5220000, // 52.2 Lac BDT
-  trainedMembers: 8920,
-  monthlyCollection: 3726000,
+  totalMembers: 1850,
+  activeMembers: 987,
+  pendingApplications: 10,
+  totalWelfareFund: 155000, // 4.85 Crore BDT
+  totalMedicalAssistance: 543000, // 78.4 Lac BDT
+  totalAccidentAssistance: 350000, // 52.2 Lac BDT
+  trainedMembers: 256,
+  monthlyCollection: 10200,
   todayCollection: 128400
 };
 
@@ -518,7 +518,7 @@ export const initialAuditLogs: AuditLog[] = [
     id: 'aud-1',
     timestamp: '2026-09-17 10:14:02',
     userId: 'admin-01',
-    userName: 'অধ্যক্ষ শাহ আলম (সুপার এডমিন)',
+    userName: 'অধ্যক্ষ মোঃ মান্নান শিকদার (সুপার এডমিন)',
     role: 'SUPER_ADMIN',
     action: 'APPROVE_APPLICATION',
     module: 'APPLICATION',

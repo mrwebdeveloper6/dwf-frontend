@@ -105,7 +105,7 @@ export const DwfLogo: React.FC<DwfLogoProps> = ({
                   : 'text-slate-900'
               } ${currentSize.title}`}
             >
-              <span className="sm:hidden">ডিডব্লিউএফ</span>
+              <span className="sm:hidden">ডি.ডব্লিউ.এফ</span>
               <span className="hidden sm:inline">ড্রাইভার্স ওয়েলফেয়ার ফাউন্ডেশন</span>
             </span>
             <span className="bg-emerald-700 text-white font-black text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded tracking-wide font-mono shrink-0">

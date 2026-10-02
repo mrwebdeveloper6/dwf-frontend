@@ -67,7 +67,7 @@ export const ContactPage: React.FC = () => {
               </h1>
               <p className="text-xs sm:text-sm text-emerald-100/90 mt-2 max-w-2xl leading-relaxed">
                 {language === 'bn'
-                  ? 'ঢাকা প্রধান কার্যালয় সহ চট্টগ্রাম, রাজশাহী, বগুড়া, সিলেট ও খুলনা আন্তঃজেলা বাস টার্মিনালস্থ ডিডব্লিউএফ সেবা কেন্দ্রের সাথে সরাসরি যোগাযোগ করুন।'
+                  ? 'ঢাকা প্রধান কার্যালয় সহ চট্টগ্রাম, রাজশাহী, বগুড়া, সিলেট ও খুলনা আন্তঃজেলা বাস টার্মিনালস্থ ডি.ডব্লিউ.এফ সেবা কেন্দ্রের সাথে সরাসরি যোগাযোগ করুন।'
                   : 'Reach our central headquarters and nationwide regional branches located in key transport terminals.'}
               </p>
             </div>
@@ -107,7 +107,7 @@ export const ContactPage: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <span className="text-xs font-bold text-red-600 uppercase tracking-wider">শাখা নেটওয়ার্ক</span>
-              <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mt-0.5">ডিডব্লিউএফ আঞ্চলিক শাখা কার্যালয়সমূহ</h3>
+              <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mt-0.5">ডি.ডব্লিউ.এফ আঞ্চলিক শাখা কার্যালয়সমূহ</h3>
             </div>
             <span className="text-xs font-mono font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-xl">
               মোট শাখা: {branches.length}টি

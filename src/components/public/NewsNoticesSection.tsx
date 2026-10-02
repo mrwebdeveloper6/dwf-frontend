@@ -41,7 +41,7 @@ export const NewsNoticesSection: React.FC = () => {
               {language === 'bn' ? 'সংবাদ ও বিজ্ঞপ্তি' : 'Latest News & Circulars'}
             </span>
             <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 mt-2 tracking-tight">
-              {language === 'bn' ? 'ডিডব্লিউএফ সাংগঠনিক নোটিশ বোর্ড' : 'Official Announcements & Bulletins'}
+              {language === 'bn' ? 'ডি.ডব্লিউ.এফ সাংগঠনিক নোটিশ বোর্ড' : 'Official Announcements & Bulletins'}
             </h2>
           </div>
 

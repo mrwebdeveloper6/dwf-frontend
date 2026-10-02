@@ -129,7 +129,7 @@ export const PublicVerificationModal: React.FC = () => {
                         {t.verifyValidBadge}
                       </h4>
                       <p className="text-[11px] text-emerald-700">
-                        {language === 'bn' ? 'ডিডব্লিউএফ সেন্ট্রাল ডাটাবেসে নিবন্ধিত ও বৈধ' : 'Officially Registered & Active in Core Ledger'}
+                        {language === 'bn' ? 'ডি.ডব্লিউ.এফ সেন্ট্রাল ডাটাবেসে নিবন্ধিত ও বৈধ' : 'Officially Registered & Active in Core Ledger'}
                       </p>
                     </div>
                   </div>

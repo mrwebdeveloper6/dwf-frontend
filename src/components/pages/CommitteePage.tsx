@@ -73,7 +73,7 @@ export const CommitteePage: React.FC = () => {
               </h1>
               <p className="text-xs sm:text-sm text-emerald-100/90 mt-2 max-w-2xl leading-relaxed">
                 {language === 'bn'
-                  ? 'বাংলাদেশের পরিবহন চালক সমাজের কল্যাণ, আইনি সুরক্ষা এবং আর্থিক উন্নয়ন নিশ্চিত করতে নিয়োজিত ডিডব্লিউএফের কেন্দ্রীয় পরিচালনা পর্ষদ।'
+                  ? 'বাংলাদেশের পরিবহন চালক সমাজের কল্যাণ, আইনি সুরক্ষা এবং আর্থিক উন্নয়ন নিশ্চিত করতে নিয়োজিত ডি.ডব্লিউ.এফের কেন্দ্রীয় পরিচালনা পর্ষদ।'
                   : 'The governing council and leadership team spearheading the nationwide transport welfare trust.'}
               </p>
             </div>
